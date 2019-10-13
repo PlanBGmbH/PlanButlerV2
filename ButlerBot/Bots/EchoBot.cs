@@ -37,7 +37,7 @@ namespace ButlerBot.Bots
                 case "bestellmöglichkeiten":
                     await turnContext.SendActivityAsync($"You said {text}.", cancellationToken: cancellationToken);
                     break;
-                case "help":
+                case "hilfe":
                     await SendHelpMessage(turnContext, cancellationToken);
                     break;
                 default:
