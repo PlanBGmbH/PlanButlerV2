@@ -20,15 +20,15 @@ namespace Microsoft.BotBuilderSamples
             var waterfallSteps = new WaterfallStep[]
             {
                 NameStepAsync,
-                RestaurantStepAsync,
-                FoodStepAsync,
-                PriceStepAsync
+                //RestaurantStepAsync,
+                //FoodStepAsync,
+                //PriceStepAsync
             };
 
             // Add named dialogs to the DialogSet. These names are saved in the dialog state.
             AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             AddDialog(new TextPrompt(nameof(TextPrompt)));
-            AddDialog(new NumberPrompt<int>(nameof(NumberPrompt<int>), AgePromptValidatorAsync));
+            // AddDialog(new NumberPrompt<int>(nameof(NumberPrompt<int>), AgePromptValidatorAsync));
             AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
             AddDialog(new ConfirmPrompt(nameof(ConfirmPrompt)));
 
@@ -42,10 +42,9 @@ namespace Microsoft.BotBuilderSamples
             return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text("Bitte gib deinen Namen ein.") }, cancellationToken);
         }
 
-        private static async Task<DialogTurnResult> RestaurantStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
+        //private static async Task<DialogTurnResult> RestaurantStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        //{
 
-        }
-
+        //}
     }
 }

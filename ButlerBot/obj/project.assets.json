@@ -1503,10 +1503,10 @@
           "lib/netstandard2.0/Microsoft.AspNetCore.WebUtilities.dll": {}
         }
       },
-      "Microsoft.Bot.Builder/4.5.1": {
+      "Microsoft.Bot.Builder/4.5.3": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Bot.Connector": "4.5.1",
+          "Microsoft.Bot.Connector": "4.5.3",
           "Microsoft.Extensions.Logging": "2.1.0",
           "SourceLink.Create.CommandLine": "2.8.3"
         },
@@ -1515,6 +1515,21 @@
         },
         "runtime": {
           "lib/netstandard2.0/Microsoft.Bot.Builder.dll": {}
+        }
+      },
+      "Microsoft.Bot.Builder.Dialogs/4.5.3": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Bot.Builder": "4.5.3",
+          "Microsoft.Recognizers.Text.Choice": "1.1.3",
+          "Microsoft.Recognizers.Text.DateTime": "1.1.3",
+          "SourceLink.Create.CommandLine": "2.8.3"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Bot.Builder.Dialogs.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Bot.Builder.Dialogs.dll": {}
         }
       },
       "Microsoft.Bot.Builder.Integration.AspNet.Core/4.5.1": {
@@ -1548,10 +1563,11 @@
           "lib/netstandard2.0/Microsoft.Bot.Configuration.dll": {}
         }
       },
-      "Microsoft.Bot.Connector/4.5.1": {
+      "Microsoft.Bot.Connector/4.5.3": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Bot.Schema": "4.5.1",
+          "Microsoft.Bot.Schema": "4.5.3",
+          "Microsoft.Extensions.Logging": "2.1.0",
           "Microsoft.IdentityModel.Clients.ActiveDirectory": "5.1.0",
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "5.2.1",
           "Microsoft.Rest.ClientRuntime": "2.3.20",
@@ -1565,7 +1581,7 @@
           "lib/netstandard2.0/Microsoft.Bot.Connector.dll": {}
         }
       },
-      "Microsoft.Bot.Schema/4.5.1": {
+      "Microsoft.Bot.Schema/4.5.3": {
         "type": "package",
         "dependencies": {
           "Newtonsoft.Json": "10.0.3",
@@ -2674,6 +2690,76 @@
         },
         "runtime": {
           "lib/netstandard1.0/_._": {}
+        }
+      },
+      "Microsoft.Recognizers.Text/1.1.3": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections.Immutable": "1.4.0",
+          "System.ValueTuple": "4.4.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Recognizers.Definitions.dll": {},
+          "lib/netstandard2.0/Microsoft.Recognizers.Text.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Recognizers.Definitions.dll": {},
+          "lib/netstandard2.0/Microsoft.Recognizers.Text.dll": {}
+        }
+      },
+      "Microsoft.Recognizers.Text.Choice/1.1.3": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Recognizers.Text": "1.1.3",
+          "System.Collections.Immutable": "1.4.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Recognizers.Text.Choice.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Recognizers.Text.Choice.dll": {}
+        }
+      },
+      "Microsoft.Recognizers.Text.DateTime/1.1.3": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Recognizers.Text": "1.1.3",
+          "Microsoft.Recognizers.Text.Number": "1.1.3",
+          "Microsoft.Recognizers.Text.NumberWithUnit": "1.1.3",
+          "System.Collections.Immutable": "1.4.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Recognizers.Text.DateTime.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Recognizers.Text.DateTime.dll": {}
+        }
+      },
+      "Microsoft.Recognizers.Text.Number/1.1.3": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Recognizers.Text": "1.1.3",
+          "System.Collections.Immutable": "1.4.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Recognizers.Text.Number.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Recognizers.Text.Number.dll": {}
+        }
+      },
+      "Microsoft.Recognizers.Text.NumberWithUnit/1.1.3": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Recognizers.Text": "1.1.3",
+          "Microsoft.Recognizers.Text.Number": "1.1.3",
+          "System.Collections.Immutable": "1.4.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Recognizers.Text.NumberWithUnit.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Recognizers.Text.NumberWithUnit.dll": {}
         }
       },
       "Microsoft.Rest.ClientRuntime/2.3.20": {
@@ -4409,18 +4495,13 @@
           "lib/netstandard1.3/System.Threading.Thread.dll": {}
         }
       },
-      "System.ValueTuple/4.3.0": {
+      "System.ValueTuple/4.4.0": {
         "type": "package",
-        "dependencies": {
-          "System.Collections": "4.3.0",
-          "System.Resources.ResourceManager": "4.3.0",
-          "System.Runtime": "4.3.0"
-        },
         "compile": {
-          "lib/netstandard1.0/System.ValueTuple.dll": {}
+          "ref/netcoreapp2.0/_._": {}
         },
         "runtime": {
-          "lib/netstandard1.0/System.ValueTuple.dll": {}
+          "lib/netcoreapp2.0/_._": {}
         }
       },
       "System.Xml.ReaderWriter/4.3.0": {
@@ -5465,7 +5546,7 @@
       ]
     },
     "Microsoft.AspNetCore.Razor.Design/2.1.1": {
-      "sha512": "BOK5fckW9v7xWjpEI6bPGwkjw10OPVASZcAa8HoWJo/0Mmg4Azddj92v8noU+YgvD/6zNZ9o/RiRXXKxk5rYwQ==",
+      "sha512": "1XHObHLx6A0/57ZmLG9gfKMO/Z/gQjRXPFWQDMlPZGYwcfgufvSdmI2+RYvR5DGkbba9HIHC35ClNQ2yVNIohw==",
       "type": "package",
       "path": "microsoft.aspnetcore.razor.design/2.1.1",
       "hasTools": true,
@@ -5828,18 +5909,32 @@
         "microsoft.aspnetcore.webutilities.nuspec"
       ]
     },
-    "Microsoft.Bot.Builder/4.5.1": {
-      "sha512": "HCwrIjy4W3tK72ZDF4jQhe8NFPZjYavBwDXuk6MDUvfV3A1uG0LDjYPwNsLbVlY9/Bp80waJ1zQvwCPVK8n0Lg==",
+    "Microsoft.Bot.Builder/4.5.3": {
+      "sha512": "WVwQzpbOLRF7HJlVgR/FHnB1ptlSdCtwXLBAOa/tng/7Zc53n6Vw2q4j5s9Y4sy5ZDv1CBC6FbreVjFVHkZkOA==",
       "type": "package",
-      "path": "microsoft.bot.builder/4.5.1",
+      "path": "microsoft.bot.builder/4.5.3",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "lib/netstandard2.0/Microsoft.Bot.Builder.dll",
         "lib/netstandard2.0/Microsoft.Bot.Builder.pdb",
         "lib/netstandard2.0/Microsoft.Bot.Builder.xml",
-        "microsoft.bot.builder.4.5.1.nupkg.sha512",
+        "microsoft.bot.builder.4.5.3.nupkg.sha512",
         "microsoft.bot.builder.nuspec"
+      ]
+    },
+    "Microsoft.Bot.Builder.Dialogs/4.5.3": {
+      "sha512": "phy5KEYMqTefO6b4w6d6WMOxntDA7LkZyo4djKqFUd6i5YQ8eHjaXd7vUNXMbDUkX3felw8yDi/YROP6XdC93g==",
+      "type": "package",
+      "path": "microsoft.bot.builder.dialogs/4.5.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/Microsoft.Bot.Builder.Dialogs.dll",
+        "lib/netstandard2.0/Microsoft.Bot.Builder.Dialogs.pdb",
+        "lib/netstandard2.0/Microsoft.Bot.Builder.Dialogs.xml",
+        "microsoft.bot.builder.dialogs.4.5.3.nupkg.sha512",
+        "microsoft.bot.builder.dialogs.nuspec"
       ]
     },
     "Microsoft.Bot.Builder.Integration.AspNet.Core/4.5.1": {
@@ -5870,31 +5965,31 @@
         "microsoft.bot.configuration.nuspec"
       ]
     },
-    "Microsoft.Bot.Connector/4.5.1": {
-      "sha512": "jWWlI75/Vz6O01wF9tvRz9HEJhM6lF3saRaY+fSDDhF5qYLqc5sFUVPnQlVC7/bNmCHUzU8n3B/3KXSk7sFFBQ==",
+    "Microsoft.Bot.Connector/4.5.3": {
+      "sha512": "iKRZkgzJ48XX9nky1+ikmEN2NHlPYWi5k0DgGJ/VVGwvco3Mj7TcFRF3iNWImfwCUoDMqWwzS5OKnkMHccrVRA==",
       "type": "package",
-      "path": "microsoft.bot.connector/4.5.1",
+      "path": "microsoft.bot.connector/4.5.3",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "lib/netstandard2.0/Microsoft.Bot.Connector.dll",
         "lib/netstandard2.0/Microsoft.Bot.Connector.pdb",
         "lib/netstandard2.0/Microsoft.Bot.Connector.xml",
-        "microsoft.bot.connector.4.5.1.nupkg.sha512",
+        "microsoft.bot.connector.4.5.3.nupkg.sha512",
         "microsoft.bot.connector.nuspec"
       ]
     },
-    "Microsoft.Bot.Schema/4.5.1": {
-      "sha512": "C4OLsoB9q4TKg3kShAmU7V5Q1GeoQok1xR1hbjiztT1AdeseZWQXybXZMsLqYXT2LR/TK7GGzyKnnyHLxw1tQg==",
+    "Microsoft.Bot.Schema/4.5.3": {
+      "sha512": "9Sa9g+XUfl4uNb/UBMZT9K7NHZSwpm+Dxnimn0vBQ8X/Jk6hjn5s4wI5ovx8x2F/pYmVDH++u1jAajE4ZnEwHA==",
       "type": "package",
-      "path": "microsoft.bot.schema/4.5.1",
+      "path": "microsoft.bot.schema/4.5.3",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "lib/netstandard2.0/Microsoft.Bot.Schema.dll",
         "lib/netstandard2.0/Microsoft.Bot.Schema.pdb",
         "lib/netstandard2.0/Microsoft.Bot.Schema.xml",
-        "microsoft.bot.schema.4.5.1.nupkg.sha512",
+        "microsoft.bot.schema.4.5.3.nupkg.sha512",
         "microsoft.bot.schema.nuspec"
       ]
     },
@@ -7225,6 +7320,85 @@
         "runtime.json",
         "useSharedDesignerContext.txt",
         "version.txt"
+      ]
+    },
+    "Microsoft.Recognizers.Text/1.1.3": {
+      "sha512": "9mkm6MxMe5MplY9wdVzMIFKbRQhZ27Bro2KacqSWeXTc405PM8vqSrTiiQ6H/4VwZrnjTTGKU2WmAhRbQslFKA==",
+      "type": "package",
+      "path": "microsoft.recognizers.text/1.1.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Microsoft.Recognizers.Definitions.dll",
+        "lib/net45/Microsoft.Recognizers.Text.dll",
+        "lib/net452/Microsoft.Recognizers.Definitions.dll",
+        "lib/net452/Microsoft.Recognizers.Text.dll",
+        "lib/net462/Microsoft.Recognizers.Definitions.dll",
+        "lib/net462/Microsoft.Recognizers.Text.dll",
+        "lib/netstandard2.0/Microsoft.Recognizers.Definitions.dll",
+        "lib/netstandard2.0/Microsoft.Recognizers.Text.dll",
+        "microsoft.recognizers.text.1.1.3.nupkg.sha512",
+        "microsoft.recognizers.text.nuspec"
+      ]
+    },
+    "Microsoft.Recognizers.Text.Choice/1.1.3": {
+      "sha512": "pMDAEwYZKhj2ckgagNGBA003aDndokWyVBb8JClgcWE76D7JnOW+wSpkh/3AVd6mGgQcIBFL7KUeMPEXtT6eQQ==",
+      "type": "package",
+      "path": "microsoft.recognizers.text.choice/1.1.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Microsoft.Recognizers.Text.Choice.dll",
+        "lib/net452/Microsoft.Recognizers.Text.Choice.dll",
+        "lib/net462/Microsoft.Recognizers.Text.Choice.dll",
+        "lib/netstandard2.0/Microsoft.Recognizers.Text.Choice.dll",
+        "microsoft.recognizers.text.choice.1.1.3.nupkg.sha512",
+        "microsoft.recognizers.text.choice.nuspec"
+      ]
+    },
+    "Microsoft.Recognizers.Text.DateTime/1.1.3": {
+      "sha512": "IFq8ec1Mm30qey0Ku5cwlkZ/18qlzg9BY+bo6h2mYwXyXfDmuCN3UbWXeyRsXTkPepE72c4rFmO08zWzFxt9lQ==",
+      "type": "package",
+      "path": "microsoft.recognizers.text.datetime/1.1.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Microsoft.Recognizers.Text.DateTime.dll",
+        "lib/net452/Microsoft.Recognizers.Text.DateTime.dll",
+        "lib/net462/Microsoft.Recognizers.Text.DateTime.dll",
+        "lib/netstandard2.0/Microsoft.Recognizers.Text.DateTime.dll",
+        "microsoft.recognizers.text.datetime.1.1.3.nupkg.sha512",
+        "microsoft.recognizers.text.datetime.nuspec"
+      ]
+    },
+    "Microsoft.Recognizers.Text.Number/1.1.3": {
+      "sha512": "RBJhV5flJMw5UlmhmOpVS7Uk8ug18qDhty4zkGafR+h8g4ZzzeQSk8Fo8O8wu4p5lq/7J31r/muNZq1bL7/F/w==",
+      "type": "package",
+      "path": "microsoft.recognizers.text.number/1.1.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Microsoft.Recognizers.Text.Number.dll",
+        "lib/net452/Microsoft.Recognizers.Text.Number.dll",
+        "lib/net462/Microsoft.Recognizers.Text.Number.dll",
+        "lib/netstandard2.0/Microsoft.Recognizers.Text.Number.dll",
+        "microsoft.recognizers.text.number.1.1.3.nupkg.sha512",
+        "microsoft.recognizers.text.number.nuspec"
+      ]
+    },
+    "Microsoft.Recognizers.Text.NumberWithUnit/1.1.3": {
+      "sha512": "X/Ng7dvy3Fvim7UqdKucLkFF3REbE6lAPLDp8j7xwM+qZAD9LQmW5Y3+KRCd2zxUYRm7tUZIEbHjcv/gz4Myig==",
+      "type": "package",
+      "path": "microsoft.recognizers.text.numberwithunit/1.1.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Microsoft.Recognizers.Text.NumberWithUnit.dll",
+        "lib/net452/Microsoft.Recognizers.Text.NumberWithUnit.dll",
+        "lib/net462/Microsoft.Recognizers.Text.NumberWithUnit.dll",
+        "lib/netstandard2.0/Microsoft.Recognizers.Text.NumberWithUnit.dll",
+        "microsoft.recognizers.text.numberwithunit.1.1.3.nupkg.sha512",
+        "microsoft.recognizers.text.numberwithunit.nuspec"
       ]
     },
     "Microsoft.Rest.ClientRuntime/2.3.20": {
@@ -12127,21 +12301,49 @@
         "system.threading.thread.nuspec"
       ]
     },
-    "System.ValueTuple/4.3.0": {
-      "sha512": "cNLEvBX3d6MMQRZe3SMFNukVbitDAEpVZO17qa0/2FHxZ7Y7PpFRpr6m2615XYM/tYYYf0B+WyHNujqIw8Luwg==",
+    "System.ValueTuple/4.4.0": {
+      "sha512": "BahUww/+mdP4ARCAh2RQhQTg13wYLVrBb9SYVgW8ZlrwjraGCXHGjo0oIiUfZ34LUZkMMR+RAzR7dEY4S1HeQQ==",
       "type": "package",
-      "path": "system.valuetuple/4.3.0",
+      "path": "system.valuetuple/4.4.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "ThirdPartyNotices.txt",
-        "dotnet_library_license.txt",
-        "lib/netstandard1.0/.xml",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/net461/System.ValueTuple.dll",
+        "lib/net461/System.ValueTuple.xml",
+        "lib/net47/System.ValueTuple.dll",
+        "lib/net47/System.ValueTuple.xml",
+        "lib/netcoreapp2.0/_._",
         "lib/netstandard1.0/System.ValueTuple.dll",
-        "lib/portable-net40+sl4+win8+wp8/.xml",
+        "lib/netstandard1.0/System.ValueTuple.xml",
+        "lib/netstandard2.0/_._",
         "lib/portable-net40+sl4+win8+wp8/System.ValueTuple.dll",
-        "system.valuetuple.4.3.0.nupkg.sha512",
-        "system.valuetuple.nuspec"
+        "lib/portable-net40+sl4+win8+wp8/System.ValueTuple.xml",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "lib/xamarintvos10/_._",
+        "lib/xamarinwatchos10/_._",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/net461/System.ValueTuple.dll",
+        "ref/net461/System.ValueTuple.xml",
+        "ref/net47/System.ValueTuple.dll",
+        "ref/net47/System.ValueTuple.xml",
+        "ref/netcoreapp2.0/_._",
+        "ref/netstandard2.0/_._",
+        "ref/portable-net40+sl4+win8+wp8/System.ValueTuple.dll",
+        "ref/portable-net40+sl4+win8+wp8/System.ValueTuple.xml",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "ref/xamarintvos10/_._",
+        "ref/xamarinwatchos10/_._",
+        "system.valuetuple.4.4.0.nupkg.sha512",
+        "system.valuetuple.nuspec",
+        "useSharedDesignerContext.txt",
+        "version.txt"
       ]
     },
     "System.Xml.ReaderWriter/4.3.0": {
@@ -12478,29 +12680,33 @@
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v2.1": [
       "Microsoft.AspNetCore.App >= 2.1.1",
+      "Microsoft.Bot.Builder.Dialogs >= 4.5.3",
       "Microsoft.Bot.Builder.Integration.AspNet.Core >= 4.5.1",
       "Microsoft.NETCore.App >= 2.1.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\PhilippJ\\.nuget\\packages\\": {},
+    "C:\\Users\\Geschäft\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackagesFallback\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\PhilippJ\\source\\repos\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj",
+      "projectUniqueName": "C:\\Users\\Geschäft\\Documents\\GitHub\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj",
       "projectName": "ButlerBot",
-      "projectPath": "C:\\Users\\PhilippJ\\source\\repos\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj",
-      "packagesPath": "C:\\Users\\PhilippJ\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\PhilippJ\\source\\repos\\PlanButlerV2\\ButlerBot\\obj\\",
+      "projectPath": "C:\\Users\\Geschäft\\Documents\\GitHub\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj",
+      "packagesPath": "C:\\Users\\Geschäft\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Geschäft\\Documents\\GitHub\\PlanButlerV2\\ButlerBot\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackagesFallback\\",
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\PhilippJ\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\Geschäft\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.Fallback.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.1"
@@ -12529,6 +12735,10 @@
             "version": "[2.1.1, )",
             "autoReferenced": true
           },
+          "Microsoft.Bot.Builder.Dialogs": {
+            "target": "Package",
+            "version": "[4.5.3, )"
+          },
           "Microsoft.Bot.Builder.Integration.AspNet.Core": {
             "target": "Package",
             "version": "[4.5.1, )"
@@ -12541,10 +12751,16 @@
           }
         },
         "imports": [
-          "net461"
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
         ],
         "assetTargetFallback": true,
-        "warn": true
+        "warn": true,
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.0.100\\RuntimeIdentifierGraph.json"
       }
     }
   }
