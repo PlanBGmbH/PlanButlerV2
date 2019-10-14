@@ -1,26 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Geschäft\\Documents\\GitHub\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj": {}
+    "C:\\Users\\PeterS\\Source\\Repos\\PlanButlerV22\\ButlerBot\\ButlerBot.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Geschäft\\Documents\\GitHub\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj": {
+    "C:\\Users\\PeterS\\Source\\Repos\\PlanButlerV22\\ButlerBot\\ButlerBot.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Geschäft\\Documents\\GitHub\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj",
+        "projectUniqueName": "C:\\Users\\PeterS\\Source\\Repos\\PlanButlerV22\\ButlerBot\\ButlerBot.csproj",
         "projectName": "ButlerBot",
-        "projectPath": "C:\\Users\\Geschäft\\Documents\\GitHub\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj",
-        "packagesPath": "C:\\Users\\Geschäft\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Geschäft\\Documents\\GitHub\\PlanButlerV2\\ButlerBot\\obj\\",
+        "projectPath": "C:\\Users\\PeterS\\Source\\Repos\\PlanButlerV22\\ButlerBot\\ButlerBot.csproj",
+        "packagesPath": "C:\\Users\\PeterS\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\PeterS\\Source\\Repos\\PlanButlerV22\\ButlerBot\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackagesFallback\\",
+          "C:\\Microsoft\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\Geschäft\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\PeterS\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.Fallback.config"
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp2.1"

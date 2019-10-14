@@ -2,10 +2,10 @@
   "ExpandedNodes": [
     "",
     "\\ButlerBot",
-    "\\ButlerBot\\Bots",
-    "\\ButlerBot\\Controllers",
-    "\\ButlerBot\\Dialogs"
+    "\\ButlerBot\\Properties",
+    "\\ButlerBot\\Util",
+    "\\ButlerBot\\wwwroot"
   ],
-  "SelectedNode": "\\ButlerBot\\Order.cs",
+  "SelectedNode": "\\ButlerBot\\Properties\\launchSettings.json",
   "PreviewInSolutionExplorer": false
 }
