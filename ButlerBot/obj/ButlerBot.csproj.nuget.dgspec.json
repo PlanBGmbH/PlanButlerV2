@@ -1,26 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\PeterS\\Source\\Repos\\PlanButlerV22\\ButlerBot\\ButlerBot.csproj": {}
+    "C:\\Users\\PhilippJ\\Source\\Repos\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj": {}
   },
   "projects": {
-    "C:\\Users\\PeterS\\Source\\Repos\\PlanButlerV22\\ButlerBot\\ButlerBot.csproj": {
+    "C:\\Users\\PhilippJ\\Source\\Repos\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\PeterS\\Source\\Repos\\PlanButlerV22\\ButlerBot\\ButlerBot.csproj",
+        "projectUniqueName": "C:\\Users\\PhilippJ\\Source\\Repos\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj",
         "projectName": "ButlerBot",
-        "projectPath": "C:\\Users\\PeterS\\Source\\Repos\\PlanButlerV22\\ButlerBot\\ButlerBot.csproj",
-        "packagesPath": "C:\\Users\\PeterS\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\PeterS\\Source\\Repos\\PlanButlerV22\\ButlerBot\\obj\\",
+        "projectPath": "C:\\Users\\PhilippJ\\Source\\Repos\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj",
+        "packagesPath": "C:\\Users\\PhilippJ\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\PhilippJ\\Source\\Repos\\PlanButlerV2\\ButlerBot\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Microsoft\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\PeterS\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Users\\PhilippJ\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp2.1"
@@ -65,16 +63,10 @@
             }
           },
           "imports": [
-            "net461",
-            "net462",
-            "net47",
-            "net471",
-            "net472",
-            "net48"
+            "net461"
           ],
           "assetTargetFallback": true,
-          "warn": true,
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.0.100\\RuntimeIdentifierGraph.json"
+          "warn": true
         }
       }
     }

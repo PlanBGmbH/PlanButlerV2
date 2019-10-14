@@ -6,9 +6,9 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 
-namespace ButlerBot.Bots
+namespace ButlerBot
 {
-    public class EchoBot<T> : ActivityHandler where T: Dialog
+    public class EchoBot<T> : ActivityHandler where T : Dialog
     {
         private const string WelcomeMessage = "Guten Tag, du schreibst gerade mit dem neuen PlanButler Bot. " +
                                               "Möchtest du Essen bestellen oder dir die Bestellmöglichkeiten anschauen?";
@@ -29,17 +29,10 @@ namespace ButlerBot.Bots
             Logger = logger;
         }
 
-
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
-            foreach (var member in membersAdded)
-            {
-                if (member.Id != turnContext.Activity.Recipient.Id)
-                {
-                    await turnContext.SendActivityAsync(WelcomeMessage, cancellationToken: cancellationToken);
-                    await turnContext.SendActivityAsync(PatternMessage, cancellationToken: cancellationToken);      
-                }
-            }
+            await turnContext.SendActivityAsync(WelcomeMessage, cancellationToken: cancellationToken);
+            await turnContext.SendActivityAsync(PatternMessage, cancellationToken: cancellationToken);
         }
 
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
@@ -64,8 +57,8 @@ namespace ButlerBot.Bots
 
         private static async Task SendHelpMessage(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
-            await turnContext.SendActivityAsync(WelcomeMessage, cancellationToken:cancellationToken);
-            await turnContext.SendActivityAsync(PatternMessage, cancellationToken:cancellationToken);
+            await turnContext.SendActivityAsync(WelcomeMessage, cancellationToken: cancellationToken);
+            await turnContext.SendActivityAsync(PatternMessage, cancellationToken: cancellationToken);
         }
     }
 }
