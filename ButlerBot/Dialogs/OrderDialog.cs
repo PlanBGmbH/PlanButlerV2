@@ -10,6 +10,10 @@ namespace ButlerBot
 {
     public class OrderDialog : ComponentDialog
     {
+        Util.BackendCommunication backendcom = new Util.BackendCommunication();
+
+        //Gets the blob Container 
+        // Task<string> TaskUrl = backendcom.GetDocument("a", "c");
 
         public OrderDialog()
             : base(nameof(OrderDialog))
