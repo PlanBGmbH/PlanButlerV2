@@ -10,18 +10,21 @@ namespace ButlerBot
 {
     public class OrderDialog : ComponentDialog
     {
+        private readonly IStatePropertyAccessor<Order> _OrderAccessor;
         public OrderDialog(UserState userState)
             : base(nameof(OrderDialog))
         {
+            _OrderAccessor = userState.CreateProperty<Order>("Order");
+
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
-            {
+                {
                 NameStepAsync,
                 RestaurantStepAsync,
                 FoodStepAsync,
                 PriceStepAsync,
                 SummaryStepAsync
-            };
+                };
 
             // Add named dialogs to the DialogSet. These names are saved in the dialog state.
             AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
