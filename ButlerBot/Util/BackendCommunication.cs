@@ -34,7 +34,7 @@ namespace ButlerBot.Util
                 "/blob/" + storageAccountName + "/" + resourceName,
                 "",
                 "",
-                "https",
+                "https", 
                 "2018-03-28");
             var sasToken = storageAccountUrl + resourceName +
                     "?" +
