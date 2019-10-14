@@ -21,9 +21,10 @@ namespace ButlerBot
         protected readonly BotState UserState;
         protected readonly ILogger Logger;
 
-        public EchoBot(ConversationState conversationState, T dialog, ILogger<EchoBot<T>> logger)
+        public EchoBot(ConversationState conversationState, UserState userState, T dialog, ILogger<EchoBot<T>> logger)
         {
             ConversationState = conversationState;
+            UserState = userState;
             Dialog = dialog;
             Logger = logger;
         }
