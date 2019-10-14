@@ -8,15 +8,15 @@ using Microsoft.Bot.Builder.Dialogs.Choices;
 
 namespace ButlerBot
 {
-    public class TopLevelDialog : ComponentDialog
+    public class MainDialog : ComponentDialog
     {
-        public TopLevelDialog()
-            : base(nameof(TopLevelDialog))
+        public MainDialog()
+            : base(nameof(MainDialog))
         {
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
                 {
-                
+                    InitialStepAsync
                 };
 
             // Add named dialogs to the DialogSet. These names are saved in the dialog state.
@@ -30,6 +30,10 @@ namespace ButlerBot
             InitialDialogId = nameof(WaterfallDialog);
         }
 
+        private async Task<DialogTurnResult> InitialStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            return await stepContext.BeginDialogAsync(nameof(OrderDialog), null, cancellationToken);
+        }
 
     }
 }
