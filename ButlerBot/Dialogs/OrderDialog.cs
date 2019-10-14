@@ -35,9 +35,8 @@ namespace ButlerBot
             // The initial child Dialog to run.
             InitialDialogId = nameof(WaterfallDialog);
         }
-
         private static async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
+        {        
             return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text("Bitte gib deinen Namen ein.") }, cancellationToken);
         }
 
