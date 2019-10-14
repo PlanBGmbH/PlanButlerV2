@@ -1,8 +1,11 @@
 {
   "ExpandedNodes": [
     "",
-    "\\ButlerBot"
+    "\\ButlerBot",
+    "\\ButlerBot\\Bots",
+    "\\ButlerBot\\Controllers",
+    "\\ButlerBot\\Dialogs"
   ],
-  "SelectedNode": "\\ButlerBot",
+  "SelectedNode": "\\ButlerBot\\Order.cs",
   "PreviewInSolutionExplorer": false
 }

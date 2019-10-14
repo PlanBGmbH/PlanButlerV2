@@ -5546,7 +5546,7 @@
       ]
     },
     "Microsoft.AspNetCore.Razor.Design/2.1.1": {
-      "sha512": "1XHObHLx6A0/57ZmLG9gfKMO/Z/gQjRXPFWQDMlPZGYwcfgufvSdmI2+RYvR5DGkbba9HIHC35ClNQ2yVNIohw==",
+      "sha512": "BOK5fckW9v7xWjpEI6bPGwkjw10OPVASZcAa8HoWJo/0Mmg4Azddj92v8noU+YgvD/6zNZ9o/RiRXXKxk5rYwQ==",
       "type": "package",
       "path": "microsoft.aspnetcore.razor.design/2.1.1",
       "hasTools": true,
@@ -5910,7 +5910,7 @@
       ]
     },
     "Microsoft.Bot.Builder/4.5.3": {
-      "sha512": "WVwQzpbOLRF7HJlVgR/FHnB1ptlSdCtwXLBAOa/tng/7Zc53n6Vw2q4j5s9Y4sy5ZDv1CBC6FbreVjFVHkZkOA==",
+      "sha512": "+63tnM5l41DHXt2F9TTn5B6chalpd0qCCwo42DNwQtVu+vzL8QkobnFlofYQ4LTv7FsNVKSeVW0vcXFm3n7uMA==",
       "type": "package",
       "path": "microsoft.bot.builder/4.5.3",
       "files": [
@@ -5924,7 +5924,7 @@
       ]
     },
     "Microsoft.Bot.Builder.Dialogs/4.5.3": {
-      "sha512": "phy5KEYMqTefO6b4w6d6WMOxntDA7LkZyo4djKqFUd6i5YQ8eHjaXd7vUNXMbDUkX3felw8yDi/YROP6XdC93g==",
+      "sha512": "zHNryzvqqvAcPas6EdDGG20x89HzZakrxWpJs8t4rPaMxDRT1Gh9rmaMb0Bkgdpi5tn+n+Q88MZTKCRbsxN14g==",
       "type": "package",
       "path": "microsoft.bot.builder.dialogs/4.5.3",
       "files": [
@@ -5966,7 +5966,7 @@
       ]
     },
     "Microsoft.Bot.Connector/4.5.3": {
-      "sha512": "iKRZkgzJ48XX9nky1+ikmEN2NHlPYWi5k0DgGJ/VVGwvco3Mj7TcFRF3iNWImfwCUoDMqWwzS5OKnkMHccrVRA==",
+      "sha512": "bB/2QUsV90Ocbg1QG37O7/l+vlyrfG8PnJqOZxf9sydlF1mmPtr/PtkngnNwkLJ2GwWIhUss+og4k+Z6iSAa2w==",
       "type": "package",
       "path": "microsoft.bot.connector/4.5.3",
       "files": [
@@ -5980,7 +5980,7 @@
       ]
     },
     "Microsoft.Bot.Schema/4.5.3": {
-      "sha512": "9Sa9g+XUfl4uNb/UBMZT9K7NHZSwpm+Dxnimn0vBQ8X/Jk6hjn5s4wI5ovx8x2F/pYmVDH++u1jAajE4ZnEwHA==",
+      "sha512": "enDpOx6nW+aFUSj7WeMrGefZIurgB7NoAeN5JNS8s7BsejMOAS4Kfqyse1At9pIBTGLoTJuh1VyRQnNxDF+fJw==",
       "type": "package",
       "path": "microsoft.bot.schema/4.5.3",
       "files": [
@@ -7323,7 +7323,7 @@
       ]
     },
     "Microsoft.Recognizers.Text/1.1.3": {
-      "sha512": "9mkm6MxMe5MplY9wdVzMIFKbRQhZ27Bro2KacqSWeXTc405PM8vqSrTiiQ6H/4VwZrnjTTGKU2WmAhRbQslFKA==",
+      "sha512": "yAUBOJ6zvKzVlz+lin9u1CuUAYxCflX+plVx87CxnmvyWkvzaiOIXH//UjIWbploucWrKzELaGqWBtEbB5eSWg==",
       "type": "package",
       "path": "microsoft.recognizers.text/1.1.3",
       "files": [
@@ -7342,7 +7342,7 @@
       ]
     },
     "Microsoft.Recognizers.Text.Choice/1.1.3": {
-      "sha512": "pMDAEwYZKhj2ckgagNGBA003aDndokWyVBb8JClgcWE76D7JnOW+wSpkh/3AVd6mGgQcIBFL7KUeMPEXtT6eQQ==",
+      "sha512": "Lp97dVUtSLUw5FvWVtSXH2SwqfyjZIipm1Ht7ETYWc3bxzJ6TE8K3qtj8CZ1lb6Cw2TnbAMDYOWjGbqAY779oA==",
       "type": "package",
       "path": "microsoft.recognizers.text.choice/1.1.3",
       "files": [
@@ -7357,7 +7357,7 @@
       ]
     },
     "Microsoft.Recognizers.Text.DateTime/1.1.3": {
-      "sha512": "IFq8ec1Mm30qey0Ku5cwlkZ/18qlzg9BY+bo6h2mYwXyXfDmuCN3UbWXeyRsXTkPepE72c4rFmO08zWzFxt9lQ==",
+      "sha512": "RY1LMXc2JoLDIzM+dGEZ+BHgE0j7YdM/md9af7yBVcwwVAsOMD9Ttn98LcQEXPLxrcMECBU94OxIy2P8f7uKig==",
       "type": "package",
       "path": "microsoft.recognizers.text.datetime/1.1.3",
       "files": [
@@ -7372,7 +7372,7 @@
       ]
     },
     "Microsoft.Recognizers.Text.Number/1.1.3": {
-      "sha512": "RBJhV5flJMw5UlmhmOpVS7Uk8ug18qDhty4zkGafR+h8g4ZzzeQSk8Fo8O8wu4p5lq/7J31r/muNZq1bL7/F/w==",
+      "sha512": "VICzqX41bB3HjVZLZfHLDZwJaTb8UXA21jUJspdMSR6vjifZw3ITWcbmlCjkdHmb+zEU9lEtvC5ljR50TkGkPA==",
       "type": "package",
       "path": "microsoft.recognizers.text.number/1.1.3",
       "files": [
@@ -7387,7 +7387,7 @@
       ]
     },
     "Microsoft.Recognizers.Text.NumberWithUnit/1.1.3": {
-      "sha512": "X/Ng7dvy3Fvim7UqdKucLkFF3REbE6lAPLDp8j7xwM+qZAD9LQmW5Y3+KRCd2zxUYRm7tUZIEbHjcv/gz4Myig==",
+      "sha512": "S/bf18vz2QVMQDSDN/7YkZpLdqbeVumZY6bruyfqIUsw4KycaOFbxjb6rO+dwvLHTQp9aeT15V6DXBxMeZKkvg==",
       "type": "package",
       "path": "microsoft.recognizers.text.numberwithunit/1.1.3",
       "files": [
@@ -12302,7 +12302,7 @@
       ]
     },
     "System.ValueTuple/4.4.0": {
-      "sha512": "BahUww/+mdP4ARCAh2RQhQTg13wYLVrBb9SYVgW8ZlrwjraGCXHGjo0oIiUfZ34LUZkMMR+RAzR7dEY4S1HeQQ==",
+      "sha512": "hBl0/yPqtMnwrsqCYSxYr4Abvo9hSVYmf+55EniEMyCEPJRM1VGr8o+kHeHJdEqgr6wrQMhZ7HowYmejruXStg==",
       "type": "package",
       "path": "system.valuetuple/4.4.0",
       "files": [
@@ -12686,27 +12686,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Geschäft\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackagesFallback\\": {},
+    "C:\\Users\\PhilippJ\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Geschäft\\Documents\\GitHub\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj",
+      "projectUniqueName": "C:\\Users\\PhilippJ\\Source\\Repos\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj",
       "projectName": "ButlerBot",
-      "projectPath": "C:\\Users\\Geschäft\\Documents\\GitHub\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj",
-      "packagesPath": "C:\\Users\\Geschäft\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Geschäft\\Documents\\GitHub\\PlanButlerV2\\ButlerBot\\obj\\",
+      "projectPath": "C:\\Users\\PhilippJ\\Source\\Repos\\PlanButlerV2\\ButlerBot\\ButlerBot.csproj",
+      "packagesPath": "C:\\Users\\PhilippJ\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\PhilippJ\\Source\\Repos\\PlanButlerV2\\ButlerBot\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackagesFallback\\",
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\Geschäft\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.Fallback.config"
+        "C:\\Users\\PhilippJ\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.1"
@@ -12751,16 +12748,10 @@
           }
         },
         "imports": [
-          "net461",
-          "net462",
-          "net47",
-          "net471",
-          "net472",
-          "net48"
+          "net461"
         ],
         "assetTargetFallback": true,
-        "warn": true,
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.0.100\\RuntimeIdentifierGraph.json"
+        "warn": true
       }
     }
   }

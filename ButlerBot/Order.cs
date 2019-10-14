@@ -1,4 +1,4 @@
-namespace Microsoft.BotBuilderSamples
+namespace ButlerBot
 {
     /// <summary>
     /// This is our application state. Just a regular serializable .NET class.
