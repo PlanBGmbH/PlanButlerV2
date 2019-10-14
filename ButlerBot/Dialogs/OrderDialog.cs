@@ -10,11 +10,10 @@ namespace ButlerBot
 {
     public class OrderDialog : ComponentDialog
     {
-        private readonly IStatePropertyAccessor<Order> _OrderAccessor;
-        public OrderDialog(UserState userState)
+
+        public OrderDialog()
             : base(nameof(OrderDialog))
         {
-            _OrderAccessor = userState.CreateProperty<Order>("Order");
 
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
@@ -87,7 +86,7 @@ namespace ButlerBot
 
             var rnd = new Random();
 
-            stepContext.Values["price"] = Convert.ToString(rnd.Next());
+            stepContext.Values["price"] = Convert.ToString(rnd.Next(1, 50));
 
             var msg = $"Danke fürs bestellen {stepContext.Values["name"]}, du hast {stepContext.Values["food"]} von {stepContext.Values["restaurant"]} ausgewählt" +
                 $" und deine Bestellung wird {stepContext.Values["price"]} kosten.";
@@ -106,7 +105,10 @@ namespace ButlerBot
                 order.Name = (string)stepContext.Values["name"];
                 order.Restaurant = (string)stepContext.Values["restaurant"];
                 order.Food = (string)stepContext.Values["food"];
-                order.Price = (int)stepContext.Values["price"];
+                order.Price = Convert.ToInt32(stepContext.Values["price"]);
+
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text($"{order.Name} {order.Restaurant} {order.Food} {order.Price}"), cancellationToken);
+
             }
             else
             {

@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\ButlerBot",
+    "\\ButlerBot\\bin",
+    "\\ButlerBot\\Controllers",
+    "\\ButlerBot\\Dialogs",
+    "\\ButlerBot\\obj",
+    "\\ButlerBot\\Properties",
+    "\\ButlerBot\\Properties\\PublishProfiles",
+    "\\ButlerBot\\Util",
+    "\\ButlerBot\\wwwroot"
+  ],
+  "SelectedNode": "\\ButlerBot\\ButlerBot.sln",
+  "PreviewInSolutionExplorer": false
+}
