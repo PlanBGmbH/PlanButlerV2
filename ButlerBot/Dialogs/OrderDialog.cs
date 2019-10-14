@@ -10,13 +10,9 @@ namespace ButlerBot
 {
     public class OrderDialog : ComponentDialog
     {
-        private readonly IStatePropertyAccessor<Order> _orderAccessor;
-
         public OrderDialog(UserState userState)
             : base(nameof(OrderDialog))
         {
-            _orderAccessor = userState.CreateProperty<Order>("Order");
-
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
             {
@@ -102,11 +98,11 @@ namespace ButlerBot
         {
             if ((bool)stepContext.Result)
             {
-                var order = await _orderAccessor.GetAsync(stepContext.Context, () => new Order(), cancellationToken);
+                var order = new Order();
 
-                order.Name = stepContext.Values["name"];
-                order.Restaurant = stepContext.Values["restaurant"];
-                order.Food = stepContext.Values["food"];
+                order.Name = (string)stepContext.Values["name"];
+                order.Restaurant = (string)stepContext.Values["restaurant"];
+                order.Food = (string)stepContext.Values["food"];
                 order.Price = (int)stepContext.Values["price"];
             }
             else
