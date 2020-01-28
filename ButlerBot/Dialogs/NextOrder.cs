@@ -105,24 +105,24 @@
             }
             else
             {
-                //if (DateTime.Now.IsDaylightSavingTime())
-                //{
-                    
-                
-                //    if (DateTime.Now.Hour + 1 > 12)
-                //    {
-                //        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist nach 12 Uhr. Bitte bestelle für einen anderen Tag."));
-                //        return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));
-                //    }
-                //}
-                //else
-                //{
-                //    if (DateTime.Now.Hour + 2 > 12)
-                //    {
-                //        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist nach 12 Uhr. Bitte bestelle für einen anderen Tag."));
-                //        return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));
-                //    }
-                //}
+                if (DateTime.Now.IsDaylightSavingTime())
+                {
+
+
+                    if (DateTime.Now.Hour + 1 > 12)
+                    {
+                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist nach 12 Uhr. Bitte bestelle für einen anderen Tag."));
+                        return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));
+                    }
+                }
+                else
+                {
+                    if (DateTime.Now.Hour + 2 > 12)
+                    {
+                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist nach 12 Uhr. Bitte bestelle für einen anderen Tag."));
+                        return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));
+                    }
+                }
 
                 return await stepContext.PromptAsync(
                               nameof(ChoicePrompt),
@@ -491,8 +491,16 @@
                 }
                 else
                 {
-                    msg = $"Danke {stepContext.Values["companyName"]} für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast bei dem Restaurant {stepContext.Values["restaurant"]}, " +
-                         $"das Essen {stepContext.Values["food"]} bestellt. Es werden {stepContext.Values["price"] }€ berechnet.";
+                    if (stepContext.Values["companyStatus"].ToString().ToLower() == "privat")
+                    {
+                        msg = $"Danke, du hast für {stepContext.Values["companyName"]} bei dem Restaurant {stepContext.Values["restaurant"]}, " +
+                         $"das Essen {stepContext.Values["food"]} bestellt. Es werden dir {stepContext.Values["price"] }€ berechnet.";
+                    }
+                    else
+                    {
+                        msg = $"Danke, du hast für {stepContext.Values["companyName"]} bei dem Restaurant {stepContext.Values["restaurant"]}, " +
+                   $"das Essen {stepContext.Values["food"]} bestellt. Es wird PlanB {stepContext.Values["price"] }€ berechnet.";
+                    }
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
 
 
