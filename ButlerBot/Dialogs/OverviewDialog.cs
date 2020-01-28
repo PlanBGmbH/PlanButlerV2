@@ -12,7 +12,7 @@
     {
 
         // In this Array you can Easy modify your choice List.
-        private static string[] choices = { "Essen bestellen", "Weiteres Essen Bestellen", "Essensplan anschauen", "Belastung Checken", "Für einen anderen Tag Essen bestellen", "Für einen Tag Essen löschen", "Tages belastung anzeigen" };
+        private static string[] choices = { "Essen Bestellen",  "Für einen anderen Tag Essen bestellen", "Bestellung entfernen", "Monatliche Belastung anzeigen", "Tagesbestellung" };
         private static ComponentDialog[] dialogs;
 
         public OverviewDialog()
@@ -26,12 +26,12 @@
             DeleteOrderDialog deletOrderDialog = new DeleteOrderDialog();
             List<ComponentDialog> dialogsList = new List<ComponentDialog>();
             DailyCreditDialog dailyCreditDialog = new DailyCreditDialog();
-            dialogsList.Add(orderDialog);
+            //dialogsList.Add(orderDialog);
             dialogsList.Add(nextorderDialog);
-            dialogsList.Add(planDialog);
-            dialogsList.Add(creditDialog);
             dialogsList.Add(orderForAnotherDay);
+            //dialogsList.Add(planDialog);
             dialogsList.Add(deletOrderDialog);
+            dialogsList.Add(creditDialog);
             dialogsList.Add(dailyCreditDialog);
             dialogs = dialogsList.ToArray();
 

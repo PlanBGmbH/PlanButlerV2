@@ -68,7 +68,7 @@ namespace ButlerBot
                 if (dayId != -1)
                 {
                     var nameID = orderBlob.Day[dayId].Order.FindIndex(x => x.Name == stepContext.Context.Activity.From.Name);
-                    if (DateTime.Now.Hour > 12)
+                    if (DateTime.Now.Hour-1 >= 12)
                     {
                         await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist schon nach 12 Uhr"));
                         return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));

@@ -40,7 +40,7 @@
             return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
             {
                 Prompt = MessageFactory.Text("Von welchem Restaurant möchtest du die Speisekarte sehen?"),
-                Choices = ChoiceFactory.ToChoices(new List<string> { "Bieg", "Delphi", "Leib und Seele", "Liederhalle" }),
+                Choices = ChoiceFactory.ToChoices(new List<string> { "Bieg", "Delphi", "Leib und Seele", "Liederhalle" ,"Feasy","La Boussola"}),
                 Style = ListStyle.HeroCard,
             }, cancellationToken);
         }

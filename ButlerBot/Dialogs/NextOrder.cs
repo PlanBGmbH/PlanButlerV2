@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
@@ -96,6 +97,7 @@
                 valid = false;
             }
             stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
+
             if (companyStatus == "kunde")
             {
                 stepContext.Values["companyStatus"] = companyStatus;
@@ -103,6 +105,25 @@
             }
             else
             {
+                //if (DateTime.Now.IsDaylightSavingTime())
+                //{
+                    
+                
+                //    if (DateTime.Now.Hour + 1 > 12)
+                //    {
+                //        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist nach 12 Uhr. Bitte bestelle für einen anderen Tag."));
+                //        return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));
+                //    }
+                //}
+                //else
+                //{
+                //    if (DateTime.Now.Hour + 2 > 12)
+                //    {
+                //        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist nach 12 Uhr. Bitte bestelle für einen anderen Tag."));
+                //        return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));
+                //    }
+                //}
+
                 return await stepContext.PromptAsync(
                               nameof(ChoicePrompt),
                               new PromptOptions
@@ -138,29 +159,23 @@
                 {
                     return await stepContext.PromptAsync(
                               nameof(TextPrompt),
-                              new PromptOptions { Prompt = MessageFactory.Text("Für wen ist das Essen das?") },
+                              new PromptOptions { Prompt = MessageFactory.Text("Für wen ist das Essen?") },
                               cancellationToken);
                 }
                 else
-                {
-                    stepContext.Values["companyName"] = String.Empty;
                     return await stepContext.NextAsync(null, cancellationToken);
-                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                if (companyName == " ")
+                if (companyName == " " && companyStatus.ToLower().ToString() == "kunde")
                 {
                     return await stepContext.PromptAsync(
                                                  nameof(TextPrompt),
                                                  new PromptOptions { Prompt = MessageFactory.Text("Für welche Firma soll bestellt werden?") },
                                                  cancellationToken);
                 }
-                else
-                {
-                    return await stepContext.NextAsync(null, cancellationToken);
-                }
             }
+            return await stepContext.NextAsync(null, cancellationToken);
         }
 
         private static async Task<DialogTurnResult> QuantatyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -479,19 +494,15 @@
                     msg = $"Danke {stepContext.Values["companyName"]} für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast bei dem Restaurant {stepContext.Values["restaurant"]}, " +
                          $"das Essen {stepContext.Values["food"]} bestellt. Es werden {stepContext.Values["price"] }€ berechnet.";
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
-                    if (Convert.ToInt32(leftQuantity) > 0 && stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
+
+
+                    return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
                     {
-                        return await stepContext.NextAsync(null, cancellationToken);
-                    }
-                    else
-                    {
-                        return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
-                        {
-                            Prompt = MessageFactory.Text("Passt das so?"),
-                            Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
-                            Style = ListStyle.HeroCard,
-                        });
-                    }
+                        Prompt = MessageFactory.Text("Passt das so?"),
+                        Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
+                        Style = ListStyle.HeroCard,
+                    });
+
                 }
             }
 

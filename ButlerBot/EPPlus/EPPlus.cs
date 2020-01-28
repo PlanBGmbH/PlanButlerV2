@@ -288,6 +288,7 @@
             using (HttpClient httpClient = new HttpClient())
             {
                 string resource = container + "/" + resourceName;
+                var sasToken = "";
                 var response = httpClient.GetAsync(sasToken).Result;
                 return (response.Content.ReadAsStringAsync().Result);
             }
