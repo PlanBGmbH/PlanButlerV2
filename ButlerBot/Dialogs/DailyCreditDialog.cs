@@ -55,14 +55,14 @@
 
             var msg = "";
             int dayNumber = DateTime.Now.DayOfYear;
-            SalaryDeduction money = JsonConvert.DeserializeObject<SalaryDeduction>(GetDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year + ".json"));
+            SalaryDeduction money = JsonConvert.DeserializeObject<SalaryDeduction>(BotMethods.GetDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year + ".json"));
             var userId = money.Order.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
             try
             {
 
                 OrderBlob orderBlob = new OrderBlob();
                 int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
                 var dayId = orderBlob.Day.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
                 var nameID = orderBlob.Day[dayId].Order.FindAll(x => x.Name == (string)stepContext.Values["name"]);
                 msg += $"Heute beträgt die Belastung: {Environment.NewLine}";
@@ -129,7 +129,7 @@
                 try
                 {
                     var lastmonth = DateTime.Now.Month - 1;
-                    MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(GetDocument("moneylog", "money_" + lastmonth.ToString() + "_" + DateTime.Now.Year + ".json"));
+                    MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(BotMethods.GetDocument("moneylog", "money_" + lastmonth.ToString() + "_" + DateTime.Now.Year + ".json"));
 
                     var userId = money.User.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
                     if (userId != -1)
@@ -149,19 +149,6 @@
 
             await stepContext.EndDialogAsync();
             return await stepContext.BeginDialogAsync(nameof(OverviewDialog));
-        }
-
-        /// <summary>
-        /// Gets a document from our StorageAccount
-        /// </summary>
-        /// <param name="container">Describes the needed container</param>
-        /// <param name="resourceName">Describes the needed resource</param>
-        /// <returns>Returns a JSON you specified with container and resourceName</returns>
-        private static string GetDocument(string container, string resourceName)
-        {
-           BackendCommunication backendcom = new BackendCommunication();
-            string taskUrl = backendcom.GetDocument(container, resourceName);
-            return taskUrl;
         }
     }
 }

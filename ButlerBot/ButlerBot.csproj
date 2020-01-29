@@ -17,8 +17,11 @@
     <PackageReference Include="AdaptiveCards" Version="1.2.3" />
     <PackageReference Include="EPPlus" Version="4.5.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.Bot.Builder" Version="4.5.3" />
+    <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.14" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Http" Version="3.0.2" />
+    <PackageReference Include="Microsoft.Bot.Builder" Version="4.7.2" />
     <PackageReference Include="Microsoft.Bot.Builder.Dialogs" Version="4.5.3" />
+    <PackageReference Include="Microsoft.Bot.Builder.Integration.ApplicationInsights.Core" Version="4.7.2" />
     <PackageReference Include="Microsoft.Bot.Builder.Integration.AspNet.Core" Version="4.5.1" />
     <PackageReference Include="Microsoft.Bot.Builder.Teams" Version="4.3.0-beta1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.113">
@@ -30,6 +33,7 @@
   <ItemGroup>
     <Reference Include="BotLibraryV2">
       <HintPath>..\BotLibraryV2\BotLibraryV2\bin\Debug\netcoreapp3.0\BotLibraryV2.dll</HintPath>
+      <Private>true</Private>
     </Reference>
   </ItemGroup>
 

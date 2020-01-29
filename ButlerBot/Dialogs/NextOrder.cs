@@ -1,18 +1,18 @@
-﻿namespace ButlerBot
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Net;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using BotLibraryV2;
-    using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Dialogs;
-    using Microsoft.Bot.Builder.Dialogs.Choices;
-    using Microsoft.Bot.Schema;
-    using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
+using BotLibraryV2;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Choices;
+using Microsoft.Bot.Schema;
+using Newtonsoft.Json;
 
+namespace ButlerBot
+{
     /// <summary>
     /// NextOrder.
     /// </summary>
@@ -87,7 +87,7 @@
             // Get the Plan
             try
             {
-                string food = GetDocument("eatingplan", "ButlerOverview.json");
+                string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json");
                 plan = JsonConvert.DeserializeObject<Plan>(food);
                 dayId = plan.Planday.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
                 valid = true;
@@ -427,7 +427,7 @@
                     try
                     {
 
-                        var orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                        var orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
                         var dayID = orderBlob.Day.FindIndex(x => x.Name == weekDaysEN[indexer]);
                         if (dayID == -1)
                         {
@@ -553,7 +553,7 @@
                             order.Restaurant = (string)stepContext.Values["restaurant"];
                             order.Quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
                             order.Meal = (string)stepContext.Values["food"];
-                            var orderblob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                            var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
                             var dayID = orderblob.Day.FindIndex(x => x.Name == weekDaysEN[indexer]);
                             if (dayID == -1)
                             {
@@ -588,9 +588,9 @@
                                 }
                             }
                             var bufferorder = order;
-                            HttpStatusCode statusOrder = UploadOrder(order);
-                            HttpStatusCode statusSalary = UploadOrderforSalaryDeduction(bufferorder);
-                            HttpStatusCode statusMoney = UploadMoney(bufferorder);
+                            HttpStatusCode statusOrder = BotMethods.UploadOrder(order);
+                            HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
+                            HttpStatusCode statusMoney = BotMethods.UploadMoney(bufferorder);
                             if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
                             {
                                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Die Bestellung wurde gespeichert."), cancellationToken);
@@ -598,9 +598,9 @@
                             else
                             {
                                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
-                                DeletOrderforSalaryDeduction(bufferorder);
-                                DeletMoney(bufferorder);
-                                DeletOrder(bufferorder);
+                                BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
+                                BotMethods.DeleteMoney(bufferorder);
+                                BotMethods.DeleteOrder(bufferorder);
                                 await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                             }
@@ -622,9 +622,9 @@
                         order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
                         order.Grand = 0;
                         var bufferorder = order;
-                        HttpStatusCode statusOrder = UploadOrder(order);
-                        HttpStatusCode statusSalary = UploadOrderforSalaryDeduction(bufferorder);
-                        HttpStatusCode statusMoney = UploadMoney(bufferorder);
+                        HttpStatusCode statusOrder = BotMethods.UploadOrder(order);
+                        HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
+                        HttpStatusCode statusMoney = BotMethods.UploadMoney(bufferorder);
                         if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
                         {
                             await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Die Bestellung wurde gespeichert."), cancellationToken);
@@ -632,9 +632,9 @@
                         else
                         {
                             await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
-                            DeletOrderforSalaryDeduction(bufferorder);
-                            DeletMoney(bufferorder);
-                            DeletOrder(bufferorder);
+                            BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
+                            BotMethods.DeleteMoney(bufferorder);
+                            BotMethods.DeleteOrder(bufferorder);
                             await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                             return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                         }
@@ -665,9 +665,9 @@
                             tempOrder.Price = item.Price;
                             tempOrder.Grand = 0;
                             var bufferorder = tempOrder;
-                            statusOrder = UploadOrder(tempOrder);
-                            statusSalary = UploadOrderforSalaryDeduction(bufferorder);
-                            statusMoney = UploadMoney(bufferorder);
+                            statusOrder = BotMethods.UploadOrder(tempOrder);
+                            statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
+                            statusMoney = BotMethods.UploadMoney(bufferorder);
                             if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
                             {
 
@@ -675,9 +675,9 @@
                             else
                             {
                                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
-                                DeletOrderforSalaryDeduction(bufferorder);
-                                DeletMoney(bufferorder);
-                                DeletOrder(bufferorder);
+                                BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
+                                BotMethods.DeleteMoney(bufferorder);
+                                BotMethods.DeleteOrder(bufferorder);
                                 await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                             }
@@ -757,274 +757,16 @@
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param companyName="order"></param>
-        private static HttpStatusCode UploadMoney(Order order)
-        {
-            try
-            {
-                MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(GetDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json"));
-                var _money = money;
-                if (order.CompanyStatus.ToString().ToLower() == "für mich" || order.CompanyStatus.ToString().ToLower() == "privat")
-                {
-                    var userId = _money.User.FindIndex(x => x.Name == order.Name);
-
-                    // enters if the current user is not in the list. 
-                    if (userId == -1)
-                    {
-                        User user = new User() { Name = order.Name, Owe = order.Price };
-                        _money.User.Add(user);
-
-                        HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money));
-                        return status;
-                    }
-                    else // enters if everything is normal
-                    {
-                        var newOwe = money.User[userId].Owe;
-                        newOwe += order.Price;
-                        _money.User[userId].Owe = newOwe;
-
-                        HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money));
-                        return status;
-                    }
-                }
-                else
-                {
-                    var userId = _money.User.FindIndex(x => x.Name == order.CompanyName);
-
-                    // enters if the current user is not in the list. 
-                    if (userId == -1)
-                    {
-                        User user = new User() { Name = order.CompanyName, Owe = order.Price };
-                        _money.User.Add(user);
-
-                        HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money));
-                        return status;
-                    }
-                    else // enters if everything is normal
-                    {
-                        var newOwe = money.User[userId].Owe;
-                        newOwe += order.Price;
-                        _money.User[userId].Owe = newOwe;
-
-                        HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money));
-                        return status;
-                    }
-                }
-
-            }
-            catch // enters if blob dont exist
-            {
-                List<User> users = new List<User>();
-                User user = new User() { Name = order.CompanyName, Owe = order.Price };
-                users.Add(user);
-                MoneyLog money = new MoneyLog() { Monthnumber = DateTime.Now.Month, Title = "moneylog", User = users };
-
-                HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(money));
-                return status;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param companyName="order"></param>
-        private static HttpStatusCode UploadOrder(Order order)
-        {
-            OrderBlob orderBlob = new OrderBlob();
-            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-            try
-            {
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                var dayId = orderBlob.Day.FindIndex(x => x.Name == weekDaysEN[indexer]);
-                if (dayId == -1) // enters if the current day is not in the list 
-                {
-                    List<Order> orders = new List<Order>();
-                    orders.Add(order);
-                    orderBlob.Day.Add(new Day() { Name = weekDaysEN[indexer], Order = orders, Weeknumber = weeknumber });
-                    orderBlob.Title = "orders/" + DateTime.Now.Month + "/" + DateTime.Now.Year;
-
-                    HttpStatusCode status = PutDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(orderBlob));
-                    return status;
-                }
-                else // enters if everything is normal
-                {
-                    orderBlob.Day[dayId].Order.Add(order);
-                    HttpStatusCode status = PutDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(orderBlob));
-                    return status;
-                }
-            }
-            catch // enters if blob dont exist
-            {
-                List<Day> day = new List<Day>();
-                List<Order> orders = new List<Order>();
-
-                orders.Add(order);
-                day.Add(new Day() { Name = DateTime.Now.DayOfWeek.ToString().ToLower(), Order = orders, Weeknumber = weeknumber });
-
-                orderBlob.Title = "orders/" + DateTime.Now.Month + "/" + DateTime.Now.Year;
-                orderBlob.Day = day;
-
-                HttpStatusCode status = PutDocument("orders", "orders_" + weeknumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(orderBlob));
-                return status;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param companyName="order"></param>
-        private static HttpStatusCode UploadOrderforSalaryDeduction(Order order)
-        {
-            SalaryDeduction salaryDeduction = new SalaryDeduction();
-            int dayNumber = DateTime.Now.DayOfYear;
-            try
-            {
-                salaryDeduction = JsonConvert.DeserializeObject<SalaryDeduction>(GetDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year + ".json"));
-                salaryDeduction.Order.Add(order);
-                HttpStatusCode status = PutDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction));
-                return status;
-            }
-            catch // enters if blob dont exist
-            {
-                List<Order> orders = new List<Order>();
-
-                salaryDeduction.Daynumber = dayNumber;
-                salaryDeduction.Name = "SalaryDeduction";
-
-                orders.Add(order);
-                salaryDeduction.Order = orders;
-
-                HttpStatusCode status = PutDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction));
-                return status;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param companyName="container"></param>
-        /// <param companyName="resourceName"></param>
-        /// <param companyName="body"></param>
-        /// <returns></returns>
-        private static HttpStatusCode PutDocument(string container, string resourceName, string body)
-        {
-           BackendCommunication backendcom = newBackendCommunication();
-            HttpStatusCode taskUrl = backendcom.PutDocument(container, resourceName, body, "q.planbutler");
-            return taskUrl;
-        }
-
-        /// <summary>
-        /// Gets a document from our StorageAccount
-        /// </summary>
-        /// <param companyName="container">Describes the needed container</param>
-        /// <param companyName="resourceName">Describes the needed resource</param>
-        /// <returns>Returns a JSON you specified with container and resourceName</returns>
-        private static string GetDocument(string container, string resourceName)
-        {
-            Util.BackendCommunication backendcom = new Util.BackendCommunication();
-            string taskUrl = backendcom.GetDocument(container, resourceName);
-            return taskUrl;
-        }
-
-        /// <summary>
-        /// delets the entry of your order.
-        /// </summary>
-        /// <param companyName="order"></param>
-        private static void DeletMoney(Order order)
-        {
-            try
-            {
-                MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(GetDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json"));
-                var _money = money;
-                var userId = _money.User.FindIndex(x => x.Name == order.CompanyName);
-                _money.User.RemoveAt(userId);
-                PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money));
-            }
-            catch // enters if blob dont exist
-            {
-                List<User> users = new List<User>();
-                User user = new User() { Name = order.CompanyName, Owe = order.Price };
-                users.Add(user);
-                MoneyLog money = new MoneyLog() { Monthnumber = DateTime.Now.Month, Title = "moneylog", User = users };
-
-                PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(money));
-            }
-        }
-
-        /// <summary>
-        /// delets the entry of your order.
-        /// </summary>
-        /// <param companyName="order">.</param>
-        private static void DeletOrder(Order order)
-        {
-            OrderBlob orderBlob = new OrderBlob();
-            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-            try
-            {
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                var valueDay = orderBlob.Day.FindIndex(x => x.Name == dayName);
-                var nameId = orderBlob.Day[valueDay].Order.FindIndex(x => x.CompanyName == order.CompanyName);
-                orderBlob.Day[valueDay].Order.RemoveAt(nameId);
-                PutDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(orderBlob));
-            }
-            catch // enters if blob dont exist
-            {
-                List<Day> day = new List<Day>();
-                List<Order> orders = new List<Order>();
-
-                orders.Add(order);
-                day.Add(new Day() { Name = DateTime.Now.DayOfWeek.ToString().ToLower(), Order = orders, Weeknumber = weeknumber });
-
-                orderBlob.Title = "orders/" + DateTime.Now.Month + "/" + DateTime.Now.Year;
-                orderBlob.Day = day;
-
-                PutDocument("orders", "orders_" + weeknumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(orderBlob));
-            }
-        }
-
-        /// <summary>
-        /// delets the entry of your order.
-        /// </summary>
-        /// <param companyName="order"></param>
-        private static void DeletOrderforSalaryDeduction(Order order)
-        {
-            SalaryDeduction salaryDeduction = new SalaryDeduction();
-            var dayId = order.Date.Date.DayOfYear;
-            salaryDeduction = JsonConvert.DeserializeObject<SalaryDeduction>(GetDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year + ".json"));
-            var nameId = salaryDeduction.Order.FindIndex(x => x.CompanyName == order.CompanyName);
-            salaryDeduction.Order.RemoveAt(nameId);
-            try
-            {
-                PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction));
-            }
-            catch // enters if blob dont exist
-            {
-                List<Order> orders = new List<Order>();
-
-                salaryDeduction.Daynumber = dayId;
-                salaryDeduction.Name = "SalaryDeduction";
-
-                orders.Add(order);
-                salaryDeduction.Order = orders;
-
-                PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction));
-            }
-        }
-
         /// <summary>
         /// Gets the chioses corresponding to the identifier you sepcify
         /// </summary>
-        /// <param companyName="identifier">The identifier is used to define what choises you want</param>
-        /// <param companyName="plan">The plan Object</param>
+        /// <param name="identifier">The identifier is used to define what choises you want</param>
+        /// <param name="plan">The plan Object</param>
         /// <returns>Returnds the specified choises</returns>
         private static IList<Choice> GetChoice(string identifier, Plan plan)
         {
             List<string> choise = new List<string>();
-            var day = plan.Planday[indexer];
+            var day = plan.Planday[dayId];
             if (identifier == "restaurant")
             {
                 if (day.Restaurant1 != null)
@@ -1056,4 +798,5 @@
         }
     }
 }
+
 

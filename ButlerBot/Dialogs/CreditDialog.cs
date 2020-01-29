@@ -54,7 +54,7 @@
 
             try
             {
-                MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(GetDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json"));
+                MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(BotMethods.GetDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json"));
 
                 var userId = money.User.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
                 if (userId != -1)
@@ -93,7 +93,7 @@
                 try
                 {
                     var lastmonth = DateTime.Now.Month - 1;
-                    MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(GetDocument("moneylog", "money_" + lastmonth.ToString() + "_" + DateTime.Now.Year + ".json"));
+                    MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(BotMethods.GetDocument("moneylog", "money_" + lastmonth.ToString() + "_" + DateTime.Now.Year + ".json"));
 
                     var userId = money.User.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
                     if (userId != -1)
@@ -113,19 +113,6 @@
 
             await stepContext.EndDialogAsync();
             return await stepContext.BeginDialogAsync(nameof(OverviewDialog));
-        }
-
-        /// <summary>
-        /// Gets a document from our StorageAccount
-        /// </summary>
-        /// <param name="container">Describes the needed container</param>
-        /// <param name="resourceName">Describes the needed resource</param>
-        /// <returns>Returns a JSON you specified with container and resourceName</returns>
-        private static string GetDocument(string container, string resourceName)
-        {
-            Util.BackendCommunication backendcom = new Util.BackendCommunication();
-            string taskUrl = backendcom.GetDocument(container, resourceName);
-            return taskUrl;
         }
     }
 }

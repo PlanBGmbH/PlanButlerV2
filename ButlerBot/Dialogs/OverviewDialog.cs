@@ -23,14 +23,14 @@
             PlanDialog planDialog = new PlanDialog();
             CreditDialog creditDialog = new CreditDialog();
             OrderForOtherDayDialog orderForAnotherDay = new OrderForOtherDayDialog();
-            DeleteOrderDialog deletOrderDialog = new DeleteOrderDialog();
+            DeleteOrderDialog DeleteOrderDialog = new DeleteOrderDialog();
             List<ComponentDialog> dialogsList = new List<ComponentDialog>();
             DailyCreditDialog dailyCreditDialog = new DailyCreditDialog();
             //dialogsList.Add(orderDialog);
             dialogsList.Add(nextorderDialog);
             dialogsList.Add(orderForAnotherDay);
             //dialogsList.Add(planDialog);
-            dialogsList.Add(deletOrderDialog);
+            dialogsList.Add(DeleteOrderDialog);
             dialogsList.Add(creditDialog);
             dialogsList.Add(dailyCreditDialog);
             dialogs = dialogsList.ToArray();

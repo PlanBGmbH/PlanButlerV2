@@ -72,7 +72,7 @@
                     // Get the Order from the BlobStorage and the current day ID
                     OrderBlob orderBlob = new OrderBlob();
                     int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-                    orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                    orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
                     var dayId = orderBlob.Day.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
 
                     string orderlist = string.Empty;
@@ -98,7 +98,7 @@
                     // Get the Order from the BlobStorage, the current day ID and nameId from the user
                     OrderBlob orderBlob = new OrderBlob();
                     int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-                    orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                    orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
                     var dayId = orderBlob.Day.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
                     var nameID = orderBlob.Day[dayId].Order.FindAll(x => x.Name == innerDc.Context.Activity.From.Name);
 
@@ -150,27 +150,15 @@
                 }
                 else if (text.Contains("excel"))
                 {
-                    await innerDc.Context.SendActivityAsync(MessageFactory.Text($"Einen Moment ich suche schnell alles zusammen!"), cancellationToken);
+                    /*await innerDc.Context.SendActivityAsync(MessageFactory.Text($"Einen Moment ich suche schnell alles zusammen!"), cancellationToken);
                     // string[] name = innerDc.Context.Activity.From.Name.Split(' ');
-                    var message = EPPlus.EPPlus.GetExcel("PhilippJ");// name[0] + name[1][0]
-                    await innerDc.Context.SendActivityAsync(MessageFactory.Text(message), cancellationToken);
+                    var message = GetExcel("PhilippJ");// name[0] + name[1][0]
+                    await innerDc.Context.SendActivityAsync(MessageFactory.Text(message), cancellationToken);*/
                 }
             }
 
             return null;
         }
 
-        /// <summary>
-        /// Gets a document from our StorageAccount
-        /// </summary>
-        /// <param name="container">Describes the needed container</param>
-        /// <param name="resourceName">Describes the needed resource</param>
-        /// <returns>Returns a JSON you specified with container and resourceName</returns>
-        private static string GetDocument(string container, string resourceName)
-        {
-            Util.BackendCommunication backendcom = new Util.BackendCommunication();
-            string taskUrl = backendcom.GetDocument(container, resourceName);
-            return taskUrl;
-        }
     }
 }

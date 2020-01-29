@@ -5,6 +5,9 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
+    using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.Bot.Builder.ApplicationInsights;
+    using Microsoft.Bot.Builder.Integration.ApplicationInsights.Core;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -39,6 +42,24 @@
 
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
             services.AddTransient<IBot, TeamsBot<MainDialog>>();
+
+            // Add Application Insights services into service collection
+            services.AddApplicationInsightsTelemetry();
+
+            // Create the telemetry client.
+            services.AddSingleton<IBotTelemetryClient, BotTelemetryClient>();
+
+            // Add telemetry initializer that will set the correlation context for all telemetry items.
+            services.AddSingleton<ITelemetryInitializer, OperationCorrelationTelemetryInitializer>();
+
+            // Add telemetry initializer that sets the user ID and session ID (in addition to other bot-specific properties such as activity ID)
+            services.AddSingleton<ITelemetryInitializer, TelemetryBotIdInitializer>();
+
+            // Create the telemetry middleware to initialize telemetry gathering
+            services.AddSingleton<TelemetryInitializerMiddleware>();
+
+            // Create the telemetry middleware (used by the telemetry initializer) to track conversation events
+            services.AddSingleton<TelemetryLoggerMiddleware>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

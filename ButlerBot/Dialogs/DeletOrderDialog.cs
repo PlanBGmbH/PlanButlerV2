@@ -5,7 +5,7 @@
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
-     using BotLibraryV2;
+    using BotLibraryV2;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Builder.Dialogs.Choices;
@@ -26,7 +26,7 @@
             : base(nameof(DeleteOrderDialog))
         {
             // Get the Plan
-            string food = GetDocument("eatingplan", "ButlerOverview.json");
+            string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json");
             plan = JsonConvert.DeserializeObject<Plan>(food);
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
@@ -34,7 +34,7 @@
                 this.InitialStepAsync,
                 this.NameStepAsync,
                 RemoveStepAsync,
-                DeletOrderStep,
+                DeleteOrderStep,
                 SecondFoodStepAsync,
                 };
 
@@ -138,7 +138,7 @@
 
                 order.CompanyStatus = "intern";
                 order.Name = (string)stepContext.Values["name"];
-                order = GetOrder(order);
+                order = BotMethods.GetOrder(order);
                 var temp = order.Meal;
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
@@ -157,7 +157,7 @@
             }
         }
 
-        private static async Task<DialogTurnResult> DeletOrderStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private static async Task<DialogTurnResult> DeleteOrderStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             stepContext.Values["mainChoise"] = ((FoundChoice)stepContext.Result).Value;
             var text = stepContext.Values["mainChoise"];
@@ -166,13 +166,13 @@
                 var order = new Order();
                 order.CompanyStatus = "intern";
                 order.Name = (string)stepContext.Values["name"];
-                var bufferOrder = GetOrder(order);
+                var bufferOrder = BotMethods.GetOrder(order);
                 order = bufferOrder;
                 var temst = 0;
-                DeleteOrder(order);
+                BotMethods.DeleteOrder(order);
 
-                DeletOrderforSalaryDeduction(bufferOrder);
-                DeleteMoney(bufferOrder);
+                BotMethods.DeleteOrderforSalaryDeduction(bufferOrder);
+                BotMethods.DeleteMoney(bufferOrder);
 
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Okay deine Bestellung wurde entfernt"), cancellationToken);
                 return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
@@ -203,147 +203,6 @@
                 await stepContext.EndDialogAsync(null, cancellationToken);
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
             }
-        }
-
-        /// <summary>
-        /// delets the entry of your order.
-        /// </summary>
-        /// <param name="order"></param>
-        private static void DeleteMoney(Order order)
-        {
-            try
-            {
-                MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(GetDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json"));
-                var userId = money.User.FindIndex(x => x.Name == order.Name);
-                money.User[userId].Owe = Math.Round(money.User[userId].Owe - order.Price, 2);
-                PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(money));
-            }
-            catch // enters if blob dont exist
-            {
-                List<User> users = new List<User>();
-                User user = new User() { Name = order.Name, Owe = order.Price };
-                users.Add(user);
-                MoneyLog money = new MoneyLog() { Monthnumber = DateTime.Now.Month, Title = "moneylog", User = users };
-
-                PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(money));
-            }
-        }
-
-        /// <summary>
-        /// delets the entry of your order.
-        /// </summary>
-        /// <param name="order"></param>
-        private static void DeleteOrder(Order order)
-        {
-            OrderBlob orderBlob = new OrderBlob();
-            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-            try
-            {
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                var valueDay = orderBlob.Day.FindIndex(x => x.Name == dayName);
-                var collection = orderBlob.Day[valueDay].Order.FindAll(x => x.Name == order.Name);
-                foreach (var item in collection)
-                {
-                    if (item.Meal == order.Meal)
-                    {
-                        orderBlob.Day[valueDay].Order.Remove(item);
-                    }
-                }
-                PutDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(orderBlob));
-            }
-            catch // enters if blob dont exist
-            {
-                List<Day> day = new List<Day>();
-                List<Order> orders = new List<Order>();
-
-                orders.Add(order);
-                day.Add(new Day() { Name = DateTime.Now.DayOfWeek.ToString().ToLower(), Order = orders, Weeknumber = weeknumber });
-
-                orderBlob.Title = "orders/" + DateTime.Now.Month + "/" + DateTime.Now.Year;
-                orderBlob.Day = day;
-
-                PutDocument("orders", "orders_" + weeknumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(orderBlob));
-            }
-        }
-
-        /// <summary>
-        /// gets the order entry.
-        /// </summary>
-        /// <param name="order"></param>
-        private static Order GetOrder(Order order)
-        {
-            OrderBlob orderBlob = new OrderBlob();
-            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-            orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-            var valueDay = orderBlob.Day.FindIndex(x => x.Name == dayName);
-            var bufferOrder = orderBlob.Day[valueDay].Order;
-            var nameID = bufferOrder.Find(x => x.Name == order.Name);
-            return nameID;
-        }
-
-        /// <summary>
-        /// delets the entry of your order.
-        /// </summary>
-        /// <param name="order"></param>
-        private static void DeletOrderforSalaryDeduction(Order order)
-        {
-            SalaryDeduction salaryDeduction = new SalaryDeduction();
-            var dayId = order.Date.Date.DayOfYear;
-            salaryDeduction = JsonConvert.DeserializeObject<SalaryDeduction>(GetDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year + ".json"));
-            var collection = salaryDeduction.Order.FindAll(x => x.Name == order.Name);
-            foreach (var item in collection)
-            {
-                if (item.Meal == order.Meal)
-                {
-                    salaryDeduction.Order.Remove(item);
-                }
-            }
-
-
-
-            try
-            {
-                PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction));
-            }
-            catch // enters if blob dont exist
-            {
-                List<Order> orders = new List<Order>();
-
-                salaryDeduction.Daynumber = dayId;
-                salaryDeduction.Name = "SalaryDeduction";
-
-                orders.Add(order);
-                salaryDeduction.Order = orders;
-
-                PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction));
-            }
-        }
-
-        /// <summary>
-        /// Puts the Document in the DB.
-        /// </summary>
-        /// <param name="container"></param>
-        /// <param name="resourceName"></param>
-        /// <param name="body"></param>
-        /// <returns></returns>
-        private static HttpStatusCode PutDocument(string container, string resourceName, string body)
-        {
-            Util.BackendCommunication backendcom = new Util.BackendCommunication();
-            HttpStatusCode taskUrl = backendcom.PutDocument(container, resourceName, body, "q.planbutler");
-            return taskUrl;
-        }
-
-        /// <summary>
-        /// Gets a document from our StorageAccount
-        /// </summary>
-        /// <param name="container">Describes the needed container</param>
-        /// <param name="resourceName">Describes the needed resource</param>
-        /// <returns>Returns a JSON you specified with container and resourceName</returns>
-        private static string GetDocument(string container, string resourceName)
-        {
-            Util.BackendCommunication backendcom = new Util.BackendCommunication();
-            string taskUrl = backendcom.GetDocument(container, resourceName);
-            return taskUrl;
         }
     }
 }

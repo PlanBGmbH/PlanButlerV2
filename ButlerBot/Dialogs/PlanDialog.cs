@@ -50,7 +50,7 @@
             stepContext.Values["restaurant"] = ((FoundChoice)stepContext.Result).Value;
             string restaurant = stepContext.Values["restaurant"].ToString();
 
-            var picture = GetDocument("pictures", restaurant.Replace(' ', '_') + ".txt");
+            var picture = BotMethods.GetDocument("pictures", restaurant.Replace(' ', '_') + ".txt");
             if (!picture.Contains("BlobNotFound"))
             {
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text("Okay, hier der Essensplan von " + restaurant), cancellationToken);
@@ -82,13 +82,6 @@
                 await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
             }
-        }
-
-        private static string GetDocument(string container, string resourceName)
-        {
-            Util.BackendCommunication backendcom = new Util.BackendCommunication();
-            string taskUrl = backendcom.GetDocument(container, resourceName);
-            return taskUrl;
         }
     }
 }

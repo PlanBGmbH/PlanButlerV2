@@ -263,30 +263,6 @@ namespace BotLibraryV2
         /// <summary>
         /// delets the entry of your order.
         /// </summary>
-        /// <param companyName="order"></param>
-        public static void DeleteMoneyCompany(Order order)
-        {
-            try
-            {
-                MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(GetDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json"));
-                var _money = money;
-                var userId = _money.User.FindIndex(x => x.Name == order.CompanyName);
-                _money.User.RemoveAt(userId);
-                PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money));
-            }
-            catch // enters if blob dont exist
-            {
-                List<User> users = new List<User>();
-                User user = new User() { Name = order.CompanyName, Owe = order.Price };
-                users.Add(user);
-                MoneyLog money = new MoneyLog() { Monthnumber = DateTime.Now.Month, Title = "moneylog", User = users };
-
-                PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(money));
-            }
-        }
-        /// <summary>
-        /// delets the entry of your order.
-        /// </summary>
         /// <param companyName="order">.</param>
         public static void DeleteOrderCompany(Order order)
         {
