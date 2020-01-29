@@ -10,6 +10,7 @@
     using Microsoft.Bot.Builder.Integration.ApplicationInsights.Core;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.AspNetCore.Http;
 
     public class Startup
     {
@@ -59,7 +60,11 @@
             services.AddSingleton<TelemetryInitializerMiddleware>();
 
             // Create the telemetry middleware (used by the telemetry initializer) to track conversation events
-            services.AddSingleton<TelemetryLoggerMiddleware>();
+            services.AddSingleton<TelemetryLoggerMiddleware>(sp =>
+            {
+                var telemetryClient = sp.GetService<IBotTelemetryClient>();
+                return new TelemetryLoggerMiddleware(telemetryClient, logPersonalInformation: true);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

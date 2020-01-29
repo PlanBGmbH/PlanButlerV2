@@ -449,8 +449,16 @@ namespace ButlerBot
                             var nameId = order.FindIndex(x => x.Name == nameAsString);
                             if (nameId == -1)
                             {
-                                msg = $"Danke {stepContext.Values["name"]} für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast bei dem Restaurant {stepContext.Values["restaurant"]}, " +
-                                $"das Essen {stepContext.Values["food"]} bestellt. Dir werden {Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2)}€ berechnet.";
+                                if (Convert.ToDouble(stepContext.Values["price"]) <= grand)
+                                {
+                                    msg = $"Danke {stepContext.Values["name"]} für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast bei dem Restaurant {stepContext.Values["restaurant"]}, " +
+                                      $"das Essen {stepContext.Values["food"]} bestellt. Dir werden 0€ berechnet.";
+                                }
+                                else
+                                {
+                                    msg = $"Danke {stepContext.Values["name"]} für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast bei dem Restaurant {stepContext.Values["restaurant"]}, " +
+                                   $"das Essen {stepContext.Values["food"]} bestellt. Dir werden {Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2)}€ berechnet.";
+                                }
                             }
                             else
                             {

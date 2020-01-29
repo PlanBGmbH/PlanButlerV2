@@ -150,10 +150,10 @@
                 }
                 else if (text.Contains("excel"))
                 {
-                    /*await innerDc.Context.SendActivityAsync(MessageFactory.Text($"Einen Moment ich suche schnell alles zusammen!"), cancellationToken);
+                    await innerDc.Context.SendActivityAsync(MessageFactory.Text($"Einen Moment ich suche schnell alles zusammen!"), cancellationToken);
                     // string[] name = innerDc.Context.Activity.From.Name.Split(' ');
-                    var message = GetExcel("PhilippJ");// name[0] + name[1][0]
-                    await innerDc.Context.SendActivityAsync(MessageFactory.Text(message), cancellationToken);*/
+                    getExcel.Run();// name[0] + name[1][0]
+                    //await innerDc.Context.SendActivityAsync(MessageFactory.Text(message), cancellationToken);
                 }
             }
 

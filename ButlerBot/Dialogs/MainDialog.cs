@@ -13,9 +13,11 @@
 
     public class MainDialog : InterruptDialog
     {
-        public MainDialog()
+        public MainDialog(IBotTelemetryClient telemetryClient)
             : base(nameof(MainDialog))
         {
+            // Set the telemetry client for this and all child dialogs.
+            this.TelemetryClient = telemetryClient;
 
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
