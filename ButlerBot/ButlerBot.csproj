@@ -27,6 +27,12 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="BotLibraryV2">
+      <HintPath>..\BotLibraryV2\BotLibraryV2\bin\Debug\netcoreapp3.0\BotLibraryV2.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
     <ItemGroup>
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

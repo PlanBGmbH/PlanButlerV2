@@ -6,7 +6,7 @@
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
-    using ButlerBot.Classes;
+    using BotLibraryV2;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Builder.Dialogs.Choices;
@@ -912,7 +912,7 @@
         /// <returns></returns>
         private static HttpStatusCode PutDocument(string container, string resourceName, string body)
         {
-            Util.BackendCommunication backendcom = new Util.BackendCommunication();
+           BackendCommunication backendcom = newBackendCommunication();
             HttpStatusCode taskUrl = backendcom.PutDocument(container, resourceName, body, "q.planbutler");
             return taskUrl;
         }

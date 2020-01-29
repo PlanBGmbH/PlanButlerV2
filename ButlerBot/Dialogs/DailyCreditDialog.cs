@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using ButlerBot.Classes;
+     using BotLibraryV2;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Builder.Dialogs.Choices;
@@ -159,7 +159,7 @@
         /// <returns>Returns a JSON you specified with container and resourceName</returns>
         private static string GetDocument(string container, string resourceName)
         {
-            Util.BackendCommunication backendcom = new Util.BackendCommunication();
+           BackendCommunication backendcom = new BackendCommunication();
             string taskUrl = backendcom.GetDocument(container, resourceName);
             return taskUrl;
         }
