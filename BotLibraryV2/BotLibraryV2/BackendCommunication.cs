@@ -1,4 +1,4 @@
-﻿namespace ButlerBot.Util
+﻿namespace BotLibraryV2
 {
     using System;
     using System.Collections.Generic;
@@ -19,7 +19,7 @@
             using (HttpClient httpClient = new HttpClient())
             {
                 string resource = container + "/" + resourceName;
-                string sasToken = this.GenerateStorageSasToken(resource, Settings.StorageAccountUrl, Settings.StorageAccountKey);
+                string sasToken = this.GenerateStorageSasToken(resource, ButlerBot.Util.Settings.StorageAccountUrl, ButlerBot.Util.Settings.StorageAccountKey);
                 var response = httpClient.GetAsync(sasToken).Result;
                 return (response.Content.ReadAsStringAsync().Result);
             }
@@ -52,12 +52,39 @@
             return sasToken;
         }
 
+        public string GenerateStorageSasTokenWrite(string resourceName, string storageAccountUrl, string storageAccountKey)
+        {
+            var storageAccountName = storageAccountUrl.Remove(0, 8).Split('.')[0];
+            var version = "2018-03-28";
+            var startTime = DateTime.UtcNow;
+            var startTimeIso = startTime.ToString("s") + "Z";
+            var endTimeIso = startTime.AddMinutes(10).ToString("s") + "Z";
+            var hmacSha256 = new System.Security.Cryptography.HMACSHA256 { Key = Convert.FromBase64String(storageAccountKey) };
+            var payLoad = string.Format(
+                "{0}\n{1}\n{2}\n{3}\n{4}\n{5}\n{6}\n{7}\n\n\n\n\n",
+                "rw",
+                startTimeIso,
+                endTimeIso,
+                "/blob/" + storageAccountName + "/" + resourceName,
+                "",
+                "",
+                "https",
+                "2018-03-28");
+            var sasToken = storageAccountUrl + resourceName +
+                    "?" +
+                    "sp=rw&st=" + startTimeIso + "&se=" + endTimeIso + "&spr=https" +
+                    "&sv=" + version +
+                    "&sig=" + Uri.EscapeDataString(Convert.ToBase64String(hmacSha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(payLoad)))) +
+                    "&sr=b";
+            return sasToken;
+        }
+
         public HttpStatusCode PutDocument(string container, string resourceName, string body, string queueName)
         {
             string label = $"{container}/{resourceName}";
             var brokerProperty = new JObject();
             brokerProperty.Add("Label", label);
-            var connectionString = Settings.serviceBusConnectionString;
+            var connectionString = ButlerBot.Util.Settings.serviceBusConnectionString;
             var sasToken = this.GenerateServiceBusSasToken(connectionString);
             var uri = $"https{connectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);
@@ -76,7 +103,7 @@
             string label = $"{container}/{resourceName}";
             var brokerProperty = new JObject();
             brokerProperty.Add("Label", label);
-            var connectionString = Settings.serviceBusConnectionString;
+            var connectionString = ButlerBot.Util.Settings.serviceBusConnectionString;
             var sasToken = this.GenerateServiceBusSasToken(connectionString);
             var uri = $"https{connectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);

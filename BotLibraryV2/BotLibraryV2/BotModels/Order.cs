@@ -1,4 +1,4 @@
-namespace ButlerBot.Classes
+namespace BotLibraryV2
 {
     using System;
 
@@ -12,6 +12,7 @@ namespace ButlerBot.Classes
         public string CompanyStatus { get; set; }
 
         public string Name { get; set; }
+
         public string CompanyName { get; set; }
 
         public string Restaurant { get; set; }

@@ -1,4 +1,4 @@
-﻿namespace ButlerBot.Classes
+﻿namespace BotLibraryV2
 {
     using System;
     using System.Collections.Generic;
