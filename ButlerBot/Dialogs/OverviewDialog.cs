@@ -1,18 +1,26 @@
 ﻿namespace ButlerBot
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using BotLibraryV2;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Builder.Dialogs.Choices;
     using Microsoft.Bot.Schema;
+    using Newtonsoft.Json;
 
     public class OverviewDialog : ComponentDialog
     {
+        private static Plan plan = new Plan();
+        private static int dayId;
+        private static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
+        private static int indexer = 0;
+        private static bool valid;
 
         // In this Array you can Easy modify your choice List.
-        private static string[] choices = { "Essen Bestellen",  "Für einen anderen Tag Essen bestellen", "Bestellung entfernen", "Monatliche Belastung anzeigen", "Tagesbestellung" };
+        private static string[] choices = { "Essen Bestellen", "Für einen anderen Tag Essen bestellen", "Bestellung entfernen", "Monatliche Belastung anzeigen", "Tagesbestellung" };
         private static ComponentDialog[] dialogs;
 
         public OverviewDialog()
@@ -67,7 +75,55 @@
             // Cards are sent as Attachments in the Bot Framework.
             // So we need to create a list of attachments for the reply activity.
             var attachments = new List<Attachment>();
+            for (int i = 0; i < weekDaysEN.Length; i++)
+            {
+                if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower() && DateTime.Now.Hour < 12)
+                {
+                    indexer = i;
+                }
+                else if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower() && weekDaysEN[i] != "friday")
+                {
+                    indexer = i + 1;
+                }
+            }
+            try
+            {
+                string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json");
+                plan = JsonConvert.DeserializeObject<Plan>(food);
+                dayId = plan.Planday.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
+                valid = true;
+            }
+            catch
+            {
+                valid = false;
+            }
+            List<string> choise = new List<string>();
+            var day = plan.Planday[dayId];
+            if (day.Restaurant1 != null)
+            {
+                choise.Add(day.Restaurant1);
+            }
+            if (day.Restaurant2 != null)
+            {
+                choise.Add(day.Restaurant2);
+            }
+            string msg = "";
+            bool temp = false;
+            foreach (var item in choise)
+            {
 
+                if (temp == false)
+                {
+                    msg = $"Heute wird bei dem Restaurant: {item} Essen bestellt";
+                    temp = true;
+                }
+                else
+                {
+                    msg += $"und bei dem Restaurant: {item}";
+                }
+
+            }
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg));
             // Reply to the activity we received with an activity.
             var reply = MessageFactory.Attachment(attachments);
             List<string> choiceList = new List<string>();

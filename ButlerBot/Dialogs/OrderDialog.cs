@@ -263,8 +263,8 @@ namespace ButlerBot
                 {
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
                     BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
-                    BotMethods.DeleteMoney(bufferorder);
-                    BotMethods.DeleteOrder(bufferorder);
+                    BotMethods.DeleteMoney(bufferorder, dayName);
+                    BotMethods.DeleteOrder(bufferorder, dayName);
                     await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                     return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                 }

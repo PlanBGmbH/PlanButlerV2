@@ -157,7 +157,7 @@ namespace BotLibraryV2
         /// 
         /// </summary>
         /// <param name="order"></param>
-        public static void DeleteMoney(Order order)
+        public static void DeleteMoney(Order order, string day)
         {
             try
             {
@@ -181,16 +181,16 @@ namespace BotLibraryV2
         /// gets the order entry.
         /// </summary>
         /// <param name="order"></param>
-        public static Order GetOrder(Order order)
-        {
-            OrderBlob orderBlob = new OrderBlob();
-            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-            orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-            var valueDay = orderBlob.Day.FindIndex(x => x.Name == dayName);
-            var bufferOrder = orderBlob.Day[valueDay].Order;
-            var nameID = bufferOrder.Find(x => x.Name == order.Name);
-            return nameID;
-        }
+        //public static Order GetOrder(Order order)
+        //{
+        //    OrderBlob orderBlob = new OrderBlob();
+        //    int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
+        //    orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+        //    var valueDay = orderBlob.Day.FindIndex(x => x.Name == dayName);
+        //    var bufferOrder = orderBlob.Day[valueDay].Order;
+        //    var orderValue = bufferOrder.Find(x => x.Name == order.Name);
+        //    return orderValue;
+        //}
         /// <summary>
         /// 
         /// </summary>
@@ -392,14 +392,14 @@ namespace BotLibraryV2
         /// delets the entry of your order. Equivalent zu DeleteOrder()
         /// </summary>
         /// <param name="order"></param>
-        public static void DeleteOrder(Order order)
+        public static void DeleteOrder(Order order, string daySelection)
         {
             OrderBlob orderBlob = new OrderBlob();
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
             try
             {
                 orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                var valueDay = orderBlob.Day.FindIndex(x => x.Name == dayName);
+                var valueDay = orderBlob.Day.FindIndex(x => x.Name == daySelection);
                 var collection = orderBlob.Day[valueDay].Order.FindAll(x => x.Name == order.Name);
                 foreach (var item in collection)
                 {

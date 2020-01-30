@@ -6,7 +6,7 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-     using BotLibraryV2;
+    using BotLibraryV2;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Builder.Teams;
@@ -50,7 +50,6 @@
 
         private async Task<DialogTurnResult> InterruptAsync(DialogContext innerDc, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var teamscontext = innerDc.Context.TurnState.Get<ITeamsContext>();
 
             if (innerDc.Context.Activity.Type == ActivityTypes.Message)
             {
@@ -153,10 +152,12 @@
                     await innerDc.Context.SendActivityAsync(MessageFactory.Text($"Einen Moment ich suche schnell alles zusammen!"), cancellationToken);
                     // string[] name = innerDc.Context.Activity.From.Name.Split(' ');
                     getExcel.Run();// name[0] + name[1][0]
+                    var temp = BotMethods.GetDocument("excel", "Monatsübersicht_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".xlsx");
+                    //session.send(temp);
+                    
                     //await innerDc.Context.SendActivityAsync(MessageFactory.Text(message), cancellationToken);
                 }
             }
-
             return null;
         }
 

@@ -50,7 +50,7 @@ namespace ButlerBot
                 //byte[] arr = excelPackage.GetAsByteArray();
                 excelPackage.Save();
                 // Return Excel File under the given Path.
-                PutDocument("excel", "45.xlsx", stream);
+                PutDocument("excel", "Monatsübersicht_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".xlsx", stream);
 
             }
             //FileStream fs = new FileStream("C:\\Users\\SamuelS\\Desktop\\test.xlsx", FileMode.OpenOrCreate, FileAccess.ReadWrite);
@@ -284,7 +284,7 @@ namespace ButlerBot
             {
                 BackendCommunication backendcom = new BackendCommunication();
                 //HttpStatusCode taskUrl = backendcom.PutDocumentStream(container, resourceName, body, "q.planbutler");
-                var sas = backendcom.GenerateStorageSasToken($"{container}/{resourceName}", Settings.StorageAccountUrl, Settings.StorageAccountKey);
+                var sas = backendcom.GenerateStorageSasTokenWrite($"{container}/{resourceName}", Settings.StorageAccountUrl, Settings.StorageAccountKey);
                 HttpClient client = new HttpClient();
                 HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Put, sas);
                 msg.Headers.Add("x-ms-blob-type", "BlockBlob");

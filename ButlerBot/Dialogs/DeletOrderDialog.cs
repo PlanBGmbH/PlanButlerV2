@@ -21,6 +21,8 @@
         static string dayName;
         static string[] weekDays = { "Montag", "Dienstag", "Mitwoch", "Donnerstag", "Freitag" };
         static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
+        static int indexer = 0;
+
 
         public DeleteOrderDialog()
             : base(nameof(DeleteOrderDialog))
@@ -54,8 +56,7 @@
             // So we need to create a list of attachments for the reply activity.
             var attachments = new List<Attachment>();
             List<string> currentWeekDays = new List<string>();
-            int indexer = 0;
-
+          
             // Reply to the activity we received with an activity.
             var reply = MessageFactory.Attachment(attachments);
 
@@ -99,7 +100,6 @@
         {
             stepContext.Values["mainChoise"] = ((FoundChoice)stepContext.Result).Value;
             var text = stepContext.Values["mainChoise"];
-            int indexer = 0;
             for (int i = 0; i < weekDays.Length; i++)
             {
                 if (weekDays[i] == text)
@@ -138,8 +138,9 @@
 
                 order.CompanyStatus = "intern";
                 order.Name = (string)stepContext.Values["name"];
-                order = BotMethods.GetOrder(order);
-                var temp = order.Meal;
+                var mealVal = GetOrder(order);
+
+                string temp = mealVal.Meal;
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
@@ -149,7 +150,7 @@
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"An diesem Tag gibt es keine Bestellung.\n:("), cancellationToken);
                 await stepContext.EndDialogAsync(null, cancellationToken);
@@ -163,16 +164,17 @@
             var text = stepContext.Values["mainChoise"];
             if (text.ToString().ToLower() == "ja")
             {
+                string day = weekDaysEN[indexer];
                 var order = new Order();
                 order.CompanyStatus = "intern";
                 order.Name = (string)stepContext.Values["name"];
-                var bufferOrder = BotMethods.GetOrder(order);
+                var bufferOrder = GetOrder(order);
                 order = bufferOrder;
                 var temst = 0;
-                BotMethods.DeleteOrder(order);
+                BotMethods.DeleteOrder(order, weekDaysEN[indexer]);
 
                 BotMethods.DeleteOrderforSalaryDeduction(bufferOrder);
-                BotMethods.DeleteMoney(bufferOrder);
+                BotMethods.DeleteMoney(bufferOrder,weekDaysEN[indexer]);
 
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Okay deine Bestellung wurde entfernt"), cancellationToken);
                 return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
@@ -203,6 +205,16 @@
                 await stepContext.EndDialogAsync(null, cancellationToken);
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
             }
+        }
+        public static Order GetOrder(Order order)
+        {
+            OrderBlob orderBlob = new OrderBlob();
+            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
+            orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+            var valueDay = orderBlob.Day.FindIndex(x => x.Name == dayName);
+            var bufferOrder = orderBlob.Day[valueDay].Order;
+            var orderValue = bufferOrder.Find(x => x.Name == order.Name);
+            return orderValue;
         }
     }
 }

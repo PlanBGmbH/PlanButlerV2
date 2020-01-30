@@ -577,8 +577,7 @@ namespace ButlerBot
                             else
                             {
                                 var orderDay = orderblob.Day[dayID].Order;
-                                var nameAsString = Convert.ToString(stepContext.Values["companyName"]);
-                                var nameId = orderDay.FindIndex(x => x.CompanyName == nameAsString);
+                                var nameId = orderDay.FindIndex(x => x.Name == order.Name);
                                 if (nameId == -1)
                                 {
                                     if (order.Price <= grand)
@@ -607,8 +606,8 @@ namespace ButlerBot
                             {
                                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
                                 BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
-                                BotMethods.DeleteMoney(bufferorder);
-                                BotMethods.DeleteOrder(bufferorder);
+                                BotMethods.DeleteMoney(bufferorder,weekDaysEN[indexer]);
+                                BotMethods.DeleteOrder(bufferorder, weekDaysEN[indexer]);
                                 await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                             }
@@ -641,8 +640,8 @@ namespace ButlerBot
                         {
                             await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
                             BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
-                            BotMethods.DeleteMoney(bufferorder);
-                            BotMethods.DeleteOrder(bufferorder);
+                            BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer]);
+                            BotMethods.DeleteOrder(bufferorder, weekDaysEN[indexer]);
                             await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                             return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                         }
@@ -684,8 +683,8 @@ namespace ButlerBot
                             {
                                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
                                 BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
-                                BotMethods.DeleteMoney(bufferorder);
-                                BotMethods.DeleteOrder(bufferorder);
+                                BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer]);
+                                BotMethods.DeleteOrder(bufferorder, weekDaysEN[indexer]);
                                 await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                             }
