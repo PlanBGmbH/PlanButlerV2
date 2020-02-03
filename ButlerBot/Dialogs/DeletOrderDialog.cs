@@ -34,6 +34,7 @@
             var waterfallSteps = new WaterfallStep[]
                 {
                 this.InitialStepAsync,
+                CompanyStepAsync,
                 this.NameStepAsync,
                 RemoveStepAsync,
                 DeleteOrderStep,
@@ -55,21 +56,21 @@
             // So we need to create a list of attachments for the reply activity.
             var attachments = new List<Attachment>();
             List<string> currentWeekDays = new List<string>();
-          
+
             // Reply to the activity we received with an activity.
             var reply = MessageFactory.Attachment(attachments);
 
-            for (int i = 0; i < weekDays.Length; i++)
-            {
-                if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower() && DateTime.Now.Hour < 12)
-                {
-                    indexer = i;
-                }
-                else if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower() && weekDaysEN[i] != "friday")
-                {
-                    indexer = i + 1;
-                }
-            }
+            //for (int i = 0; i < weekDays.Length; i++)
+            //{
+            //    if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower() && DateTime.Now.Hour < 12)
+            //    {
+            //        indexer = i;
+            //    }
+            //    else if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower() && weekDaysEN[i] != "friday")
+            //    {
+            //        indexer = i + 1;
+            //    }
+            //}
 
             for (int i = indexer; i < weekDays.Length; i++)
             {
@@ -95,9 +96,24 @@
             }
         }
 
-        private async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private static async Task<DialogTurnResult> CompanyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             stepContext.Values["mainChoise"] = ((FoundChoice)stepContext.Result).Value;
+            stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
+            return await stepContext.PromptAsync(
+               nameof(ChoicePrompt),
+               new PromptOptions
+               {
+                   Prompt = MessageFactory.Text("Für wen willst du bestellen?"),
+                   Choices = ChoiceFactory.ToChoices(new List<string> { "Für mich", "Praktikant", "Kunde" }),
+                   Style = ListStyle.HeroCard,
+               }, cancellationToken);
+        }
+
+
+        private async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            stepContext.Values["companyStatus"] = ((FoundChoice)stepContext.Result).Value;
             var text = stepContext.Values["mainChoise"];
             for (int i = 0; i < weekDays.Length; i++)
             {
@@ -113,33 +129,30 @@
 
             valueDay = plan.Planday.FindIndex(x => x.Name == weekDaysEN[indexer]);
             dayName = weekDaysEN[indexer];
-            if (stepContext.Context.Activity.From.Name != "User")
-            {
-                stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
-                return await stepContext.NextAsync(null, cancellationToken);
-            }
-            else
-            {
-                return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text($"Bitte gib deinen Namen ein.") }, cancellationToken);
-            }
+            stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
+            return await stepContext.NextAsync(null, cancellationToken);
         }
 
         private async Task<DialogTurnResult> RemoveStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             try
             {
-                if (stepContext.Context.Activity.From.Name == "User")
-                {
-                    stepContext.Values["name"] = (string)stepContext.Result;
-                }
-
                 var order = new Order();
-
                 order.CompanyStatus = "intern";
                 order.Name = (string)stepContext.Values["name"];
-                var mealVal = GetOrder(order);
+                List<Order> mealVal = new List<Order>();
+                var obj = GetOrder(order);
+                //foreach(item in obj)
+                //{
 
-                string temp = mealVal.Meal;
+                //}
+                string temp = "";
+                for (int i = mealVal.Count; i <= 0; i++)
+                {
+                     temp = mealVal[i].Meal;
+                    break;
+                }
+
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
@@ -173,7 +186,7 @@
                 BotMethods.DeleteOrder(order, weekDaysEN[indexer]);
 
                 BotMethods.DeleteOrderforSalaryDeduction(bufferOrder);
-                BotMethods.DeleteMoney(bufferOrder,weekDaysEN[indexer]);
+                BotMethods.DeleteMoney(bufferOrder, weekDaysEN[indexer]);
 
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Okay deine Bestellung wurde entfernt"), cancellationToken);
                 await stepContext.EndDialogAsync();

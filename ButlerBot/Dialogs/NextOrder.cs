@@ -27,7 +27,11 @@ namespace ButlerBot
         private static string companyName = " ";
         private static string[] weekDays = { "Montag", "Dienstag", "Mitwoch", "Donnerstag", "Freitag" };
         private static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
-        private static List<Order> orderList = new List<Order>();
+        private static List<Order> orderList = new List<Order>();   
+        private static List<string> meal1List = new List<string>();
+        private static List<string> meal1ListwithMoney = new List<string>();
+        private static List<string> meal2List = new List<string>();
+        private static List<string> meal2ListWithMoney = new List<string>();
         private static int indexer = 0;
         private static int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
         private const double grand = 3.30;
@@ -65,8 +69,6 @@ namespace ButlerBot
                 QuantatyStepAsync,
                 FoodStepAsync,
                 MealQuantatyStepAsync,
-                SetMealQuantatyStepAsync,
-                GetMealQuantatyStepAsync,
                 PriceStepAsync,
                 SummaryStepAsync,
             };
@@ -197,20 +199,37 @@ namespace ButlerBot
                 stepContext.Values["companyName"] = (string)stepContext.Result;
             }
 
+            if (string.IsNullOrEmpty(plan.Planday[indexer].Restaurant2))
+            {
+                stepContext.Values["restaurant"] = plan.Planday[indexer].Restaurant1;
+                return await stepContext.NextAsync(null, cancellationToken);
+            }
+            else
+            {
 
-            return await stepContext.PromptAsync(
-                nameof(ChoicePrompt),
-                new PromptOptions
-                {
-                    Prompt = MessageFactory.Text("Danke, bei welchem Restaurant möchtest du Bestellen?"),
-                    Choices = GetChoice("restaurant", plan),
-                    Style = ListStyle.HeroCard,
-                }, cancellationToken);
+                return await stepContext.PromptAsync(
+                    nameof(ChoicePrompt),
+                    new PromptOptions
+                    {
+                        Prompt = MessageFactory.Text("Danke, bei welchem Restaurant möchtest du Bestellen?"),
+                        Choices = GetChoice("restaurant", plan),
+                        Style = ListStyle.HeroCard,
+                    }, cancellationToken);
+
+            }
         }
 
         private static async Task<DialogTurnResult> QuantatyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["restaurant"] = ((FoundChoice)stepContext.Result).Value;
+            try
+            {
+                stepContext.Values["restaurant"] = ((FoundChoice)stepContext.Result).Value;
+            }
+            catch (Exception)
+            {
+
+            }
+
 
             if (leftQuantity == " ")
             {
@@ -281,82 +300,30 @@ namespace ButlerBot
 
         private static async Task<DialogTurnResult> MealQuantatyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["food"] = ((FoundChoice)stepContext.Result).Value;
-            string msg = " ";
-            if (leftQuantity != " ")
+            var obj = ((FoundChoice)stepContext.Result).Value;
+            for (int i = 0; i < meal1List.Count; i++)
             {
-                return await stepContext.NextAsync(null, cancellationToken);
-            }
-            else
-            {
-                if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
+                if (meal1ListwithMoney[i] == obj)
                 {
-                    msg = $"Wie oft soll {stepContext.Values["food"]} bestellt werden?";
-                    return await stepContext.PromptAsync(
-                       nameof(TextPrompt),
-                       new PromptOptions
-                       {
-                           Prompt = MessageFactory.Text(msg),
-                       }, cancellationToken);
+                    stepContext.Values["food"] = meal1List[i];
+                    i = meal1List.Count;
                 }
-            }
-
-            return await stepContext.NextAsync(null, cancellationToken);
-
-        }
-
-        private static async Task<DialogTurnResult> SetMealQuantatyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-            string msg = " ";
-            try
-            {
-                stepContext.Values["Choice"] = ((FoundChoice)stepContext.Result).Value;
-                if (stepContext.Values["Choice"].ToString().ToLower() == "ja")
+                try
                 {
-                    if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
+                    if (meal2ListWithMoney[i] == obj)
                     {
-                        string val = "1";
-                        stepContext.Values["quantaty"] = val;
-                        leftQuantity = Convert.ToString(Convert.ToInt32(leftQuantity) - 1);
+                        stepContext.Values["food"] = meal2List[i];
+                        i = meal1List.Count;
                     }
                 }
-                else
+                catch (Exception)
                 {
-                    msg = $"Wie oft soll {stepContext.Values["food"]} bestellt werden?";
-                    return await stepContext.PromptAsync(
-                       nameof(TextPrompt),
-                       new PromptOptions
-                       {
-                           Prompt = MessageFactory.Text(msg),
-                       }, cancellationToken);
-                }
 
-            }
-            catch (Exception)
-            {
-                string val = "1";
-                stepContext.Values["quantaty"] = val;
-            }
-
-            return await stepContext.NextAsync(null, cancellationToken);
-
-        }
-
-        private static async Task<DialogTurnResult> GetMealQuantatyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-
-            if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
-            {
-                if (stepContext.Values["Choice"].ToString().ToLower() == "nein")
-                {
-                    stepContext.Values["quantaty"] = (string)stepContext.Result;
-                    int quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
-                    leftQuantity = Convert.ToString(Convert.ToInt32(leftQuantity) - quantaty);
                 }
             }
-
             return await stepContext.NextAsync(null, cancellationToken);
         }
+
 
 
 
@@ -371,12 +338,12 @@ namespace ButlerBot
             if (stepContext.Values["restaurant"].ToString().ToLower() == plan.Planday[indexer].Restaurant1.ToLower())
             {
                 int foodId = plan.Planday[indexer].Meal1.FindIndex(x => x.Name == (string)stepContext.Values["food"]);
-                stepContext.Values["price"] = plan.Planday[indexer].Meal1[foodId].Price * Convert.ToInt32(stepContext.Values["quantaty"]);
+                stepContext.Values["price"] = plan.Planday[indexer].Meal1[foodId].Price;
             }
             else if (stepContext.Values["restaurant"].ToString().ToLower() == plan.Planday[dayId].Restaurant2.ToLower())
             {
                 int foodId = plan.Planday[indexer].Meal2.FindIndex(x => x.Name == (string)stepContext.Values["food"]);
-                stepContext.Values["price"] = plan.Planday[indexer].Meal2[foodId].Price * Convert.ToInt32(stepContext.Values["quantaty"]);
+                stepContext.Values["price"] = plan.Planday[indexer].Meal2[foodId].Price;
             }
             return await stepContext.NextAsync(null, cancellationToken);
         }
@@ -389,9 +356,9 @@ namespace ButlerBot
             if (stepContext.Values["companyStatus"].ToString().ToLower() == "für mich")
             {
                 order.Date = DateTime.Now;
-                order.CompanyStatus = (string)stepContext.Values["companyStatus"];
+                order.CompanyStatus = "intern";
                 order.Name = (string)stepContext.Values["name"];
-                order.CompanyName = "intern";
+                order.CompanyName = "PlanB";
                 order.Restaurant = (string)stepContext.Values["restaurant"];
                 order.Quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
                 order.Meal = (string)stepContext.Values["food"];
@@ -458,7 +425,7 @@ namespace ButlerBot
                 order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
                 order.Grand = 0;
                 orderList.Add(order);
-                companyStatus = "kunde";
+                companyStatus = "extern";
                 companyName = (string)stepContext.Values["companyName"];
                 if (Convert.ToInt32(leftQuantity) >= 1)
                 {
@@ -554,14 +521,24 @@ namespace ButlerBot
             {
                 foreach (var food in day.Meal1)
                 {
+                    meal1List.Add(food.Name);
+                }
+                foreach (var food in day.Meal1)
+                {
                     choise.Add(food.Name + " " + food.Price + "€");
+                    meal1ListwithMoney.Add(food.Name + " " + food.Price + "€");
                 }
             }
             else if (identifier == "food2")
             {
                 foreach (var food in day.Meal2)
                 {
+                    meal2List.Add(food.Name);
+                }
+                foreach (var food in day.Meal2)
+                {
                     choise.Add(food.Name + " " + food.Price + "€");
+                    meal2ListWithMoney.Add(food.Name + " " + food.Price + "€");
                 }
             }
 

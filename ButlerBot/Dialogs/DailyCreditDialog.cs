@@ -70,12 +70,12 @@
 
                             if (item.CompanyStatus.ToLower().ToString() == "kunde" || item.CompanyStatus.ToLower().ToString() == "privat" || item.CompanyStatus.ToLower().ToString() == "praktikant")
                             {
-                                corders += $"{item.CompanyName} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€ {Environment.NewLine}";
+                                corders += $"{item.CompanyName} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€ {Environment.NewLine}";
                                 sum += Convert.ToInt32(item.Price);
                             }
                             else
                             {
-                                orders += $"{item.Name} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€  {Environment.NewLine}";
+                                orders += $"{item.Name} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€  {Environment.NewLine}";
                                 csum += Convert.ToInt32(item.Price);
                             }
                         }
