@@ -142,22 +142,11 @@
                 order.Name = (string)stepContext.Values["name"];
                 List<Order> mealVal = new List<Order>();
                 var obj = GetOrder(order);
-                //foreach(item in obj)
-                //{
-
-                //}
-                string temp = "";
-                for (int i = mealVal.Count; i <= 0; i++)
-                {
-                     temp = mealVal[i].Meal;
-                    break;
-                }
-
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
                     {
-                        Prompt = MessageFactory.Text($"Soll {temp} gelöscht werden?"),
+                        Prompt = MessageFactory.Text($"Soll  gelöscht werden?"),
                         Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);
