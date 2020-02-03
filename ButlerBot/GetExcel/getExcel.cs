@@ -50,7 +50,16 @@ namespace ButlerBot
                 //byte[] arr = excelPackage.GetAsByteArray();
                 excelPackage.Save();
                 // Return Excel File under the given Path.
-                PutDocument("excel", "Monatsübersicht_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".xlsx", stream);
+                string monthid = "";
+                if (DateTime.Now.Month < 10)
+                {
+                    monthid = "0" + DateTime.Now.Month.ToString();
+                }
+                else
+                {
+                    monthid = DateTime.Now.Month.ToString();
+                }
+                PutDocument("excel", "Monatsuebersicht_" + monthid + "_" + DateTime.Now.Year + ".xlsx", stream);
 
             }
             //FileStream fs = new FileStream("C:\\Users\\SamuelS\\Desktop\\test.xlsx", FileMode.OpenOrCreate, FileAccess.ReadWrite);

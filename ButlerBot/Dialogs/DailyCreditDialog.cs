@@ -34,26 +34,14 @@
         }
 
         private async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-            if (stepContext.Context.Activity.From.Name != "User")
-            {
+        {         
                 stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
-                return await stepContext.NextAsync(null, cancellationToken);
-            }
-            else
-            {
-                return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text($"Bitte gib deinen Namen ein.") }, cancellationToken);
-            }
+                return await stepContext.NextAsync(null, cancellationToken);           
         }
 
         private async Task<DialogTurnResult> GetMoneyStepAsync1(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            if (stepContext.Context.Activity.From.Name == "User")
-            {
-                stepContext.Values["name"] = (string)stepContext.Result;
-            }
-
-            var msg = "";
+                      var msg = "";
             int dayNumber = DateTime.Now.DayOfYear;
             SalaryDeduction money = JsonConvert.DeserializeObject<SalaryDeduction>(BotMethods.GetDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year + ".json"));
             var userId = money.Order.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
@@ -73,21 +61,22 @@
                     if (nameID.Count > 0)
                     {
                         message = string.Empty;
-                        string orders = string.Empty;
+                        string orders = $"Für dich wurde:{Environment.NewLine}";
+                        string corders = $"Für den Externen: {Environment.NewLine}";
                         foreach (var item in nameID)
                         {
 
                             if (item.CompanyStatus.ToLower().ToString() == "kunde" || item.CompanyStatus.ToLower().ToString() == "privat" || item.CompanyStatus.ToLower().ToString() == "praktikant")
                             {
-                                orders = $"Für den Externen {item.CompanyName} wurde das Essen {item.Meal} {item.Quantaty} mal bestellt und kostet {item.Price}€ {Environment.NewLine}";
+                                corders += $"{item.CompanyName} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€ {Environment.NewLine}";
                             }
                             else
                             {
-                                orders = $"Für dich wurde das Essen {item.Meal} {item.Quantaty} mal bestellt und kostet {item.Price}€  {Environment.NewLine}";
+                                orders += $"{item.Name} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€  {Environment.NewLine}";
                             }
-
-                            msg += $"{orders}";
                         }
+                        orders += corders;
+                        msg += $"{orders}";
                     }
                 }
             }

@@ -46,7 +46,7 @@ namespace ButlerBot
         {
             for (int i = 0; i < weekDays.Length; i++)
             {
-                if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower() && DateTime.Now.Hour < 12)
+                if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower())/* && DateTime.Now.Hour < 12*/
                 {
                     indexer = i;
                 }
@@ -61,15 +61,14 @@ namespace ButlerBot
             {
                 CompanyStepAsync,
                 NameStepAsync,
-                QuantatyStepAsync,
                 RestaurantStepAsync,
+                QuantatyStepAsync,
                 FoodStepAsync,
                 MealQuantatyStepAsync,
                 SetMealQuantatyStepAsync,
                 GetMealQuantatyStepAsync,
                 PriceStepAsync,
                 SummaryStepAsync,
-                SecondFoodStepAsync,
             };
 
             // Add named dialogs to the DialogSet. These names are saved in the dialog state.
@@ -97,7 +96,6 @@ namespace ButlerBot
                 valid = false;
             }
             stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
-
             if (companyStatus == "kunde")
             {
                 stepContext.Values["companyStatus"] = companyStatus;
@@ -105,31 +103,31 @@ namespace ButlerBot
             }
             else
             {
-                if (DateTime.Now.IsDaylightSavingTime())
-                {
+                //if (DateTime.Now.IsDaylightSavingTime())
+                //{
 
 
-                    if (DateTime.Now.Hour + 1 > 12)
-                    {
-                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist nach 12 Uhr. Bitte bestelle für einen anderen Tag."));
-                        return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));
-                    }
-                }
-                else
-                {
-                    if (DateTime.Now.Hour + 2 > 12)
-                    {
-                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist nach 12 Uhr. Bitte bestelle für einen anderen Tag."));
-                        return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));
-                    }
-                }
+                //    if (DateTime.Now.Hour > 12)
+                //    {
+                //        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist nach 12 Uhr. Bitte bestelle für einen anderen Tag."));
+                //        return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));
+                //    }
+                //}
+                //else
+                //{
+                //    if (DateTime.Now.Hour + 1 > 12)
+                //    {
+                //        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist nach 12 Uhr. Bitte bestelle für einen anderen Tag."));
+                //        return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));
+                //    }
+                //}
 
                 return await stepContext.PromptAsync(
                               nameof(ChoicePrompt),
                               new PromptOptions
                               {
                                   Prompt = MessageFactory.Text("Für wen willst du bestellen?"),
-                                  Choices = ChoiceFactory.ToChoices(new List<string> { "Für mich", "Privat", "Praktikant", "Kunde" }),
+                                  Choices = ChoiceFactory.ToChoices(new List<string> { "Für mich", "Kunde" }),
                                   Style = ListStyle.HeroCard,
                               }, cancellationToken);
             }
@@ -155,7 +153,7 @@ namespace ButlerBot
                         return await stepContext.NextAsync(null, cancellationToken);
                     }
                 }
-                else if (companyStatus.ToLower().ToString() == "praktikant" || companyStatus.ToLower().ToString() == "privat")
+                else if (companyStatus.ToLower().ToString() == "praktikant")
                 {
                     return await stepContext.PromptAsync(
                               nameof(TextPrompt),
@@ -178,8 +176,9 @@ namespace ButlerBot
             return await stepContext.NextAsync(null, cancellationToken);
         }
 
-        private static async Task<DialogTurnResult> QuantatyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private static async Task<DialogTurnResult> RestaurantStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
+
             if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
             {
                 if (companyName == " ")
@@ -193,10 +192,25 @@ namespace ButlerBot
                 }
 
             }
-            else if (stepContext.Values["companyStatus"].ToString().ToLower() == "privat" || stepContext.Values["companyStatus"].ToString().ToLower() == "praktikant")
+            else if (stepContext.Values["companyStatus"].ToString().ToLower() == "praktikant")
             {
                 stepContext.Values["companyName"] = (string)stepContext.Result;
             }
+
+
+            return await stepContext.PromptAsync(
+                nameof(ChoicePrompt),
+                new PromptOptions
+                {
+                    Prompt = MessageFactory.Text("Danke, bei welchem Restaurant möchtest du Bestellen?"),
+                    Choices = GetChoice("restaurant", plan),
+                    Style = ListStyle.HeroCard,
+                }, cancellationToken);
+        }
+
+        private static async Task<DialogTurnResult> QuantatyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            stepContext.Values["restaurant"] = ((FoundChoice)stepContext.Result).Value;
 
             if (leftQuantity == " ")
             {
@@ -218,10 +232,8 @@ namespace ButlerBot
             return await stepContext.NextAsync(null, cancellationToken);
         }
 
-        private static async Task<DialogTurnResult> RestaurantStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private static async Task<DialogTurnResult> FoodStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-
-
             if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
             {
                 if (leftQuantity == " ")
@@ -234,23 +246,6 @@ namespace ButlerBot
                 string val = "1";
                 stepContext.Values["quantaty"] = val;
             }
-
-            return await stepContext.PromptAsync(
-                nameof(ChoicePrompt),
-                new PromptOptions
-                {
-                    Prompt = MessageFactory.Text("Danke, bei welchem Restaurant möchtest du Bestellen?"),
-                    Choices = GetChoice("restaurant", plan),
-                    Style = ListStyle.HeroCard,
-                }, cancellationToken);
-        }
-
-
-
-        private static async Task<DialogTurnResult> FoodStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-            stepContext.Values["restaurant"] = ((FoundChoice)stepContext.Result).Value;
-
 
             await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Du willst bei {stepContext.Values["restaurant"]} bestellen."), cancellationToken);
 
@@ -391,250 +386,116 @@ namespace ButlerBot
                 int foodId = plan.Planday[indexer].Meal2.FindIndex(x => x.Name == (string)stepContext.Values["food"]);
                 stepContext.Values["price"] = plan.Planday[indexer].Meal2[foodId].Price * Convert.ToInt32(stepContext.Values["quantaty"]);
             }
-            else
-            {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text("Da ist wohl etwas schief gelaufen, bitte fang nochmal von vorne an."), cancellationToken);
-                return await stepContext.EndDialogAsync();
-            }
-
-            string msg = string.Empty;
-            if (leftQuantity != " ")
-            {
-                if (leftQuantity == "0")
-                {
-                    msg = $"Danke für deine Bestellung. Hier ist eine kleine Zusammenfassung:" + Environment.NewLine;
-                    foreach (var item in orderList)
-                    {
-                        msg += $"Du hast für die Firma {item.CompanyName}, {item.Quantaty} mal " +
-                       $"{item.Meal} bei {item.Restaurant} betstellt. Es werden {item.Price}€ berechnet." + Environment.NewLine;
-                    }
-                    if (Convert.ToInt32(stepContext.Values["quantaty"]) >= 1)
-                    {
-                        msg += $"Du hast für die Firma {stepContext.Values["companyName"]}, {stepContext.Values["quantaty"]} mal " +
-                        $"{stepContext.Values["food"]} bei {stepContext.Values["restaurant"]} betstellt. Es werden {stepContext.Values["price"]}€ berechnet.";
-                    }
-                }
-            }
-            else
-            {
-                if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
-                {
-                    msg = $"Danke für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast für die Firma {stepContext.Values["companyName"]}, {stepContext.Values["quantaty"]} mal " +
-                        $"{stepContext.Values["food"]} bei {stepContext.Values["restaurant"]} betstellt. Es werden {stepContext.Values["price"]}€ berechnet.";
-                }
-                else if (stepContext.Values["companyStatus"].ToString().ToLower() == "für mich")
-                {
-                    try
-                    {
-
-                        var orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                        var dayID = orderBlob.Day.FindIndex(x => x.Name == weekDaysEN[indexer]);
-                        if (dayID == -1)
-                        {
-                            if (Convert.ToDouble(stepContext.Values["price"]) <= grand)
-                            {
-                                msg = $"Danke {stepContext.Values["name"]} für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast bei dem Restaurant {stepContext.Values["restaurant"]}, " +
-                                  $"das Essen {stepContext.Values["food"]} bestellt. Dir werden 0€ berechnet.";
-                            }
-                            else
-                            {
-                                msg = $"Danke {stepContext.Values["name"]} für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast bei dem Restaurant {stepContext.Values["restaurant"]}, " +
-                               $"das Essen {stepContext.Values["food"]} bestellt. Dir werden {Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2)}€ berechnet.";
-                            }
-                        }
-                        else
-                        {
-                            var order = orderBlob.Day[dayID].Order;
-                            var nameAsString = Convert.ToString(stepContext.Values["name"]);
-                            var nameId = order.FindIndex(x => x.Name == nameAsString);
-                            if (nameId == -1)
-                            {
-                                if (Convert.ToDouble(stepContext.Values["price"]) <= grand)
-                                {
-                                    msg = $"Danke {stepContext.Values["name"]} für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast bei dem Restaurant {stepContext.Values["restaurant"]}, " +
-                                      $"das Essen {stepContext.Values["food"]} bestellt. Dir werden 0€ berechnet.";
-                                }
-                                else
-                                {
-                                    msg = $"Danke {stepContext.Values["name"]} für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast bei dem Restaurant {stepContext.Values["restaurant"]}, " +
-                                   $"das Essen {stepContext.Values["food"]} bestellt. Dir werden {Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2)}€ berechnet.";
-                                }
-                            }
-                            else
-                            {
-                                msg = $"Danke {stepContext.Values["name"]} für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast bei dem Restaurant {stepContext.Values["restaurant"]}, " +
-                                $"das Essen {stepContext.Values["food"]} bestellt. Dir werden {Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2)}€ berechnet.";
-                            }
-                        }
-
-                        await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
-                        return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
-                        {
-                            Prompt = MessageFactory.Text("Passt das so?"),
-                            Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
-                            Style = ListStyle.HeroCard,
-                        });
-                    }
-                    catch (Exception)
-                    {
-                        if (stepContext.Values["companyStatus"].ToString().ToLower() == "für mich")
-                        {
-                            msg = $"Danke {stepContext.Values["name"]} für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast bei dem Restaurant {stepContext.Values["restaurant"]}, " +
-                        $"das Essen {stepContext.Values["food"]} bestellt. Es werden {Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2)}€ berechnet.";
-                        }
-                        else
-                        {
-                            msg = $"Danke {stepContext.Values["companyName"]} für deine Bestellung. Hier ist eine kleine Zusammenfassung: Du hast bei dem Restaurant {stepContext.Values["restaurant"]}, " +
-                            $"das Essen {stepContext.Values["food"]} bestellt. Es werden {stepContext.Values["price"] }€ berechnet.";
-                        }
-
-                        await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
-                        return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
-                        {
-                            Prompt = MessageFactory.Text("Passt das so?"),
-                            Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
-                            Style = ListStyle.HeroCard,
-                        });
-                    }
-                }
-                else
-                {
-                    if (stepContext.Values["companyStatus"].ToString().ToLower() == "privat")
-                    {
-                        msg = $"Danke, du hast für {stepContext.Values["companyName"]} bei dem Restaurant {stepContext.Values["restaurant"]}, " +
-                         $"das Essen {stepContext.Values["food"]} bestellt. Es werden dir {stepContext.Values["price"] }€ berechnet.";
-                    }
-                    else
-                    {
-                        msg = $"Danke, du hast für {stepContext.Values["companyName"]} bei dem Restaurant {stepContext.Values["restaurant"]}, " +
-                   $"das Essen {stepContext.Values["food"]} bestellt. Es wird PlanB {stepContext.Values["price"] }€ berechnet.";
-                    }
-                    await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
-
-
-                    return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
-                    {
-                        Prompt = MessageFactory.Text("Passt das so?"),
-                        Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
-                        Style = ListStyle.HeroCard,
-                    });
-
-                }
-            }
-
-            if (!string.IsNullOrEmpty(msg))
-            {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
-            }
-
-            if (Convert.ToInt32(leftQuantity) > 0 && stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
-            {
-                return await stepContext.NextAsync(null, cancellationToken);
-            }
-            else
-            {
-                return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
-                {
-                    Prompt = MessageFactory.Text("Passt das so?"),
-                    Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
-                    Style = ListStyle.HeroCard,
-                });
-            }
+            return await stepContext.NextAsync(null, cancellationToken);
         }
 
         private static async Task<DialogTurnResult> SummaryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            try
+
+
+            var order = new Order();
+            if (stepContext.Values["companyStatus"].ToString().ToLower() == "für mich")
             {
-                stepContext.Values["Choice"] = ((FoundChoice)stepContext.Result).Value;
-                if (stepContext.Values["Choice"].ToString().ToLower() == "ja")
+                order.Date = DateTime.Now;
+                order.CompanyStatus = (string)stepContext.Values["companyStatus"];
+                order.Name = (string)stepContext.Values["name"];
+                order.CompanyName = "intern";
+                order.Restaurant = (string)stepContext.Values["restaurant"];
+                order.Quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
+                order.Meal = (string)stepContext.Values["food"];
+                var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                var dayID = orderblob.Day.FindIndex(x => x.Name == weekDaysEN[indexer]);
+                if (dayID == -1)
                 {
-                    var order = new Order();
-                    if (stepContext.Values["companyStatus"].ToString().ToLower() == "für mich")
+                    if (order.Price <= grand)
                     {
-                        try
+                        order.Price = 0;
+                    }
+                    else
+                    {
+                        order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
+                    }
+                }
+                else
+                {
+                    var orderDay = orderblob.Day[dayID].Order;
+                    var nameId = orderDay.FindIndex(x => x.Name == order.Name);
+                    if (nameId == -1)
+                    {
+                        if (order.Price <= grand)
                         {
-                            order.Date = DateTime.Now;
-                            order.CompanyStatus = (string)stepContext.Values["companyStatus"];
-                            order.Name = (string)stepContext.Values["name"];
-                            order.CompanyName = "intern";
-                            order.Restaurant = (string)stepContext.Values["restaurant"];
-                            order.Quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
-                            order.Meal = (string)stepContext.Values["food"];
-                            var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                            var dayID = orderblob.Day.FindIndex(x => x.Name == weekDaysEN[indexer]);
-                            if (dayID == -1)
-                            {
-                                if (order.Price <= grand)
-                                {
-                                    order.Price = 0;
-                                }
-                                else
-                                {
-                                    order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
-                                }
-                            }
-                            else
-                            {
-                                var orderDay = orderblob.Day[dayID].Order;
-                                var nameId = orderDay.FindIndex(x => x.Name == order.Name);
-                                if (nameId == -1)
-                                {
-                                    if (order.Price <= grand)
-                                    {
-                                        order.Price = 0;
-                                    }
-                                    else
-                                    {
-                                        order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
-                                    }
-                                }
-                                else
-                                {
-                                    order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
-                                }
-                            }
-                            var bufferorder = order;
-                            HttpStatusCode statusOrder = BotMethods.UploadOrder(order);
-                            HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
-                            HttpStatusCode statusMoney = BotMethods.UploadMoney(bufferorder);
-                            if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
-                            {
-                                await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Die Bestellung wurde gespeichert."), cancellationToken);
-                            }
-                            else
-                            {
-                                await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
-                                BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
-                                BotMethods.DeleteMoney(bufferorder,weekDaysEN[indexer]);
-                                BotMethods.DeleteOrder(bufferorder, weekDaysEN[indexer]);
-                                await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
-                                return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
-                            }
+                            order.Price = 0;
                         }
-                        catch (Exception)
+                        else
                         {
                             order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
                         }
                     }
-                    else if (stepContext.Values["companyStatus"].ToString().ToLower() == "private" || stepContext.Values["companyStatus"].ToString().ToLower() == "praktikant")
+                    else
                     {
-                        order.Date = DateTime.Now;
-                        order.CompanyStatus = (string)stepContext.Values["companyStatus"];
-                        order.CompanyName = (string)stepContext.Values["companyName"];
-                        order.Name = (string)stepContext.Values["name"];
-                        order.Restaurant = (string)stepContext.Values["restaurant"];
-                        order.Quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
-                        order.Meal = (string)stepContext.Values["food"];
                         order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
-                        order.Grand = 0;
-                        var bufferorder = order;
-                        HttpStatusCode statusOrder = BotMethods.UploadOrder(order);
-                        HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
-                        HttpStatusCode statusMoney = BotMethods.UploadMoney(bufferorder);
+                    }
+                }
+                var bufferorder = order;
+                HttpStatusCode statusOrder = BotMethods.UploadOrder(order);
+                HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
+                HttpStatusCode statusMoney = BotMethods.UploadMoney(bufferorder);
+                if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
+                {
+                    await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Die Bestellung wurde gespeichert."), cancellationToken);
+                }
+                else
+                {
+                    await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
+                    BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
+                    BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer]);
+                    BotMethods.DeleteOrder(bufferorder, weekDaysEN[indexer]);
+                    await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
+                    return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
+                }
+            }
+
+            if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
+            {
+                order.Date = DateTime.Now;
+                order.CompanyStatus = (string)stepContext.Values["companyStatus"];
+                order.CompanyName = (string)stepContext.Values["companyName"];
+                order.Name = (string)stepContext.Values["name"];
+                order.Restaurant = (string)stepContext.Values["restaurant"];
+                order.Quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
+                order.Meal = (string)stepContext.Values["food"];
+                order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
+                order.Grand = 0;
+                orderList.Add(order);
+                companyStatus = "kunde";
+                companyName = (string)stepContext.Values["companyName"];
+                if (Convert.ToInt32(leftQuantity) >= 1)
+                {
+                    await stepContext.EndDialogAsync(null, cancellationToken);
+                    return await stepContext.BeginDialogAsync(nameof(NextOrder), null, cancellationToken);
+                }
+                if (leftQuantity == "0")
+                {
+
+                    foreach (var item in orderList)
+                    {
+                        Order tempOrder = new Order();
+                        tempOrder.Date = item.Date;
+                        tempOrder.CompanyStatus = item.CompanyStatus;
+                        tempOrder.CompanyName = item.CompanyName;
+                        tempOrder.Name = item.Name;
+                        tempOrder.Restaurant = item.Restaurant;
+                        tempOrder.Quantaty = item.Quantaty;
+                        tempOrder.Meal = item.Meal;
+                        tempOrder.Price = item.Price;
+                        tempOrder.Grand = 0;
+                        var bufferorder = tempOrder;
+                        statusOrder = BotMethods.UploadOrder(tempOrder);
+                        statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
+                        statusMoney = BotMethods.UploadMoney(bufferorder);
                         if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
                         {
-                            await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Die Bestellung wurde gespeichert."), cancellationToken);
+
                         }
                         else
                         {
@@ -645,125 +506,21 @@ namespace ButlerBot
                             await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                             return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                         }
-                    }
-
-                    if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
-                    {
-                        order.Date = DateTime.Now;
-                        order.CompanyStatus = (string)stepContext.Values["companyStatus"];
-                        order.CompanyName = (string)stepContext.Values["companyName"];
-                        order.Name = (string)stepContext.Values["name"];
-                        order.Restaurant = (string)stepContext.Values["restaurant"];
-                        order.Quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
-                        order.Meal = (string)stepContext.Values["food"];
-                        order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
-                        order.Grand = 0;
-                        orderList.Add(order);
-                        foreach (var item in orderList)
-                        {
-                            Order tempOrder = new Order();
-                            tempOrder.Date = item.Date;
-                            tempOrder.CompanyStatus = item.CompanyStatus;
-                            tempOrder.CompanyName = item.CompanyName;
-                            tempOrder.Name = item.Name;
-                            tempOrder.Restaurant = item.Restaurant;
-                            tempOrder.Quantaty = item.Quantaty;
-                            tempOrder.Meal = item.Meal;
-                            tempOrder.Price = item.Price;
-                            tempOrder.Grand = 0;
-                            var bufferorder = tempOrder;
-                            statusOrder = BotMethods.UploadOrder(tempOrder);
-                            statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
-                            statusMoney = BotMethods.UploadMoney(bufferorder);
-                            if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
-                            {
-
-                            }
-                            else
-                            {
-                                await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
-                                BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
-                                BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer]);
-                                BotMethods.DeleteOrder(bufferorder, weekDaysEN[indexer]);
-                                await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
-                                return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
-                            }
-                        }
-
                         companyStatus = " ";
                         companyName = " ";
                         leftQuantity = " ";
-                        orderList.Clear();
                     }
-
                     if (leftQuantity == " ")
                     {
-                        return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
-                        {
-                            Prompt = MessageFactory.Text("Willst du nochmal für jemand Essen bestellen?"),
-                            Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
-                            Style = ListStyle.HeroCard,
-                        });
-                    }
-                    else
-                    {
-                        companyStatus = "kunde";
-                        companyName = (string)stepContext.Values["companyName"];
-                        await stepContext.EndDialogAsync(null, cancellationToken);
-                        return await stepContext.BeginDialogAsync(nameof(NextOrder), null, cancellationToken);
+                        orderList.Clear();
                     }
                 }
-                else
-                {
-                    await stepContext.Context.SendActivityAsync(MessageFactory.Text("Okay deine Bestellung wird nicht gespeichert."), cancellationToken);
-                    companyStatus = " ";
-                    companyName = " ";
-                    leftQuantity = " ";
-                    orderList.Clear();
-                    await stepContext.EndDialogAsync(null, cancellationToken);
-                    return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
-                }
             }
-            catch (Exception)
-            {
-                Order order = new Order();
-                order.Date = DateTime.Now;
-                order.CompanyStatus = (string)stepContext.Values["companyStatus"];
-                order.CompanyName = (string)stepContext.Values["companyName"];
-                order.Name = (string)stepContext.Values["name"];
-                order.Restaurant = (string)stepContext.Values["restaurant"];
-                order.Quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
-                order.Meal = (string)stepContext.Values["food"];
-                order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
-                order.Grand = 0;
-                if (Convert.ToInt32(stepContext.Values["quantaty"]) >= 1)
-                {
-                    orderList.Add(order);
-                }
-
-                companyStatus = "kunde";
-                companyName = (string)stepContext.Values["companyName"];
-                await stepContext.EndDialogAsync(null, cancellationToken);
-                return await stepContext.BeginDialogAsync(nameof(NextOrder), null, cancellationToken);
-            }
+            await stepContext.EndDialogAsync(null, cancellationToken);
+            return await stepContext.BeginDialogAsync(nameof(DailyCreditDialog), null, cancellationToken);
 
         }
 
-
-        private static async Task<DialogTurnResult> SecondFoodStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-            stepContext.Values["SecondFoodChoise"] = ((FoundChoice)stepContext.Result).Value;
-
-            if (stepContext.Values["SecondFoodChoise"].ToString().ToLower() == "ja")
-            {
-                return await stepContext.BeginDialogAsync(nameof(NextOrder), null, cancellationToken);
-            }
-            else
-            {
-                await stepContext.EndDialogAsync(null, cancellationToken);
-                return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
-            }
-        }
         /// <summary>
         /// Gets the chioses corresponding to the identifier you sepcify
         /// </summary>

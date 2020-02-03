@@ -15,4 +15,12 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.0-preview2.19523.17" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Reference Include="BotLibraryV2">
+      <HintPath>..\..\BotLibraryV2\BotLibraryV2\bin\Debug\netcoreapp3.0\BotLibraryV2.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
 </Project>

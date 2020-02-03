@@ -152,7 +152,16 @@
                     await innerDc.Context.SendActivityAsync(MessageFactory.Text($"Einen Moment ich suche schnell alles zusammen!"), cancellationToken);
                     // string[] name = innerDc.Context.Activity.From.Name.Split(' ');
                     getExcel.Run();// name[0] + name[1][0]
-                    var temp = BotMethods.GetDocument("excel", "Monatsuebersicht_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".xlsx");
+                    string monthid = "";
+                    if (DateTime.Now.Month < 10)
+                    {
+                        monthid = "0" + DateTime.Now.Month.ToString();
+                    }
+                    else
+                    {
+                        monthid = DateTime.Now.Month.ToString();
+                    }
+                    var temp = BotMethods.GetDocument("excel", "Monatsuebersicht_" + monthid + "_" + DateTime.Now.Year + ".xlsx");
                     //session.send(temp);
                     
                     //await innerDc.Context.SendActivityAsync(MessageFactory.Text(message), cancellationToken);

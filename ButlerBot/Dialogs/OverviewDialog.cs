@@ -70,7 +70,7 @@
 
         private async Task<DialogTurnResult> InitialStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            await stepContext.Context.SendActivityAsync(MessageFactory.Text("Wähle eines der unteren Ergeignisse aus oder schreibe Hilfe um zu erfahren was ich sonst noch alles kann."), cancellationToken);
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text("Wähle eines der unteren Ereignisse aus oder schreibe Hilfe um zu erfahren was ich sonst noch alles kann."), cancellationToken);
 
             // Cards are sent as Attachments in the Bot Framework.
             // So we need to create a list of attachments for the reply activity.
@@ -114,7 +114,7 @@
 
                 if (temp == false)
                 {
-                    msg = $"Heute wird bei dem Restaurant: {item} Essen bestellt";
+                    msg = $"Heute wird bei dem Restaurant: {item} Essen bestellt ";
                     temp = true;
                 }
                 else
