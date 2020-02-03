@@ -75,19 +75,19 @@
 
                             if (item.CompanyStatus.ToLower().ToString() == "extern")
                             {
-                                corders += $"{item.CompanyName} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€ {Environment.NewLine}";
+                                corders += $"{item.CompanyName} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Price}€ {Environment.NewLine}";
                                 csum += Convert.ToDouble(item.Price);
                                 cchecker = true;
                             }
                             else if (item.CompanyStatus.ToLower().ToString() == "internship")
                             {
-                                iorders += $"{item.CompanyName} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€ {Environment.NewLine}";
+                                iorders += $"{item.CompanyName} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Price}€ {Environment.NewLine}";
                                 isum += Convert.ToDouble(item.Price);
                                 ichecker = true;
                             }
                             else
                             {
-                                orders += $"{item.Name} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€  {Environment.NewLine}";
+                                orders += $"{item.Name} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Price}€  {Environment.NewLine}";
                                 sum += Convert.ToDouble(item.Price);
                                 check = true;
                             }
