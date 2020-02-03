@@ -62,21 +62,21 @@
                     {
                         message = string.Empty;
                         string orders = $"Für dich wurde:{Environment.NewLine}";
-                        int sum = 0;
+                        double sum = 0;
                         string corders = $"Für den Externen: {Environment.NewLine}";
-                        int csum = 0;
+                        double csum = 0;
                         foreach (var item in nameID)
                         {
 
-                            if (item.CompanyStatus.ToLower().ToString() == "kunde" || item.CompanyStatus.ToLower().ToString() == "privat" || item.CompanyStatus.ToLower().ToString() == "praktikant")
+                            if (item.CompanyStatus.ToLower().ToString() == "extern" || item.CompanyStatus.ToLower().ToString() == "internship")
                             {
                                 corders += $"{item.CompanyName} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€ {Environment.NewLine}";
-                                sum += Convert.ToInt32(item.Price);
+                                csum += Convert.ToDouble(item.Price);
                             }
                             else
                             {
                                 orders += $"{item.Name} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€  {Environment.NewLine}";
-                                csum += Convert.ToInt32(item.Price);
+                                sum += Convert.ToDouble(item.Price);
                             }
                         }
                         orders += $"Insgesammt werden dir {sum}€ berechnet{Environment.NewLine}";

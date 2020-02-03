@@ -27,7 +27,7 @@ namespace ButlerBot
         private static string companyName = " ";
         private static string[] weekDays = { "Montag", "Dienstag", "Mitwoch", "Donnerstag", "Freitag" };
         private static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
-        private static List<Order> orderList = new List<Order>();   
+        private static List<Order> orderList = new List<Order>();
         private static List<string> meal1List = new List<string>();
         private static List<string> meal1ListwithMoney = new List<string>();
         private static List<string> meal2List = new List<string>();
@@ -98,7 +98,7 @@ namespace ButlerBot
                 valid = false;
             }
             stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
-            if (companyStatus == "kunde")
+            if (companyStatus == "extern")
             {
                 stepContext.Values["companyStatus"] = companyStatus;
                 return await stepContext.NextAsync();
@@ -141,7 +141,7 @@ namespace ButlerBot
             {
                 stepContext.Values["companyStatus"] = ((FoundChoice)stepContext.Result).Value;
                 companyStatus = (string)stepContext.Values["companyStatus"];
-                if (companyStatus.ToLower().ToString() == "kunde")
+                if (companyStatus.ToLower().ToString() == "kunde" || companyStatus == "extern")
                 {
                     if (companyName == " ")
                     {
@@ -181,7 +181,7 @@ namespace ButlerBot
         private static async Task<DialogTurnResult> RestaurantStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
 
-            if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
+            if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde" || stepContext.Values["companyStatus"].ToString().ToLower() == "extern")
             {
                 if (companyName == " ")
                 {
@@ -353,7 +353,7 @@ namespace ButlerBot
 
 
             var order = new Order();
-            if (stepContext.Values["companyStatus"].ToString().ToLower() == "für mich")
+            if (stepContext.Values["companyStatus"].ToString().ToLower() == "für mich" || stepContext.Values["companyStatus"].ToString().ToLower() == "intern")
             {
                 order.Date = DateTime.Now;
                 order.CompanyStatus = "intern";
@@ -362,24 +362,12 @@ namespace ButlerBot
                 order.Restaurant = (string)stepContext.Values["restaurant"];
                 order.Quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
                 order.Meal = (string)stepContext.Values["food"];
-                var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                var dayID = orderblob.Day.FindIndex(x => x.Name == weekDaysEN[indexer]);
-                if (dayID == -1)
+                order.Price = Convert.ToDouble(stepContext.Values["price"]);
+                try
                 {
-                    if (order.Price <= grand)
-                    {
-                        order.Price = 0;
-                    }
-                    else
-                    {
-                        order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
-                    }
-                }
-                else
-                {
-                    var orderDay = orderblob.Day[dayID].Order;
-                    var nameId = orderDay.FindIndex(x => x.Name == order.Name);
-                    if (nameId == -1)
+                    var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                    var dayID = orderblob.Day.FindIndex(x => x.Name == weekDaysEN[indexer]);
+                    if (dayID == -1)
                     {
                         if (order.Price <= grand)
                         {
@@ -392,9 +380,37 @@ namespace ButlerBot
                     }
                     else
                     {
-                        order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
+                        var orderDay = orderblob.Day[dayID].Order;
+                        var nameId = orderDay.FindIndex(x => x.Name == order.Name);
+                        if (nameId == -1)
+                        {
+                            if (order.Price <= grand)
+                            {
+                                order.Price = 0;
+                            }
+                            else
+                            {
+                                order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
+                            }
+                        }
+                        else
+                        {
+                            order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
+                        }
                     }
                 }
+                catch (Exception)
+                {
+                    if (order.Price <= grand)
+                    {
+                        order.Price = 0;
+                    }
+                    else
+                    {
+                        order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
+                    }
+                }
+
                 var bufferorder = order;
                 HttpStatusCode statusOrder = BotMethods.UploadOrder(order);
                 HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
@@ -413,20 +429,25 @@ namespace ButlerBot
                     return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                 }
             }
-            else if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
+            else if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde" || stepContext.Values["companyStatus"].ToString().ToLower() == "extern")
             {
                 order.Date = DateTime.Now;
-                order.CompanyStatus = (string)stepContext.Values["companyStatus"];
+                order.CompanyStatus = "extern";
                 order.CompanyName = (string)stepContext.Values["companyName"];
                 order.Name = (string)stepContext.Values["name"];
                 order.Restaurant = (string)stepContext.Values["restaurant"];
-                order.Quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
+                order.Quantaty = 1;
                 order.Meal = (string)stepContext.Values["food"];
                 order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
                 order.Grand = 0;
                 orderList.Add(order);
                 companyStatus = "extern";
                 companyName = (string)stepContext.Values["companyName"];
+                if (leftQuantity != " ")
+                {
+                    leftQuantity = Convert.ToString(Convert.ToInt32(leftQuantity) - 1);
+                }
+
                 if (Convert.ToInt32(leftQuantity) >= 1)
                 {
                     await stepContext.EndDialogAsync(null, cancellationToken);
@@ -474,10 +495,10 @@ namespace ButlerBot
                     }
                 }
             }
-            else if (stepContext.Values["companyStatus"].ToString().ToLower() == "praktikant")
+            else if (stepContext.Values["companyStatus"].ToString().ToLower() == "praktikant" || stepContext.Values["companyStatus"].ToString().ToLower() == "intership")
             {
                 order.Date = DateTime.Now;
-                order.CompanyStatus = (string)stepContext.Values["companyStatus"];
+                order.CompanyStatus = "internship";
                 order.CompanyName = (string)stepContext.Values["companyName"];
                 order.Name = (string)stepContext.Values["name"];
                 order.Restaurant = (string)stepContext.Values["restaurant"];
