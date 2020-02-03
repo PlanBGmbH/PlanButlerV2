@@ -37,7 +37,6 @@
                 this.NameStepAsync,
                 RemoveStepAsync,
                 DeleteOrderStep,
-                SecondFoodStepAsync,
                 };
 
             // Add named dialogs to the DialogSet. These names are saved in the dialog state.
@@ -177,12 +176,8 @@
                 BotMethods.DeleteMoney(bufferOrder,weekDaysEN[indexer]);
 
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Okay deine Bestellung wurde entfernt"), cancellationToken);
-                return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
-                {
-                    Prompt = MessageFactory.Text("Willst du nochmal eine Bestellung entfernen?"),
-                    Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
-                    Style = ListStyle.HeroCard,
-                });
+                await stepContext.EndDialogAsync();
+                return await stepContext.BeginDialogAsync(nameof(OverviewDialog));
             }
             else
             {
@@ -192,20 +187,6 @@
             }
         }
 
-        private static async Task<DialogTurnResult> SecondFoodStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-            stepContext.Values["SecondFoodChoise"] = ((FoundChoice)stepContext.Result).Value;
-
-            if (stepContext.Values["SecondFoodChoise"].ToString().ToLower() == "ja")
-            {
-                return await stepContext.BeginDialogAsync(nameof(DeleteOrderDialog), null, cancellationToken);
-            }
-            else
-            {
-                await stepContext.EndDialogAsync(null, cancellationToken);
-                return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
-            }
-        }
         public static Order GetOrder(Order order)
         {
             OrderBlob orderBlob = new OrderBlob();

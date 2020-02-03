@@ -127,7 +127,7 @@ namespace ButlerBot
                               new PromptOptions
                               {
                                   Prompt = MessageFactory.Text("Für wen willst du bestellen?"),
-                                  Choices = ChoiceFactory.ToChoices(new List<string> { "Für mich", "Kunde" }),
+                                  Choices = ChoiceFactory.ToChoices(new List<string> { "Für mich", "Praktikant", "Kunde" }),
                                   Style = ListStyle.HeroCard,
                               }, cancellationToken);
             }
@@ -285,15 +285,7 @@ namespace ButlerBot
             string msg = " ";
             if (leftQuantity != " ")
             {
-                msg = $"Möchtest du das Essen einmal bestellen?";
-                return await stepContext.PromptAsync(
-              nameof(ChoicePrompt),
-              new PromptOptions
-              {
-                  Prompt = MessageFactory.Text(msg),
-                  Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
-                  Style = ListStyle.HeroCard,
-              }, cancellationToken);
+                return await stepContext.NextAsync(null, cancellationToken);
             }
             else
             {
@@ -454,8 +446,7 @@ namespace ButlerBot
                     return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                 }
             }
-
-            if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
+            else if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
             {
                 order.Date = DateTime.Now;
                 order.CompanyStatus = (string)stepContext.Values["companyStatus"];
@@ -516,6 +507,22 @@ namespace ButlerBot
                     }
                 }
             }
+            else if (stepContext.Values["companyStatus"].ToString().ToLower() == "praktikant")
+            {
+                order.Date = DateTime.Now;
+                order.CompanyStatus = (string)stepContext.Values["companyStatus"];
+                order.CompanyName = (string)stepContext.Values["companyName"];
+                order.Name = (string)stepContext.Values["name"];
+                order.Restaurant = (string)stepContext.Values["restaurant"];
+                order.Quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
+                order.Meal = (string)stepContext.Values["food"];
+                order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
+                order.Grand = 0;
+                var bufferorder = order;
+                statusOrder = BotMethods.UploadOrder(order);
+                statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
+                statusMoney = BotMethods.UploadMoney(bufferorder);
+            }
             await stepContext.EndDialogAsync(null, cancellationToken);
             return await stepContext.BeginDialogAsync(nameof(DailyCreditDialog), null, cancellationToken);
 
@@ -547,14 +554,14 @@ namespace ButlerBot
             {
                 foreach (var food in day.Meal1)
                 {
-                    choise.Add(food.Name);
+                    choise.Add(food.Name + " " + food.Price + "€");
                 }
             }
             else if (identifier == "food2")
             {
                 foreach (var food in day.Meal2)
                 {
-                    choise.Add(food.Name);
+                    choise.Add(food.Name + " " + food.Price + "€");
                 }
             }
 

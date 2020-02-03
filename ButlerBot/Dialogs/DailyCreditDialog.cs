@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-     using BotLibraryV2;
+    using BotLibraryV2;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Builder.Dialogs.Choices;
@@ -34,14 +34,14 @@
         }
 
         private async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {         
-                stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
-                return await stepContext.NextAsync(null, cancellationToken);           
+        {
+            stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
+            return await stepContext.NextAsync(null, cancellationToken);
         }
 
         private async Task<DialogTurnResult> GetMoneyStepAsync1(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-                      var msg = "";
+            var msg = "";
             int dayNumber = DateTime.Now.DayOfYear;
             SalaryDeduction money = JsonConvert.DeserializeObject<SalaryDeduction>(BotMethods.GetDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year + ".json"));
             var userId = money.Order.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
@@ -62,19 +62,25 @@
                     {
                         message = string.Empty;
                         string orders = $"Für dich wurde:{Environment.NewLine}";
+                        int sum = 0;
                         string corders = $"Für den Externen: {Environment.NewLine}";
+                        int csum = 0;
                         foreach (var item in nameID)
                         {
 
                             if (item.CompanyStatus.ToLower().ToString() == "kunde" || item.CompanyStatus.ToLower().ToString() == "privat" || item.CompanyStatus.ToLower().ToString() == "praktikant")
                             {
                                 corders += $"{item.CompanyName} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€ {Environment.NewLine}";
+                                sum += Convert.ToInt32(item.Price);
                             }
                             else
                             {
                                 orders += $"{item.Name} \t/ {item.Meal} \t/ {item.Quantaty} \t/ {item.Price}€  {Environment.NewLine}";
+                                csum += Convert.ToInt32(item.Price);
                             }
                         }
+                        orders += $"Insgesammt werden dir {sum}€ berechnet{Environment.NewLine}";
+                        corders += $"Insgsammt wird für die Externen  {csum}€ berechnet{Environment.NewLine}";
                         orders += corders;
                         msg += $"{orders}";
                     }
