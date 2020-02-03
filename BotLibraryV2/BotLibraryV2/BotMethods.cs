@@ -164,7 +164,7 @@ namespace BotLibraryV2
                 MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(GetDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json"));
                 var _money = money;
                 var userId = _money.User.FindIndex(x => x.Name == order.Name);
-                _money.User.RemoveAt(userId);
+                _money.User[userId].Owe -= order.Price;
                 PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money));
             }
             catch // enters if blob dont exist
@@ -401,17 +401,17 @@ namespace BotLibraryV2
                 orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
                 var valueDay = orderBlob.Day.FindIndex(x => x.Name == daySelection);
                 var collection = orderBlob.Day[valueDay].Order.FindAll(x => x.Name == order.Name);
-                foreach (var item in collection)
+                for (int i = collection.Count - 1; i >= 0; i--)
                 {
-                    if (item.Meal == order.Meal)
+                    if (collection[i].Meal == order.Meal)
                     {
-                        orderBlob.Day[valueDay].Order.Remove(item);
+                        orderBlob.Day[valueDay].Order.Remove(collection[i]);
+                        break;
                     }
                 }
-
                 PutDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(orderBlob));
             }
-            catch // enters if blob dont exist
+            catch (Exception ex) // enters if blob dont exist
             {
                 List<Day> day = new List<Day>();
                 List<Order> orders = new List<Order>();
@@ -435,13 +435,8 @@ namespace BotLibraryV2
             var dayId = order.Date.Date.DayOfYear;
             salaryDeduction = JsonConvert.DeserializeObject<SalaryDeduction>(GetDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year + ".json"));
             var collection = salaryDeduction.Order.FindAll(x => x.Name == order.Name);
-            foreach (var item in collection)
-            {
-                if (item.Meal == order.Meal)
-                {
-                    salaryDeduction.Order.Remove(item);
-                }
-            }
+            var temp = collection.FindAll(x => x.CompanyStatus == order.CompanyStatus);
+            salaryDeduction.Order.Remove(temp[temp.Count - 1]);
 
             try
             {

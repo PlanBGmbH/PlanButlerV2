@@ -195,8 +195,11 @@
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
             orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
             var valueDay = orderBlob.Day.FindIndex(x => x.Name == dayName);
-            var bufferOrder = orderBlob.Day[valueDay].Order;
-            var orderValue = bufferOrder.Find(x => x.Name == order.Name);
+
+            var bufferOrder = orderBlob.Day[valueDay].Order.FindAll(x => x.Name == order.Name);
+
+            var temp = bufferOrder.FindAll(x => x.CompanyStatus == order.CompanyStatus);
+            var orderValue = temp[temp.Count - 1];
             return orderValue;
         }
     }
