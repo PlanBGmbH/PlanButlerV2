@@ -112,60 +112,20 @@
             }
             catch
             {
-                return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
-                {
-                    Prompt = MessageFactory.Text("Diesen Monat liegt noch keine Rechnung vor, soll ich für letzten Monat nachschauen?"),
-                    Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
-                    Style = ListStyle.HeroCard,
-                });
+               
             }
 
-            if (userId != -1)
-            {
+       
                 // Get the Order from the BlobStorage, the current day ID and nameId from the user
 
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
                 await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog));
-            }
-            else
-            {
-                return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
-                {
-                    Prompt = MessageFactory.Text("Du hast diesen Monat noch nichts bestellt, soll ich für letzten Monat nachschauen?"),
-                    Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
-                    Style = ListStyle.HeroCard,
-                });
-            }
+          
         }
 
         private async Task<DialogTurnResult> GetMoneyStepAsync2(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["Choise"] = ((FoundChoice)stepContext.Result).Value;
-
-            if (stepContext.Values["Choise"].ToString().ToLower() == "ja")
-            {
-                try
-                {
-                    var lastmonth = DateTime.Now.Month - 1;
-                    MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(BotMethods.GetDocument("moneylog", "money_" + lastmonth.ToString() + "_" + DateTime.Now.Year + ".json"));
-
-                    var userId = money.User.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
-                    if (userId != -1)
-                    {
-                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Letzten Monat betrugt deine Belastung: {money.User[userId].Owe}€"), cancellationToken);
-                    }
-                    else
-                    {
-                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Ich hab für letzten Monat auch keine Rechnung von dir gefunden. Leider kann ich dir nicht weiterhelfen.\n:("), cancellationToken);
-                    }
-                }
-                catch
-                {
-                    await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Letzten Monat gab es auch keine Rechnung.\n:("), cancellationToken);
-                }
-            }
-
             await stepContext.EndDialogAsync();
             return await stepContext.BeginDialogAsync(nameof(OverviewDialog));
         }
