@@ -22,6 +22,8 @@
         static string[] weekDays = { "Montag", "Dienstag", "Mitwoch", "Donnerstag", "Freitag" };
         static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
         static int indexer = 0;
+        static string[] companyStatus = { "intern", "extern", "internship" };
+        static string[] companyStatusD = { "Für mich", "Kunde", "Praktikant" };
 
 
         public DeleteOrderDialog()
@@ -99,6 +101,19 @@
         private static async Task<DialogTurnResult> CompanyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             stepContext.Values["mainChoise"] = ((FoundChoice)stepContext.Result).Value;
+            string text = stepContext.Values["mainChoise"].ToString();
+            for (int i = 0; i < weekDays.Length; i++)
+            {
+                if (weekDays[i] == text)
+                {
+                    indexer = i;
+                }
+                else if (weekDays[i] == text && weekDaysEN[i] != "friday")
+                {
+                    indexer = i + 1;
+                }
+            }
+
             stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
             return await stepContext.PromptAsync(
                nameof(ChoicePrompt),
@@ -114,16 +129,11 @@
         private async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             stepContext.Values["companyStatus"] = ((FoundChoice)stepContext.Result).Value;
-            var text = stepContext.Values["mainChoise"];
-            for (int i = 0; i < weekDays.Length; i++)
+            for (int i = 0; i < companyStatusD.Length; i++)
             {
-                if (weekDays[i] == text)
+                if (stepContext.Values["companyStatus"] == companyStatusD[i])
                 {
-                    indexer = i;
-                }
-                else if (weekDays[i] == text && weekDaysEN[i] != "friday")
-                {
-                    indexer = i + 1;
+                    stepContext.Values["companyStatus"] = companyStatus[i];
                 }
             }
 
@@ -138,7 +148,7 @@
             try
             {
                 var order = new Order();
-                order.CompanyStatus = "intern";
+                order.CompanyStatus = stepContext.Values["companyStatus"].ToString();
                 order.Name = (string)stepContext.Values["name"];
                 List<Order> mealVal = new List<Order>();
                 var obj = GetOrder(order);

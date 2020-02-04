@@ -20,6 +20,10 @@
         private static string dayName;
         private static string[] weekDays = { "Montag", "Dienstag", "Mitwoch", "Donnerstag", "Freitag" };
         private static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
+        private static List<string> meal1List = new List<string>();
+        private static List<string> meal1ListwithMoney = new List<string>();
+        private static List<string> meal2List = new List<string>();
+        private static List<string> meal2ListWithMoney = new List<string>();
         private static int indexer = 0;
         private static string userName = string.Empty;
 
@@ -189,7 +193,28 @@
 
         private static async Task<DialogTurnResult> PriceStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["food"] = ((FoundChoice)stepContext.Result).Value;
+
+            var obj = ((FoundChoice)stepContext.Result).Value;
+            for (int i = 0; i < meal1List.Count; i++)
+            {
+                if (meal1ListwithMoney[i] == obj)
+                {
+                    stepContext.Values["food"] = meal1List[i];
+                    i = meal1List.Count;
+                }
+                try
+                {
+                    if (meal2ListWithMoney[i] == obj)
+                    {
+                        stepContext.Values["food"] = meal2List[i];
+                        i = meal1List.Count;
+                    }
+                }
+                catch (Exception)
+                {
+
+                }
+            }
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
             var rnd = new Random();
 
@@ -321,14 +346,24 @@
             {
                 foreach (var food in day.Meal1)
                 {
+                    meal1List.Add(food.Name);
+                }
+                foreach (var food in day.Meal1)
+                {
                     choise.Add(food.Name + " " + food.Price + "€");
+                    meal1ListwithMoney.Add(food.Name + " " + food.Price + "€");
                 }
             }
             else if (identifier == "food2")
             {
                 foreach (var food in day.Meal2)
                 {
+                    meal2List.Add(food.Name);
+                }
+                foreach (var food in day.Meal2)
+                {
                     choise.Add(food.Name + " " + food.Price + "€");
+                    meal2ListWithMoney.Add(food.Name + " " + food.Price + "€");
                 }
             }
 

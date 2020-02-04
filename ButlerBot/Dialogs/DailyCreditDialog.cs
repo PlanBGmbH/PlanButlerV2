@@ -99,11 +99,11 @@
                         if (cchecker)
                         {
                             orders += corders;
-                            corders += $"Insgsammt wird für die Externen  {csum}€ berechnet{Environment.NewLine}";
+                            corders += $"Insgsammt wird für die Kunden  {csum}€ berechnet{Environment.NewLine}";
                         }
                         if (ichecker)
                         {
-                            iorders += $"Insgsammt wird für die Externen  {isum}€ berechnet{Environment.NewLine}";
+                            iorders += $"Insgsammt wird für die Praktikanten  {isum}€ berechnet{Environment.NewLine}";
                             orders += iorders;
                         }
                         msg += $"{orders}";
