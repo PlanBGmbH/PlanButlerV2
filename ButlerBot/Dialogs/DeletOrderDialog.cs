@@ -24,6 +24,7 @@
         static int indexer = 0;
         static string[] companyStatus = { "intern", "extern", "internship" };
         static string[] companyStatusD = { "Für mich", "Kunde", "Praktikant" };
+        static Order obj = new Order();
 
 
         public DeleteOrderDialog()
@@ -131,7 +132,7 @@
             stepContext.Values["companyStatus"] = ((FoundChoice)stepContext.Result).Value;
             for (int i = 0; i < companyStatusD.Length; i++)
             {
-                if (stepContext.Values["companyStatus"] == companyStatusD[i])
+                if (stepContext.Values["companyStatus"].ToString() == companyStatusD[i])
                 {
                     stepContext.Values["companyStatus"] = companyStatus[i];
                 }
@@ -149,14 +150,20 @@
             {
                 var order = new Order();
                 order.CompanyStatus = stepContext.Values["companyStatus"].ToString();
-                order.Name = (string)stepContext.Values["name"];
+                order.Name = (string)stepContext.Values["name"].ToString();
                 List<Order> mealVal = new List<Order>();
-                var obj = GetOrder(order);
+                OrderBlob orderBlob = new OrderBlob();
+                int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
+                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                var valueDay = orderBlob.Day.FindIndex(x => x.Name == weekDaysEN[indexer]);
+                var collection = orderBlob.Day[valueDay].Order.FindAll(x => x.Name == order.Name);
+                obj = collection.FindLast(x => x.CompanyStatus == order.CompanyStatus);
+
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
                     {
-                        Prompt = MessageFactory.Text($"Soll  gelöscht werden?"),
+                        Prompt = MessageFactory.Text($"Soll {obj.Meal}  gelöscht werden?"),
                         Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);
@@ -171,17 +178,13 @@
 
         private static async Task<DialogTurnResult> DeleteOrderStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["mainChoise"] = ((FoundChoice)stepContext.Result).Value;
-            var text = stepContext.Values["mainChoise"];
+            stepContext.Values["choise"] = ((FoundChoice)stepContext.Result).Value;
+            var text = stepContext.Values["choise"];
             if (text.ToString().ToLower() == "ja")
             {
-                string day = weekDaysEN[indexer];
-                var order = new Order();
-                order.CompanyStatus = "intern";
-                order.Name = (string)stepContext.Values["name"];
-                var bufferOrder = GetOrder(order);
-                order = bufferOrder;
-                var temst = 0;
+                var bufferOrder = obj;
+                var order = bufferOrder;
+
                 BotMethods.DeleteOrder(order, weekDaysEN[indexer]);
 
                 BotMethods.DeleteOrderforSalaryDeduction(bufferOrder);
