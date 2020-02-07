@@ -11,9 +11,11 @@ using PlanButlerAdmin.Models;
 using Newtonsoft.Json;
 using System.Drawing;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PlanButlerAdmin.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         public IActionResult Index()
