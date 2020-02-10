@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -63,7 +65,23 @@
                 <a class="nav-link" href="/Home/Permission">Permissions</a>
             </span>
         </div>
-        <button class="btn btn-orange"><i class="fa fa-sign-out-alt"></i></button>
+        
+        @if (User.Identity.IsAuthenticated)
+        {
+            var identity = User.Identity as ClaimsIdentity; // Azure AD V2 endpoint specific
+            string preferred_username = identity.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value;
+            <ul class="nav navbar-nav navbar-right">
+                <li class="navbar-text">Hello @preferred_username</li>
+                <li><a class="btn btn-orange" asp-area="AzureAD" asp-controller="Account" asp-action="SignOut"><i class="fa fa-sign-out-alt"></i></a></li>
+            </ul>
+        }
+        else
+        {
+            <ul class="nav navbar-nav navbar-right">
+                <li><a asp-area="AzureAD" asp-controller="Account" asp-action="Signin">Sign in</a></li>
+            </ul>
+        }
+        @*<a class="btn btn-orange"><i class="fa fa-sign-out-alt"></i></a>*@
     </nav>
     <div class="container">
         <partial name="_CookieConsentPartial" />
