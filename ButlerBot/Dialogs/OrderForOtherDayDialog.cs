@@ -251,9 +251,7 @@
             try
             {
                 var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                var dayID = orderblob.Day.FindIndex(x => x.Name == weekDaysEN[indexer]);
-                if (dayID == -1)
-                {
+               
                     if (Convert.ToDouble(stepContext.Values["price"]) <= grand)
                     {
                         order.Price = 0;
@@ -263,28 +261,7 @@
                         order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
                     }
                     order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
-                }
-                else
-                {
-                    var orderDay = orderblob.Day[dayID].Order;
-                    var nameAsString = Convert.ToString(stepContext.Values["name"]);
-                    var nameId = orderDay.FindIndex(x => x.Name == nameAsString);
-                    if (nameId == -1)
-                    {
-                        if (order.Price <= grand)
-                        {
-                            order.Price = 0;
-                        }
-                        else
-                        {
-                            order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
-                        }
-                    }
-                    else
-                    {
-                        order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
-                    }
-                }
+                
             }
             catch (Exception)
             {

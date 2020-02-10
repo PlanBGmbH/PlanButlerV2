@@ -72,11 +72,10 @@
                     OrderBlob orderBlob = new OrderBlob();
                     int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
                     orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                    var dayId = orderBlob.Day.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
 
                     string orderlist = string.Empty;
 
-                    foreach (var item in orderBlob.Day[dayId].Order)
+                    foreach (var item in orderBlob.OrderList)
                     {
                         if (item.Quantaty > 1)
                         {
@@ -98,8 +97,7 @@
                     OrderBlob orderBlob = new OrderBlob();
                     int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
                     orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                    var dayId = orderBlob.Day.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
-                    var nameID = orderBlob.Day[dayId].Order.FindAll(x => x.Name == innerDc.Context.Activity.From.Name);
+                    var nameID = orderBlob.OrderList.FindAll(x => x.Name == innerDc.Context.Activity.From.Name);
 
                     if (nameID.Count != 0)
                     {
@@ -151,7 +149,7 @@
                 {
                     await innerDc.Context.SendActivityAsync(MessageFactory.Text($"Einen Moment ich suche schnell alles zusammen!"), cancellationToken);
                     // string[] name = innerDc.Context.Activity.From.Name.Split(' ');
-                    getExcel.Run();// name[0] + name[1][0]
+                   // getExcel.Run();// name[0] + name[1][0]
                     string monthid = "";
                     if (DateTime.Now.Month < 10)
                     {

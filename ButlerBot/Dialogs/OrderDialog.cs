@@ -5,7 +5,7 @@ namespace ButlerBot
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
-     using BotLibraryV2;
+    using BotLibraryV2;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Builder.Dialogs.Choices;
@@ -60,48 +60,36 @@ namespace ButlerBot
                 valid = false;
             }
             OrderBlob orderBlob = new OrderBlob();
-            try
+
+            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
+            orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+
+            var nameID = orderBlob.OrderList.FindIndex(x => x.Name == stepContext.Context.Activity.From.Name);
+            if (DateTime.Now.Hour - 1 >= 12)
             {
-                int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                var dayId = orderBlob.Day.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
-                if (dayId != -1)
-                {
-                    var nameID = orderBlob.Day[dayId].Order.FindIndex(x => x.Name == stepContext.Context.Activity.From.Name);
-                    if (DateTime.Now.Hour-1 >= 12)
-                    {
-                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist schon nach 12 Uhr"));
-                        return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));
-                    }
-                    else if (nameID != -1)
-                    {
-                        var temp = orderBlob.Day[dayId].Order.FindAll(x => x.Name == stepContext.Context.Activity.From.Name);
-                        foreach (var item in temp)
-                        {
-                            if (item.CompanyStatus.ToLower().ToString() == "für mich")
-                            {
-                                await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Du hast heute schon etwas bestellt"));
-                                return await stepContext.BeginDialogAsync(nameof(NextOrder));
-                            }
-
-                        }
-
-                        return await stepContext.NextAsync();
-                    }
-                    else
-                    {
-                        return await stepContext.NextAsync();
-                    }
-                }
-                else
-                {
-                    return await stepContext.NextAsync();
-                }
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Es ist schon nach 12 Uhr"));
+                return await stepContext.BeginDialogAsync(nameof(OrderForOtherDayDialog));
             }
-            catch (Exception)
+            else if (nameID != -1)
+            {
+                var temp = orderBlob.OrderList.FindAll(x => x.Name == stepContext.Context.Activity.From.Name);
+                foreach (var item in temp)
+                {
+                    if (item.CompanyStatus.ToLower().ToString() == "für mich")
+                    {
+                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Du hast heute schon etwas bestellt"));
+                        return await stepContext.BeginDialogAsync(nameof(NextOrder));
+                    }
+
+                }
+
+                return await stepContext.NextAsync();
+            }
+            else
             {
                 return await stepContext.NextAsync();
             }
+
         }
 
         private static async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -214,7 +202,7 @@ namespace ButlerBot
                $"das Essen {stepContext.Values["food"]} bestellt. Dir werden {Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2)}€ berechnet.";
             }
 
-           
+
 
             await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
 
@@ -303,7 +291,7 @@ namespace ButlerBot
         /// 
         /// </summary>
         /// <param name="order"></param>
-      
+
 
         /// <summary>
         /// Gets the chioses corresponding to the identifier you sepcify

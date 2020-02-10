@@ -5,19 +5,25 @@
     using System.Linq;
     using System.Threading.Tasks;
 
-    public class Day
-    {
-        public int Weeknumber { get; set; }
 
-        public string Name { get; set; }
-
-        public List<Order> Order { get; set; }
-    }
 
     public class OrderBlob
     {
-        public string Title { get; set; }
+        public OrderBlob()
+        {
+        }
 
-        public List<Day> Day { get; set; }
+        public OrderBlob(Order order)
+        {
+            OrderList.Add(order);
+        }
+
+        public List<Order> OrderList { get; set; }
+
+        
+        //public OrderBlob(Order order)
+        //{
+        //    Order.Add(order);
+        //}
     }
 }

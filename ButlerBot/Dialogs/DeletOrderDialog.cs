@@ -155,8 +155,7 @@
                 OrderBlob orderBlob = new OrderBlob();
                 int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
                 orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                var valueDay = orderBlob.Day.FindIndex(x => x.Name == weekDaysEN[indexer]);
-                var collection = orderBlob.Day[valueDay].Order.FindAll(x => x.Name == order.Name);
+                var collection = orderBlob.OrderList.FindAll(x => x.Name == order.Name);
                 obj = collection.FindLast(x => x.CompanyStatus == order.CompanyStatus);
 
                 return await stepContext.PromptAsync(
@@ -207,9 +206,8 @@
             OrderBlob orderBlob = new OrderBlob();
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
             orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-            var valueDay = orderBlob.Day.FindIndex(x => x.Name == dayName);
-
-            var bufferOrder = orderBlob.Day[valueDay].Order.FindAll(x => x.Name == order.Name);
+          
+            var bufferOrder = orderBlob.OrderList.FindAll(x => x.Name == order.Name);
 
             var temp = bufferOrder.FindAll(x => x.CompanyStatus == order.CompanyStatus);
             var orderValue = temp[temp.Count - 1];

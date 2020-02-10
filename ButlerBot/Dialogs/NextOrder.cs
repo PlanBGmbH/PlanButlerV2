@@ -32,6 +32,7 @@ namespace ButlerBot
         private static List<string> meal1ListwithMoney = new List<string>();
         private static List<string> meal2List = new List<string>();
         private static List<string> meal2ListWithMoney = new List<string>();
+
         private static int indexer = 0;
         private static int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
         private const double grand = 3.30;
@@ -350,7 +351,8 @@ namespace ButlerBot
 
         private static async Task<DialogTurnResult> SummaryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-
+            DateTime date = DateTime.Now;
+            var stringDate = date.ToString("yyyy-MM-dd");
 
             var order = new Order();
             if (stepContext.Values["companyStatus"].ToString().ToLower() == "für mich" || stepContext.Values["companyStatus"].ToString().ToLower() == "intern")
@@ -363,12 +365,17 @@ namespace ButlerBot
                 order.Quantaty = Convert.ToInt32(stepContext.Values["quantaty"]);
                 order.Meal = (string)stepContext.Values["food"];
                 order.Price = Convert.ToDouble(stepContext.Values["price"]);
+
+
                 try
                 {
-                    var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                    var dayID = orderblob.Day.FindIndex(x => x.Name == weekDaysEN[indexer]);
-                    if (dayID == -1)
+                    var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json"));
+
+
+                    var nameId = orderblob.OrderList.FindIndex(x => x.Name == order.Name);
+                    if (nameId == -1)
                     {
+                        order.Grand = 3.3;
                         if (order.Price <= grand)
                         {
                             order.Price = 0;
@@ -380,39 +387,26 @@ namespace ButlerBot
                     }
                     else
                     {
-                        var orderDay = orderblob.Day[dayID].Order;
-                        var nameId = orderDay.FindIndex(x => x.Name == order.Name);
-                        if (nameId == -1)
-                        {
-                            if (order.Price <= grand)
-                            {
-                                order.Price = 0;
-                            }
-                            else
-                            {
-                                order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
-                            }
-                        }
-                        else
-                        {
-                            order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
-                        }
+                        order.Grand = 0;
+                        order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
                     }
+
                 }
                 catch (Exception)
                 {
+                    order.Grand = 3.3;
                     if (order.Price <= grand)
                     {
                         order.Price = 0;
                     }
                     else
-                    {
+
                         order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
-                    }
                 }
 
+
                 var bufferorder = order;
-                HttpStatusCode statusOrder = BotMethods.UploadOrder(order);
+                HttpStatusCode statusOrder = UploadOrder(order);
                 HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
                 HttpStatusCode statusMoney = BotMethods.UploadMoney(bufferorder);
                 if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
@@ -514,6 +508,50 @@ namespace ButlerBot
             await stepContext.EndDialogAsync(null, cancellationToken);
             return await stepContext.BeginDialogAsync(nameof(DailyCreditDialog), null, cancellationToken);
 
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="order"></param>
+        public static HttpStatusCode UploadOrder(Order order)
+        {
+
+
+            DateTime date = DateTime.Now;
+            var stringDate = date.ToString("yyyy-MM-dd");
+            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
+            try
+            {
+                OrderBlob orderBlob = new OrderBlob();
+                orderBlob.OrderList = new List<Order>();
+                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json"));
+
+
+
+                orderBlob.OrderList.Add(order);
+                HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+                return status;
+
+            }
+            catch // enters if blob dont exist
+            {
+                try
+                {
+                    OrderBlob orderBlob = new OrderBlob();
+                    orderBlob.OrderList = new List<Order>();
+                    orderBlob.OrderList.Add(order);
+
+                    HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+                    return status;
+                }
+                catch (Exception ex)
+                {
+
+                    return HttpStatusCode.BadRequest;
+                }
+
+            }
         }
 
         /// <summary>

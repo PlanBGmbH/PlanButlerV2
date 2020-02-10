@@ -85,7 +85,7 @@
             var brokerProperty = new JObject();
             brokerProperty.Add("Label", label);
             var connectionString = ButlerBot.Util.Settings.serviceBusConnectionString;
-            var sasToken = this.GenerateServiceBusSasToken(connectionString);
+            var sasToken = this.GenerateServiceBusSasToken(connectionString,queueName);
             var uri = $"https{connectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);
             request.Headers.Add("Authorization", sasToken);
@@ -104,7 +104,7 @@
             var brokerProperty = new JObject();
             brokerProperty.Add("Label", label);
             var connectionString = ButlerBot.Util.Settings.serviceBusConnectionString;
-            var sasToken = this.GenerateServiceBusSasToken(connectionString);
+            var sasToken = this.GenerateServiceBusSasToken(connectionString,queueName);
             var uri = $"https{connectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);
             request.Headers.Add("Authorization", sasToken);
@@ -117,13 +117,13 @@
             }
         }
 
-        public string GenerateServiceBusSasToken(string serviceBusConnectionString)
+        public string GenerateServiceBusSasToken(string serviceBusConnectionString,string que)
         {
             var connectionString = serviceBusConnectionString;
             var sasKey = connectionString.Split(';')[2].Remove(0, 16);
             var sasKeyName = connectionString.Split(';')[1].Remove(0, 20);
             var servicebusnamespace = connectionString.Split(';')[0].Remove(0, 11);
-            var resourceUri = "https" + servicebusnamespace + "q.planbutler/messages";
+            var resourceUri = "https" + servicebusnamespace + $"{que}/messages";
 
             TimeSpan sinceEpoch = DateTime.UtcNow - new DateTime(1970, 1, 1);
 
@@ -142,5 +142,6 @@
 
             return sasToken;
         }
+       
     }
 }

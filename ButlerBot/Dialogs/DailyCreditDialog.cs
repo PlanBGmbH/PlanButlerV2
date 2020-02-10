@@ -51,8 +51,8 @@
                 OrderBlob orderBlob = new OrderBlob();
                 int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
                 orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-                var dayId = orderBlob.Day.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
-                var nameID = orderBlob.Day[dayId].Order.FindAll(x => x.Name == (string)stepContext.Values["name"]);
+               
+                var nameID = orderBlob.OrderList.FindAll(x => x.Name == (string)stepContext.Values["name"]);
                 msg += $"Heute beträgt die Belastung: {Environment.NewLine}";
                 if (nameID.Count != 0)
                 {
