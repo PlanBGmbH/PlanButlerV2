@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29411.108
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BotLibraryV2", "BotLibraryV2\BotLibraryV2.csproj", "{CF42053D-0064-4298-A13A-9AAE3E050542}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BotLibraryV2", "BotLibraryV2\BotLibraryV2.csproj", "{CF42053D-0064-4298-A13A-9AAE3E050542}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BotLibraryTest", "BotLibraryTest\BotLibraryTest.csproj", "{362AE0E9-C017-4832-9CC9-9C7FAF625674}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{CF42053D-0064-4298-A13A-9AAE3E050542}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF42053D-0064-4298-A13A-9AAE3E050542}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF42053D-0064-4298-A13A-9AAE3E050542}.Release|Any CPU.Build.0 = Release|Any CPU
+		{362AE0E9-C017-4832-9CC9-9C7FAF625674}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{362AE0E9-C017-4832-9CC9-9C7FAF625674}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{362AE0E9-C017-4832-9CC9-9C7FAF625674}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{362AE0E9-C017-4832-9CC9-9C7FAF625674}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

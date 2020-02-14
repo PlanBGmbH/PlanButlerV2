@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
+[assembly: InternalsVisibleTo("BotLibraryTest")]
 namespace BotLibraryV2
 {
-    public class BotMethods
+        public class BotMethods
     {
         private static string[] weekDays = { "Montag", "Dienstag", "Mitwoch", "Donnerstag", "Freitag" };
         private static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
@@ -125,6 +127,47 @@ namespace BotLibraryV2
         }
 
         /// <summary>
+        /// Calculates the next day.
+        /// </summary>
+        /// <param name="day">The day. <c>monday, thursday,...</c>.</param>
+        /// <returns></returns>
+        internal static DateTime CalculateNextDay(string day)
+        {
+            DateTime nextDay = DateTime.MinValue; ;
+            string[] weekDaysList = { "monday", "tuesday", "wednesday", "thursday", "friday" };
+            int indexDay = 0;
+            int indexCurentDay = 0;
+            string currentDay = DateTime.Now.DayOfWeek.ToString().ToLower();
+            DateTime date = DateTime.Now;
+
+            for (int i = 0; i < weekDaysList.Length; i++)
+            {
+                if (currentDay == weekDaysList[i])
+                {
+                    indexCurentDay = i;
+                }
+
+                if (day.ToLower() == weekDaysList[i])
+                {
+                    indexDay = i;
+                }
+            }
+
+            if (indexDay == indexCurentDay)
+            {
+                nextDay = date;
+            }
+            else
+            {
+                indexCurentDay = indexDay - indexCurentDay;
+                date = DateTime.Now.AddDays(indexCurentDay);
+                nextDay = date;
+            }
+
+            return nextDay;
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="order"></param>
@@ -132,34 +175,9 @@ namespace BotLibraryV2
 
         public static HttpStatusCode UploadForOtherDay(Order order, string day)
         {
-            string[] weekDaysList = { "monday", "tuesday", "wednesday", "thursday", "friday" };
-            int indexDay = 0;
-            int indexCurentDay = 0;
-            string currentDay = DateTime.Now.DayOfWeek.ToString().ToLower();
-            DateTime date = DateTime.Now;
-            var stringDate = string.Empty;
-            for (int i = 0; i < weekDaysList.Length; i++)
-            {
-                if (currentDay == weekDaysList[i])
-                {
-                    indexCurentDay = i;
-                }
-                if (day.ToLower() == weekDaysList[i])
-                {
-                    indexDay = i;
-                }
-            }
-            if (indexDay == indexCurentDay)
-            {
-                stringDate = date.ToString("yyyy-MM-dd");
-            }
-            else
-            {
-                indexCurentDay = indexDay - indexCurentDay;
-                date = DateTime.Now.AddDays(indexCurentDay);
-                stringDate = date.ToString("yyyy-MM-dd");
-            }
-            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
+            DateTime nextDay = CalculateNextDay(day);
+            string stringDate = nextDay.ToString("yyyy-MM-dd");
+
             try
             {
                 OrderBlob orderBlob = new OrderBlob();
@@ -168,7 +186,6 @@ namespace BotLibraryV2
                 orderBlob.OrderList.Add(order);
                 HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
                 return status;
-
             }
             catch
             {
@@ -176,7 +193,7 @@ namespace BotLibraryV2
                 {
                     OrderBlob orderBlob = new OrderBlob();
                     orderBlob.OrderList = new List<Order>();
-                    order.Date = date;
+                    order.Date = DateTime.Now;
                     orderBlob.OrderList.Add(order);
                     HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
                     return status;
@@ -224,7 +241,7 @@ namespace BotLibraryV2
         public static HttpStatusCode UploadOrderforSalaryDeductionForAnotherDay(Order order, string day)
         {
             SalaryDeduction salaryDeduction = new SalaryDeduction();
-              string[] weekDaysList = { "monday", "tuesday", "wednesday", "thursday", "friday" };
+            string[] weekDaysList = { "monday", "tuesday", "wednesday", "thursday", "friday" };
             int indexDay = 0;
             int indexCurentDay = 0;
             string currentDay = DateTime.Now.DayOfWeek.ToString().ToLower();
@@ -582,7 +599,7 @@ namespace BotLibraryV2
         /// <returns></returns>
         public static async Task<List<OrderBlob>> GetDailyOverview()
         {
-            var url = ButlerBot.Util.Settings.GetDailyOverviewFunc;
+            var url = string.Empty; // TODO ButlerBot.Util.Settings.GetDailyOverviewFunc;
             var response = await client.GetAsync(url);
             var result = await response.Content.ReadAsStringAsync();
             var tmp = JsonConvert.DeserializeObject<List<OrderBlob>>(result);
@@ -597,7 +614,7 @@ namespace BotLibraryV2
         /// <returns></returns>
         public static async Task<List<OrderBlob>> GetDailyUserOverview(string user)
         {
-            var url = ButlerBot.Util.Settings.GetDailyUserOverviewFunc;
+            var url = string.Empty; //  TODO: ButlerBot.Util.Settings.GetDailyUserOverviewFunc;
             client.DefaultRequestHeaders.Add("user", user);
             var response = await client.GetAsync(url);
             var result = await response.Content.ReadAsStringAsync();
@@ -613,7 +630,7 @@ namespace BotLibraryV2
         /// <returns></returns>
         public static async Task<List<SalaryDeduction>> GetSalaryDeduction(string user)
         {
-            var url = ButlerBot.Util.Settings.GetSalaryDeduction;
+            var url = string.Empty; // TODO: ButlerBot.Util.Settings.GetSalaryDeduction;
             client.DefaultRequestHeaders.Add("user", user);
             var response = await client.GetAsync(url);
             var result = await response.Content.ReadAsStringAsync();
