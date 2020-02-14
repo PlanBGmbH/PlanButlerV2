@@ -14,10 +14,12 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Settings.StyleCop" />
+    <None Remove="StyleCop.Analyzers.ruleset" />
     <None Remove="stylecop.json" />
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="Settings.StyleCop" />
+    <AdditionalFiles Include="StyleCop.Analyzers.ruleset" />
     <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
   <ItemGroup>
