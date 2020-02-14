@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
     using BotLibraryV2;
@@ -42,86 +43,84 @@
         private async Task<DialogTurnResult> GetMoneyStepAsync1(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var msg = "";
+
             int dayNumber = DateTime.Now.DayOfYear;
             SalaryDeduction money = JsonConvert.DeserializeObject<SalaryDeduction>(BotMethods.GetDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year + ".json"));
             var userId = money.Order.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
             try
             {
-
+                string name = stepContext.Values["name"].ToString();
+                var orderList = await BotMethods.GetDailyUserOverview(name);
                 OrderBlob orderBlob = new OrderBlob();
-                int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-               
-                var nameID = orderBlob.OrderList.FindAll(x => x.Name == (string)stepContext.Values["name"]);
+
                 msg += $"Heute beträgt die Belastung: {Environment.NewLine}";
-                if (nameID.Count != 0)
+                string message = string.Empty;
+                string orders = $"Für dich wurde:{Environment.NewLine}";
+                double sum = 0;
+                string corders = $"Für den Externen: {Environment.NewLine}";
+                double csum = 0;
+                string iorders = $"Für den Praktikanten: {Environment.NewLine}";
+                double isum = 0;
+                bool check = false;
+                bool cchecker = false;
+                bool ichecker = false;
+                foreach (var item in orderList)
                 {
-
-                    string message = $"Du hast heute {nameID.LastOrDefault().Meal} bei {nameID.LastOrDefault().Restaurant} bestellt.";
-                    if (nameID.Count > 0)
+                    foreach (var items in item.OrderList)
                     {
-                        message = string.Empty;
-                        string orders = $"Für dich wurde:{Environment.NewLine}";
-                        double sum = 0;
-                        string corders = $"Für den Externen: {Environment.NewLine}";
-                        double csum = 0;
-                        string iorders = $"Für den Praktikanten: {Environment.NewLine}";
-                        double isum = 0;
-                        bool check = false;
-                        bool cchecker = false;
-                        bool ichecker = false;
-                        foreach (var item in nameID)
+
+                        if (items.CompanyStatus.ToLower().ToString() == "extern")
+                        {
+                            corders += $"{items.CompanyName} \t/ {items.Restaurant} \t/ {items.Meal} \t/ {items.Price}€ {Environment.NewLine}";
+                            csum += Convert.ToDouble(items.Price);
+                            cchecker = true;
+                        }
+                        else if (items.CompanyStatus.ToLower().ToString() == "internship")
+                        {
+                            iorders += $"{items.CompanyName} \t/ {items.Restaurant} \t/ {items.Meal} \t/ {items.Price}€ {Environment.NewLine}";
+                            isum += Convert.ToDouble(items.Price);
+                            ichecker = true;
+                        }
+                        else
                         {
 
-                            if (item.CompanyStatus.ToLower().ToString() == "extern")
+                            if (check = false)
                             {
-                                corders += $"{item.CompanyName} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Price}€ {Environment.NewLine}";
-                                csum += Convert.ToDouble(item.Price);
-                                cchecker = true;
+                                message = $"Du hast heute {items.Meal} bei {items.Restaurant} bestellt.";
                             }
-                            else if (item.CompanyStatus.ToLower().ToString() == "internship")
-                            {
-                                iorders += $"{item.CompanyName} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Price}€ {Environment.NewLine}";
-                                isum += Convert.ToDouble(item.Price);
-                                ichecker = true;
-                            }
-                            else
-                            {
-                                orders += $"{item.Name} \t/ {item.Restaurant} \t/ {item.Meal} \t/ {item.Price}€  {Environment.NewLine}";
-                                sum += Convert.ToDouble(item.Price);
-                                check = true;
-                            }
+                            orders += $"{items.Name} \t/ {items.Restaurant} \t/ {items.Meal} \t/ {items.Price}€  {Environment.NewLine}";
+                            sum += Convert.ToDouble(items.Price);
+                            check = true;
                         }
-                        if (check)
-                        {
-                            orders += $"Insgesammt werden dir {sum}€ berechnet{Environment.NewLine}";
-                        }
-                        if (cchecker)
-                        {
-                            orders += corders;
-                            corders += $"Insgsammt wird für die Kunden  {csum}€ berechnet{Environment.NewLine}";
-                        }
-                        if (ichecker)
-                        {
-                            iorders += $"Insgsammt wird für die Praktikanten  {isum}€ berechnet{Environment.NewLine}";
-                            orders += iorders;
-                        }
-                        msg += $"{orders}";
                     }
                 }
+                if (check)
+                {
+                    orders += $"Insgesammt werden dir {sum}€ berechnet{Environment.NewLine}";
+                }
+                if (cchecker)
+                {
+                    orders += corders;
+                    corders += $"Insgsammt wird für die Kunden  {csum}€ berechnet{Environment.NewLine}";
+                }
+                if (ichecker)
+                {
+                    iorders += $"Insgsammt wird für die Praktikanten  {isum}€ berechnet{Environment.NewLine}";
+                    orders += iorders;
+                }
+                msg += $"{orders}";
             }
             catch
             {
-               
+
             }
 
-       
-                // Get the Order from the BlobStorage, the current day ID and nameId from the user
+            // Get the Order from the BlobStorage, the current day ID and nameId from the user
 
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
-                await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
-                return await stepContext.BeginDialogAsync(nameof(OverviewDialog));
-          
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
+            await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
+            return await stepContext.BeginDialogAsync(nameof(OverviewDialog));
+
         }
 
         private async Task<DialogTurnResult> GetMoneyStepAsync2(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -129,5 +128,7 @@
             await stepContext.EndDialogAsync();
             return await stepContext.BeginDialogAsync(nameof(OverviewDialog));
         }
+
+
     }
 }

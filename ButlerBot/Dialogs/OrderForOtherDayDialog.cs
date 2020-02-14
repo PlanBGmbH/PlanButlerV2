@@ -11,7 +11,6 @@
     using Microsoft.Bot.Builder.Dialogs.Choices;
     using Microsoft.Bot.Schema;
     using Newtonsoft.Json;
-
     public class OrderForOtherDayDialog : ComponentDialog
     {
         private static Plan plan = new Plan();
@@ -163,6 +162,7 @@
 
             if (stepContext.Values["restaurant"].ToString().ToLower() == plan.Planday[indexer].Restaurant1.ToLower())
             {
+                stepContext.Values["rest1"] = "yes";
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
@@ -174,6 +174,7 @@
             }
             else if (stepContext.Values["restaurant"].ToString().ToLower() == plan.Planday[indexer].Restaurant2.ToLower())
             {
+                stepContext.Values["rest1"] = "no";
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
@@ -195,26 +196,31 @@
         {
 
             var obj = ((FoundChoice)stepContext.Result).Value;
-            for (int i = 0; i < meal1List.Count; i++)
+            if (stepContext.Values["rest1"].ToString() == "yes")
             {
-                if (meal1ListwithMoney[i] == obj)
+                for (int i = 0; i < meal1List.Count; i++)
                 {
-                    stepContext.Values["food"] = meal1List[i];
-                    i = meal1List.Count;
+                    if (meal1ListwithMoney[i] == obj)
+                    {
+                        stepContext.Values["food"] = meal1List[i];
+                        i = meal1List.Count;
+                    }
+
                 }
-                try
+            }
+            else
+            {
+                for (int i = 0; i < meal2List.Count; i++)
                 {
                     if (meal2ListWithMoney[i] == obj)
                     {
                         stepContext.Values["food"] = meal2List[i];
-                        i = meal1List.Count;
+                        i = meal2List.Count;
                     }
                 }
-                catch (Exception)
-                {
-
-                }
             }
+
+
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
             var rnd = new Random();
 
@@ -251,17 +257,16 @@
             try
             {
                 var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-               
-                    if (Convert.ToDouble(stepContext.Values["price"]) <= grand)
-                    {
-                        order.Price = 0;
-                    }
-                    else
-                    {
-                        order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
-                    }
+
+                if (Convert.ToDouble(stepContext.Values["price"]) <= grand)
+                {
+                    order.Price = 0;
+                }
+                else
+                {
                     order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
-                
+                }
+                order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
             }
             catch (Exception)
             {
@@ -277,8 +282,17 @@
 
             order.Grand = grand;
             var bufferorder = order;
-            HttpStatusCode statusOrder = BotMethods.UploadOrder(order);
-            HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(order);
+            string day = stepContext.Values["mainChoise"].ToString();
+            for (int i = 0; i < weekDays.Length; i++)
+            {
+                if (day == weekDays[i])
+                {
+                    indexer = i;
+                }
+            }
+
+            HttpStatusCode statusOrder = BotMethods.UploadForOtherDay(order, weekDaysEN[indexer]);
+            HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeductionForAnotherDay(order, weekDaysEN[indexer]);
             HttpStatusCode statusMoney = BotMethods.UploadMoney(order);
             if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
             {
@@ -289,10 +303,11 @@
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
                 BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
                 BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer]);
-                BotMethods.DeleteOrder(bufferorder, weekDaysEN[indexer]);
+                BotMethods.DeleteOrder(bufferorder);
                 await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
             }
+
             await stepContext.EndDialogAsync(null, cancellationToken);
             return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
         }
@@ -346,5 +361,12 @@
 
             return ChoiceFactory.ToChoices(choise);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="order"></param>
+        ///
+
     }
 }

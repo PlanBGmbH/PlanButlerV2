@@ -60,7 +60,7 @@ namespace ButlerBot
                 valid = false;
             }
             OrderBlob orderBlob = new OrderBlob();
-
+            var tmp = BotMethods.GetSalaryDeduction("2");
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
             orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
 
@@ -252,7 +252,7 @@ namespace ButlerBot
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
                     BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
                     BotMethods.DeleteMoney(bufferorder, dayName);
-                    BotMethods.DeleteOrder(bufferorder, dayName);
+                    BotMethods.DeleteOrder(bufferorder);
                     await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                     return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                 }

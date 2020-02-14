@@ -33,7 +33,8 @@
             OrderForOtherDayDialog orderForAnotherDay = new OrderForOtherDayDialog();
             DeleteOrderDialog DeleteOrderDialog = new DeleteOrderDialog();
             List<ComponentDialog> dialogsList = new List<ComponentDialog>();
-            DailyCreditDialog dailyCreditDialog = new DailyCreditDialog();
+            DailyCreditDialog dailyCreditDialog = new DailyCreditDialog();   
+            ExcellDialog excellDialog = new ExcellDialog();
             //dialogsList.Add(orderDialog);
             dialogsList.Add(nextorderDialog);
             dialogsList.Add(orderForAnotherDay);
@@ -60,6 +61,7 @@
             this.AddDialog(new DeleteOrderDialog());
             this.AddDialog(new NextOrder());
             this.AddDialog(new DailyCreditDialog());
+            this.AddDialog(new ExcellDialog());
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
             this.AddDialog(new ConfirmPrompt(nameof(ConfirmPrompt)));

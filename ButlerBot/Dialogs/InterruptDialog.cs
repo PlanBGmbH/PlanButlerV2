@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Net;
+    using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
     using BotLibraryV2;
@@ -13,6 +15,8 @@
     using Microsoft.Bot.Connector.Teams;
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
+    using Microsoft.WindowsAzure.Storage;
+    using Microsoft.WindowsAzure.Storage.Blob;
     using Newtonsoft.Json;
     using OfficeOpenXml;
 
@@ -23,7 +27,8 @@
         public InterruptDialog(string v)
             : base(nameof(InterruptDialog))
         {
-            this.AddDialog(new OverviewDialog());
+            this.AddDialog(new OverviewDialog());   
+            this.AddDialog(new ExcellDialog());
         }
 
         protected override async Task<DialogTurnResult> OnBeginDialogAsync(DialogContext innerDc, object options, CancellationToken cancellationToken = default(CancellationToken))
@@ -69,21 +74,25 @@
                 else if ((text.Contains("wurde") || text.Contains("worden")) && text.Contains("heute") && text.Contains("bestellt"))
                 {
                     // Get the Order from the BlobStorage and the current day ID
-                    OrderBlob orderBlob = new OrderBlob();
                     int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-                    orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                    //orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                    HttpRequestMessage req = new HttpRequestMessage();
+                    List<OrderBlob> tmp = await BotMethods.GetDailyOverview();
 
                     string orderlist = string.Empty;
 
-                    foreach (var item in orderBlob.OrderList)
+                    foreach (var item in tmp)
                     {
-                        if (item.Quantaty > 1)
+                        foreach (var items in item.OrderList)
                         {
-                            orderlist += $"{item.Name}: {item.Meal} x{item.Quantaty}  {Environment.NewLine}";
-                        }
-                        else
-                        {
-                            orderlist += $"{item.Name}: {item.Meal}  {Environment.NewLine}";
+                            if (items.Quantaty > 1)
+                            {
+                                orderlist += $"{items.Name}: {items.Meal} x{items.Quantaty}  {Environment.NewLine}";
+                            }
+                            else
+                            {
+                                orderlist += $"{items.Name}: {items.Meal}  {Environment.NewLine}";
+                            }
                         }
                     }
 
@@ -143,30 +152,22 @@
                 }
                 else if (text.Contains("ende") || text.Contains("exit"))
                 {
-                    return await innerDc.BeginDialogAsync(nameof(OverviewDialog));
+                    await innerDc.EndDialogAsync(cancellationToken: cancellationToken);
+                    return await innerDc.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                 }
                 else if (text.Contains("excel"))
                 {
                     await innerDc.Context.SendActivityAsync(MessageFactory.Text($"Einen Moment ich suche schnell alles zusammen!"), cancellationToken);
-                    // string[] name = innerDc.Context.Activity.From.Name.Split(' ');
-                   // getExcel.Run();// name[0] + name[1][0]
-                    string monthid = "";
-                    if (DateTime.Now.Month < 10)
-                    {
-                        monthid = "0" + DateTime.Now.Month.ToString();
-                    }
-                    else
-                    {
-                        monthid = DateTime.Now.Month.ToString();
-                    }
-                    var temp = BotMethods.GetDocument("excel", "Monatsuebersicht_" + monthid + "_" + DateTime.Now.Year + ".xlsx");
-                    //session.send(temp);
-                    
+                   
+                    await innerDc.EndDialogAsync(cancellationToken: cancellationToken);
+                    return await innerDc.BeginDialogAsync(nameof(ExcellDialog), null, cancellationToken);
+
                     //await innerDc.Context.SendActivityAsync(MessageFactory.Text(message), cancellationToken);
                 }
             }
             return null;
         }
+
 
     }
 }

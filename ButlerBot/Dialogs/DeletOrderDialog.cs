@@ -32,6 +32,7 @@
         {
             // Get the Plan
             string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json");
+            
             plan = JsonConvert.DeserializeObject<Plan>(food);
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
@@ -63,17 +64,6 @@
             // Reply to the activity we received with an activity.
             var reply = MessageFactory.Attachment(attachments);
 
-            //for (int i = 0; i < weekDays.Length; i++)
-            //{
-            //    if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower() && DateTime.Now.Hour < 12)
-            //    {
-            //        indexer = i;
-            //    }
-            //    else if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower() && weekDaysEN[i] != "friday")
-            //    {
-            //        indexer = i + 1;
-            //    }
-            //}
 
             for (int i = indexer; i < weekDays.Length; i++)
             {
@@ -153,8 +143,34 @@
                 order.Name = (string)stepContext.Values["name"].ToString();
                 List<Order> mealVal = new List<Order>();
                 OrderBlob orderBlob = new OrderBlob();
-                int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                string[] weekDaysList = { "monday", "tuesday", "wednesday", "thursday", "friday" };
+                int indexDay = 0;
+                int indexCurentDay = 0;
+                string currentDay = DateTime.Now.DayOfWeek.ToString().ToLower();
+                DateTime date = DateTime.Now;
+                var stringDate = string.Empty;
+                for (int i = 0; i < weekDaysList.Length; i++)
+                {
+                    if (currentDay == weekDaysList[i])
+                    {
+                        indexCurentDay = i;
+                    }
+                    if (weekDaysEN[indexer] == weekDaysList[i])
+                    {
+                        indexDay = i;
+                    }
+                }
+                if (indexDay == indexCurentDay)
+                {
+                    stringDate = date.ToString("yyyy-MM-dd");
+                }
+                else
+                {
+                    indexCurentDay = indexDay - indexCurentDay;
+                    date = DateTime.Now.AddDays(indexCurentDay);
+                    stringDate = date.ToString("yyyy-MM-dd");
+                }
+                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json"));
                 var collection = orderBlob.OrderList.FindAll(x => x.Name == order.Name);
                 obj = collection.FindLast(x => x.CompanyStatus == order.CompanyStatus);
 
@@ -184,9 +200,9 @@
                 var bufferOrder = obj;
                 var order = bufferOrder;
 
-                BotMethods.DeleteOrder(order, weekDaysEN[indexer]);
+                DeleteOrder(order);
 
-                BotMethods.DeleteOrderforSalaryDeduction(bufferOrder);
+                DeleteOrderforSalaryDeduction(bufferOrder);
                 BotMethods.DeleteMoney(bufferOrder, weekDaysEN[indexer]);
 
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Okay deine Bestellung wurde entfernt"), cancellationToken);
@@ -212,6 +228,52 @@
             var temp = bufferOrder.FindAll(x => x.CompanyStatus == order.CompanyStatus);
             var orderValue = temp[temp.Count - 1];
             return orderValue;
+        }
+        public static void DeleteOrder(Order order)
+        {
+            string date = order.Date.ToString("yyyy-MM-dd");
+            OrderBlob orderBlob = new OrderBlob();
+            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
+            try
+            {
+                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + date + "_" + order.Name + ".json"));
+                int orderID = orderBlob.OrderList.FindIndex(x => x.Name == order.Name);
+                orderBlob.OrderList.RemoveAt(orderID);
+                BotMethods.PutDocument("orders", "orders_" + date + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+            }
+            catch (Exception ex) // enters if blob dont exist
+            {
+                List<Order> orders = new List<Order>();
+
+                orders.Add(order);
+                BotMethods.PutDocument("orders", "orders_" + date + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+            }
+        }
+        public static void DeleteOrderforSalaryDeduction(Order order)
+        {
+            SalaryDeduction salaryDeduction = new SalaryDeduction();
+            var dayId = order.Date.Date.DayOfYear;
+            salaryDeduction = JsonConvert.DeserializeObject<SalaryDeduction>(BotMethods.GetDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year + ".json"));
+            var collection = salaryDeduction.Order.FindAll(x => x.Name == order.Name);
+            var temp = collection.FindAll(x => x.CompanyStatus == order.CompanyStatus);
+            salaryDeduction.Order.Remove(temp[temp.Count - 1]);
+
+            try
+            {
+                BotMethods.PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary");
+            }
+            catch // enters if blob dont exist
+            {
+                List<Order> orders = new List<Order>();
+
+                salaryDeduction.Daynumber = dayId;
+                salaryDeduction.Name = "SalaryDeduction";
+
+                orders.Add(order);
+                salaryDeduction.Order = orders;
+
+                BotMethods.PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary");
+            }
         }
     }
 }

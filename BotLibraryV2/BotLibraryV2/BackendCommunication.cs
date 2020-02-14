@@ -91,6 +91,7 @@
             request.Headers.Add("Authorization", sasToken);
             request.Headers.Add("BrokerProperties", JsonConvert.SerializeObject(brokerProperty));
             request.Content = new StringContent(body);
+            var temp = request.Content.ToString();
             using (HttpClient httpClient = new HttpClient())
             {
                 var response = httpClient.SendAsync(request).Result;
@@ -98,7 +99,7 @@
             }
         }
 
-        public HttpStatusCode PutDocumentStream(string container, string resourceName, System.IO.Stream body, string queueName)
+        public HttpStatusCode PutDocumentByteArray(string container, string resourceName, byte[] body, string queueName)
         {
             string label = $"{container}/{resourceName}";
             var brokerProperty = new JObject();
@@ -109,7 +110,7 @@
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);
             request.Headers.Add("Authorization", sasToken);
             request.Headers.Add("BrokerProperties", JsonConvert.SerializeObject(brokerProperty));
-            request.Content = new StreamContent(body);
+            request.Content = new ByteArrayContent(body);
             using (HttpClient httpClient = new HttpClient())
             {
                 var response = httpClient.SendAsync(request).Result;

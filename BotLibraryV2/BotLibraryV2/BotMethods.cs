@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -13,6 +14,7 @@ namespace BotLibraryV2
         private static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
         private static int indexer = 0;
         private static string dayName;
+        static HttpClient client = new HttpClient();
         /// <summary>
         /// Gets a document from our StorageAccount
         /// </summary>
@@ -38,6 +40,7 @@ namespace BotLibraryV2
             HttpStatusCode taskUrl = backendcom.PutDocument(container, resourceName, body, que);
             return taskUrl;
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -54,7 +57,7 @@ namespace BotLibraryV2
                     User user = new User() { Name = order.Name, Owe = order.Price };
                     _money.User.Add(user);
 
-                    HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money),"q.planbutlerupdatemoney");
+                    HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney");
                     return status;
                 }
                 else // enters if everything is normal
@@ -85,61 +88,104 @@ namespace BotLibraryV2
         public static HttpStatusCode UploadOrder(Order order)
         {
 
+
             DateTime date = DateTime.Now;
             var stringDate = date.ToString("yyyy-MM-dd");
-            OrderBlob orderBlob = new OrderBlob();
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
             try
             {
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json"));
+                OrderBlob orderBlob = new OrderBlob();
+                orderBlob.OrderList = new List<Order>();
+                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json"));
 
-                List<Order> orders = new List<Order>();
-                orders.Add(order);
 
-                HttpStatusCode status = PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+
+                orderBlob.OrderList.Add(order);
+                HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
                 return status;
 
             }
             catch // enters if blob dont exist
             {
-                List<Order> orders = new List<Order>();
+                try
+                {
+                    OrderBlob orderBlob = new OrderBlob();
+                    orderBlob.OrderList = new List<Order>();
+                    orderBlob.OrderList.Add(order);
 
-                orders.Add(order);
+                    HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+                    return status;
+                }
+                catch (Exception ex)
+                {
+                    return HttpStatusCode.BadRequest;
+                }
 
-
-                HttpStatusCode status = PutDocument("orders",  "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
-                return status;
             }
         }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="order"></param>
-        public static HttpStatusCode UpdateOrder(Order order)
+        /// 
+
+        public static HttpStatusCode UploadForOtherDay(Order order, string day)
         {
-            OrderBlob orderBlob = new OrderBlob();
-            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
+            string[] weekDaysList = { "monday", "tuesday", "wednesday", "thursday", "friday" };
+            int indexDay = 0;
+            int indexCurentDay = 0;
+            string currentDay = DateTime.Now.DayOfWeek.ToString().ToLower();
             DateTime date = DateTime.Now;
-            var stringDate = date.ToString("yyyy-MM-dd");
+            var stringDate = string.Empty;
+            for (int i = 0; i < weekDaysList.Length; i++)
+            {
+                if (currentDay == weekDaysList[i])
+                {
+                    indexCurentDay = i;
+                }
+                if (day.ToLower() == weekDaysList[i])
+                {
+                    indexDay = i;
+                }
+            }
+            if (indexDay == indexCurentDay)
+            {
+                stringDate = date.ToString("yyyy-MM-dd");
+            }
+            else
+            {
+                indexCurentDay = indexDay - indexCurentDay;
+                date = DateTime.Now.AddDays(indexCurentDay);
+                stringDate = date.ToString("yyyy-MM-dd");
+            }
+            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
             try
             {
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json"));
-
-                List<Order> orders = new List<Order>();
-                orders.Add(order);
-
-                HttpStatusCode status = PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+                OrderBlob orderBlob = new OrderBlob();
+                orderBlob.OrderList = new List<Order>();
+                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json"));
+                orderBlob.OrderList.Add(order);
+                HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
                 return status;
 
             }
-            catch // enters if blob dont exist
+            catch
             {
-                List<Order> orders = new List<Order>();
+                try
+                {
+                    OrderBlob orderBlob = new OrderBlob();
+                    orderBlob.OrderList = new List<Order>();
+                    order.Date = date;
+                    orderBlob.OrderList.Add(order);
+                    HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+                    return status;
+                }
+                catch (Exception ex)
+                {
+                    return HttpStatusCode.BadRequest;
+                }
 
-                orders.Add(order);
-
-                HttpStatusCode status = PutDocument("orders",  "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
-                return status;
             }
         }
         /// <summary>
@@ -149,7 +195,64 @@ namespace BotLibraryV2
         public static HttpStatusCode UploadOrderforSalaryDeduction(Order order)
         {
             SalaryDeduction salaryDeduction = new SalaryDeduction();
-            int dayNumber = DateTime.Now.DayOfYear;
+            int dayNumber = order.Date.DayOfYear;
+            try
+            {
+                salaryDeduction = JsonConvert.DeserializeObject<SalaryDeduction>(GetDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year + ".json"));
+                salaryDeduction.Order.Add(order);
+                HttpStatusCode status = PutDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary");
+                return status;
+            }
+            catch // enters if blob dont exist
+            {
+                List<Order> orders = new List<Order>();
+
+                salaryDeduction.Daynumber = dayNumber;
+                salaryDeduction.Name = "SalaryDeduction";
+
+                orders.Add(order);
+                salaryDeduction.Order = orders;
+
+                HttpStatusCode status = PutDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary");
+                return status;
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="order"></param>
+        public static HttpStatusCode UploadOrderforSalaryDeductionForAnotherDay(Order order, string day)
+        {
+            SalaryDeduction salaryDeduction = new SalaryDeduction();
+              string[] weekDaysList = { "monday", "tuesday", "wednesday", "thursday", "friday" };
+            int indexDay = 0;
+            int indexCurentDay = 0;
+            string currentDay = DateTime.Now.DayOfWeek.ToString().ToLower();
+            DateTime date = DateTime.Now;
+            var stringDate = string.Empty;
+            for (int i = 0; i < weekDaysList.Length; i++)
+            {
+                if (currentDay == weekDaysList[i])
+                {
+                    indexCurentDay = i;
+                }
+                if (day.ToLower() == weekDaysList[i])
+                {
+                    indexDay = i;
+                }
+            }
+            if (indexDay == indexCurentDay)
+            {
+                stringDate = date.ToString("yyyy-MM-dd");
+            }
+            else
+            {
+                indexCurentDay = indexDay - indexCurentDay;
+                date = DateTime.Now.AddDays(indexCurentDay);
+                stringDate = date.ToString("yyyy-MM-dd");
+            }
+            order.Date = date;
+            int dayNumber = order.Date.DayOfYear;
             try
             {
                 salaryDeduction = JsonConvert.DeserializeObject<SalaryDeduction>(GetDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year + ".json"));
@@ -183,6 +286,7 @@ namespace BotLibraryV2
                 var _money = money;
                 var userId = _money.User.FindIndex(x => x.Name == order.Name);
                 _money.User[userId].Owe -= order.Price;
+
                 PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney");
             }
             catch // enters if blob dont exist
@@ -299,7 +403,7 @@ namespace BotLibraryV2
                 List<Order> orders = new List<Order>();
 
                 orders.Add(order);
-                PutDocument("orders",  "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+                PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
             }
         }
         /// <summary>
@@ -361,7 +465,7 @@ namespace BotLibraryV2
 
 
 
-                HttpStatusCode status = PutDocument("orders",  "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+                HttpStatusCode status = PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
                 return status;
             }
         }
@@ -392,24 +496,24 @@ namespace BotLibraryV2
         /// delets the entry of your order. Equivalent zu DeleteOrder()
         /// </summary>
         /// <param name="order"></param>
-        public static void DeleteOrder(Order order, string daySelection)
+        public static void DeleteOrder(Order order)
         {
-
-            DateTime date = DateTime.Now;
-            var stringDate = date.ToString("yyyy-MM-dd");
+            string date = order.Date.ToString("yyyy-MM-dd");
             OrderBlob orderBlob = new OrderBlob();
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
             try
             {
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json"));
-                PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(GetDocument("orders", "orders_" + date + "_" + order.Name + ".json"));
+                int orderID = orderBlob.OrderList.FindIndex(x => x.Name == order.Name);
+                orderBlob.OrderList.RemoveAt(orderID);
+                PutDocument("orders", "orders_" + date + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
             }
             catch (Exception ex) // enters if blob dont exist
             {
                 List<Order> orders = new List<Order>();
 
                 orders.Add(order);
-                PutDocument("orders",  "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+                PutDocument("orders", "orders_" + date + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
             }
         }
         /// <summary>
@@ -427,7 +531,7 @@ namespace BotLibraryV2
 
             try
             {
-                PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdateorder");
+                PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary");
             }
             catch // enters if blob dont exist
             {
@@ -439,7 +543,7 @@ namespace BotLibraryV2
                 orders.Add(order);
                 salaryDeduction.Order = orders;
 
-                PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdateorder");
+                PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary");
             }
         }
         /// <summary>
@@ -467,9 +571,56 @@ namespace BotLibraryV2
 
                 orders.Add(order);
 
-                HttpStatusCode status = PutDocument("orders",  "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+                HttpStatusCode status = PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
                 return status;
             }
         }
+
+        /// <summary>
+        /// Caol on AzureFunction.
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<List<OrderBlob>> GetDailyOverview()
+        {
+            var url = ButlerBot.Util.Settings.GetDailyOverviewFunc;
+            var response = await client.GetAsync(url);
+            var result = await response.Content.ReadAsStringAsync();
+            var tmp = JsonConvert.DeserializeObject<List<OrderBlob>>(result);
+
+            return tmp;
+        }
+
+        /// <summary>
+        /// GetDailyUserOverview
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public static async Task<List<OrderBlob>> GetDailyUserOverview(string user)
+        {
+            var url = ButlerBot.Util.Settings.GetDailyUserOverviewFunc;
+            client.DefaultRequestHeaders.Add("user", user);
+            var response = await client.GetAsync(url);
+            var result = await response.Content.ReadAsStringAsync();
+            var tmp = JsonConvert.DeserializeObject<List<OrderBlob>>(result);
+            client.DefaultRequestHeaders.Clear();
+            return tmp;
+        }
+
+        /// <summary>
+        /// GetSalaryDeduction.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public static async Task<List<SalaryDeduction>> GetSalaryDeduction(string user)
+        {
+            var url = ButlerBot.Util.Settings.GetSalaryDeduction;
+            client.DefaultRequestHeaders.Add("user", user);
+            var response = await client.GetAsync(url);
+            var result = await response.Content.ReadAsStringAsync();
+            var tmp = JsonConvert.DeserializeObject<List<SalaryDeduction>>(result);
+            client.DefaultRequestHeaders.Clear();
+            return tmp;
+        }
+
     }
 }

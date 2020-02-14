@@ -49,6 +49,7 @@ namespace ButlerBot
         public NextOrder()
             : base(nameof(NextOrder))
         {
+
             for (int i = 0; i < weekDays.Length; i++)
             {
                 if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower())/* && DateTime.Now.Hour < 12*/
@@ -148,7 +149,7 @@ namespace ButlerBot
                     {
                         return await stepContext.PromptAsync(
                                                      nameof(TextPrompt),
-                                                     new PromptOptions { Prompt = MessageFactory.Text("Für welche Firma soll bestellt werden?") },
+                                                     new PromptOptions { Prompt = MessageFactory.Text("Für welche Firma soll bestellt werden? Außerdem benötige ich den Name des Kunden.") },
                                                      cancellationToken);
                     }
                     else
@@ -168,11 +169,11 @@ namespace ButlerBot
             }
             catch (Exception ex)
             {
-                if (companyName == " " && companyStatus.ToLower().ToString() == "kunde")
+                if (companyName == " " && companyStatus.ToLower().ToString() == "extern")
                 {
                     return await stepContext.PromptAsync(
                                                  nameof(TextPrompt),
-                                                 new PromptOptions { Prompt = MessageFactory.Text("Für welche Firma soll bestellt werden?") },
+                                                 new PromptOptions { Prompt = MessageFactory.Text("Für welche Firma soll bestellt werden? Außerdem benötige ich den Name des Kunden.") },
                                                  cancellationToken);
                 }
             }
@@ -271,6 +272,7 @@ namespace ButlerBot
 
             if (stepContext.Values["restaurant"].ToString().ToLower() == plan.Planday[indexer].Restaurant1.ToLower())
             {
+                stepContext.Values["rest1"] = "yes";
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
@@ -282,6 +284,7 @@ namespace ButlerBot
             }
             else if (stepContext.Values["restaurant"].ToString().ToLower() == plan.Planday[indexer].Restaurant2.ToLower())
             {
+                stepContext.Values["rest1"] = "no";
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
@@ -302,24 +305,27 @@ namespace ButlerBot
         private static async Task<DialogTurnResult> MealQuantatyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var obj = ((FoundChoice)stepContext.Result).Value;
-            for (int i = 0; i < meal1List.Count; i++)
+            if (stepContext.Values["rest1"].ToString() == "yes")
             {
-                if (meal1ListwithMoney[i] == obj)
+                for (int i = 0; i < meal1List.Count; i++)
                 {
-                    stepContext.Values["food"] = meal1List[i];
-                    i = meal1List.Count;
+                    if (meal1ListwithMoney[i] == obj)
+                    {
+                        stepContext.Values["food"] = meal1List[i];
+                        i = meal1List.Count;
+                    }
+
                 }
-                try
+            }
+            else
+            {
+                for (int i = 0; i < meal2List.Count; i++)
                 {
                     if (meal2ListWithMoney[i] == obj)
                     {
                         stepContext.Values["food"] = meal2List[i];
-                        i = meal1List.Count;
+                        i = meal2List.Count;
                     }
-                }
-                catch (Exception)
-                {
-
                 }
             }
             return await stepContext.NextAsync(null, cancellationToken);
@@ -370,27 +376,9 @@ namespace ButlerBot
                 try
                 {
                     var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json"));
-
-
                     var nameId = orderblob.OrderList.FindIndex(x => x.Name == order.Name);
-                    if (nameId == -1)
-                    {
-                        order.Grand = 3.3;
-                        if (order.Price <= grand)
-                        {
-                            order.Price = 0;
-                        }
-                        else
-                        {
-                            order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
-                        }
-                    }
-                    else
-                    {
-                        order.Grand = 0;
-                        order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
-                    }
-
+                    order.Grand = 0;
+                    order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
                 }
                 catch (Exception)
                 {
@@ -406,7 +394,7 @@ namespace ButlerBot
 
 
                 var bufferorder = order;
-                HttpStatusCode statusOrder = UploadOrder(order);
+                HttpStatusCode statusOrder = BotMethods.UploadOrder(order);
                 HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
                 HttpStatusCode statusMoney = BotMethods.UploadMoney(bufferorder);
                 if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
@@ -418,7 +406,7 @@ namespace ButlerBot
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
                     BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
                     BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer]);
-                    BotMethods.DeleteOrder(bufferorder, weekDaysEN[indexer]);
+                    BotMethods.DeleteOrder(bufferorder);
                     await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                     return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                 }
@@ -436,7 +424,7 @@ namespace ButlerBot
                 order.Grand = 0;
                 orderList.Add(order);
                 companyStatus = "extern";
-                companyName = (string)stepContext.Values["companyName"];
+                companyName = " ";
                 if (leftQuantity != " ")
                 {
                     leftQuantity = Convert.ToString(Convert.ToInt32(leftQuantity) - 1);
@@ -475,7 +463,7 @@ namespace ButlerBot
                             await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
                             BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
                             BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer]);
-                            BotMethods.DeleteOrder(bufferorder, weekDaysEN[indexer]);
+                            BotMethods.DeleteOrder(bufferorder);
                             await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                             return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                         }
@@ -514,45 +502,6 @@ namespace ButlerBot
         /// 
         /// </summary>
         /// <param name="order"></param>
-        public static HttpStatusCode UploadOrder(Order order)
-        {
-
-
-            DateTime date = DateTime.Now;
-            var stringDate = date.ToString("yyyy-MM-dd");
-            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-            try
-            {
-                OrderBlob orderBlob = new OrderBlob();
-                orderBlob.OrderList = new List<Order>();
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json"));
-
-
-
-                orderBlob.OrderList.Add(order);
-                HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
-                return status;
-
-            }
-            catch // enters if blob dont exist
-            {
-                try
-                {
-                    OrderBlob orderBlob = new OrderBlob();
-                    orderBlob.OrderList = new List<Order>();
-                    orderBlob.OrderList.Add(order);
-
-                    HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
-                    return status;
-                }
-                catch (Exception ex)
-                {
-
-                    return HttpStatusCode.BadRequest;
-                }
-
-            }
-        }
 
         /// <summary>
         /// Gets the chioses corresponding to the identifier you sepcify
