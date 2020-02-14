@@ -1,18 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <AzureFunctionsVersion>v2</AzureFunctionsVersion>
     <RootNamespace>Post_Document</RootNamespace>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>bin\Debug\netcoreapp3.0\</OutputPath>
+    <DocumentationFile>bin\Debug\netcoreapp3.0\Post Document.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netcoreapp3.0\Post Document.xml</DocumentationFile>
+    <OutputPath>bin\Release\netcoreapp3.0\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Settings.StyleCop" />
+    <None Remove="StyleCop.Analyzers.ruleset" />
+    <None Remove="stylecop.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="Settings.StyleCop" />
+    <AdditionalFiles Include="StyleCop.Analyzers.ruleset" />
+    <AdditionalFiles Include="stylecop.json" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="3.0.3" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.8" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.29" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="BotLibraryV2">
-      <HintPath>..\BotLibraryV2\BotLibraryV2\bin\Debug\netcoreapp3.0\BotLibraryV2.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\BotLibraryV2\BotLibraryV2\BotLibraryV2.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
