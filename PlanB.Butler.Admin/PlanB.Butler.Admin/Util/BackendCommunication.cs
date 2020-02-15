@@ -1,4 +1,4 @@
-﻿namespace ButlerBot.Util
+﻿namespace PlanB.Butler.Admin.Util
 {
     using System;
     using System.Collections.Generic;

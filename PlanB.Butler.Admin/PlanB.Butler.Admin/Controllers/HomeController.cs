@@ -7,13 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Mvc;
-using PlanButlerAdmin.Models;
+using PlanB.Butler.Admin.Models;
 using Newtonsoft.Json;
 using System.Drawing;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 
-namespace PlanButlerAdmin.Controllers
+namespace PlanB.Butler.Admin.Controllers
 {
     [Authorize]
     public class HomeController : Controller
@@ -117,7 +117,7 @@ namespace PlanButlerAdmin.Controllers
         /// <returns></returns>
         private static HttpStatusCode PutDocument(string container, string resourceName, string body)
         {
-            ButlerBot.Util.BackendCommunication backendcom = new ButlerBot.Util.BackendCommunication();
+            PlanB.Butler.Admin.Util.BackendCommunication backendcom = new PlanB.Butler.Admin.Util.BackendCommunication();
             HttpStatusCode taskUrl = backendcom.PutDocument(container, resourceName, body, "q.planbutler");
             return taskUrl;
         }
@@ -216,7 +216,7 @@ namespace PlanButlerAdmin.Controllers
 
         private static string GetDocument(string container, string resourceName)
         {
-            ButlerBot.Util.BackendCommunication backendcom = new ButlerBot.Util.BackendCommunication();
+            PlanB.Butler.Admin.Util.BackendCommunication backendcom = new PlanB.Butler.Admin.Util.BackendCommunication();
             string taskUrl = backendcom.GetDocument(container, resourceName);
             return taskUrl;
         }

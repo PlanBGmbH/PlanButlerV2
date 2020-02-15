@@ -1,6 +1,6 @@
 using System;
 
-namespace PlanButlerAdmin.Models
+namespace PlanB.Butler.Admin.Models
 {
     public class ErrorViewModel
     {

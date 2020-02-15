@@ -15,7 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Authentication;
 
-namespace PlanButlerAdmin
+namespace PlanB.Butler.Admin
 {
     public class Startup
     {
