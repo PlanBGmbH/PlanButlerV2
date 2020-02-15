@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29403.142
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ButlerBot", "ButlerBot.csproj", "{3C4CEEA7-A1DD-4A0B-8872-B81F68DD66BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ButlerBot", "ButlerBot.csproj", "{3C4CEEA7-A1DD-4A0B-8872-B81F68DD66BA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BotLibraryV2", "..\BotLibraryV2\BotLibraryV2\BotLibraryV2.csproj", "{2CB12B6A-A854-4F9B-84F0-30C06759BA07}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BotLibraryTest", "..\BotLibraryV2\BotLibraryTest\BotLibraryTest.csproj", "{5604673C-D97C-4749-A77A-26CF8220E997}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{3C4CEEA7-A1DD-4A0B-8872-B81F68DD66BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C4CEEA7-A1DD-4A0B-8872-B81F68DD66BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C4CEEA7-A1DD-4A0B-8872-B81F68DD66BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CB12B6A-A854-4F9B-84F0-30C06759BA07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CB12B6A-A854-4F9B-84F0-30C06759BA07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CB12B6A-A854-4F9B-84F0-30C06759BA07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CB12B6A-A854-4F9B-84F0-30C06759BA07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5604673C-D97C-4749-A77A-26CF8220E997}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5604673C-D97C-4749-A77A-26CF8220E997}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5604673C-D97C-4749-A77A-26CF8220E997}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5604673C-D97C-4749-A77A-26CF8220E997}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

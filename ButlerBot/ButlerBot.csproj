@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
@@ -33,9 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="BotLibraryV2">
-      <HintPath>..\BotLibraryV2\BotLibraryV2\bin\Debug\netcoreapp3.0\BotLibraryV2.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\BotLibraryV2\BotLibraryV2\BotLibraryV2.csproj" />
   </ItemGroup>
 
     <ItemGroup>

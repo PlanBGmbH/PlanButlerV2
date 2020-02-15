@@ -62,7 +62,7 @@
                 }
             }
             var orderList = await BotMethods.GetSalaryDeduction(indexer);
-            bool test = getExcel.Run(orderList);
+            bool test = ExcelGenerator.Run(orderList);
             await stepContext.EndDialogAsync();
             return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
         }

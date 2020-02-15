@@ -11,18 +11,18 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using BotLibraryV2;
-using ButlerBot.Util;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace ButlerBot
 {
-
-    public static class getExcel
+    /// <summary>
+    /// ExcelGenerator.
+    /// </summary>
+    internal static class ExcelGenerator
     {
-
         private static List<SalaryDeduction> salaryDeductionList = new List<SalaryDeduction>();
-        public static bool Run(List<SalaryDeduction> sal)
+        internal static bool Run(List<SalaryDeduction> sal)
         {
             salaryDeductionList = sal;
             MemoryStream stream = new MemoryStream();
@@ -67,7 +67,7 @@ namespace ButlerBot
             //fs.Dispose();
             return true;
         }
-        public static void CreateInternAndSecondMeal(ExcelWorksheet worksheetReference, List<Person> persons)
+        internal static void CreateInternAndSecondMeal(ExcelWorksheet worksheetReference, List<Person> persons)
         {
             //Create and Fill date Collum
             worksheetReference.Cells[1, 1].Value = "Datum";
@@ -133,7 +133,7 @@ namespace ButlerBot
             }
         }
 
-        public static void CreateExternMeals(ExcelWorksheet worksheetReference, List<Person> persons)
+        internal static void CreateExternMeals(ExcelWorksheet worksheetReference, List<Person> persons)
         {
             //Create and Fill date Collum
             worksheetReference.Cells[1, 1].Value = "Datum";
@@ -174,7 +174,7 @@ namespace ButlerBot
             }
         }
 
-        public static void CreateRestaurantBillingCheck(ExcelWorksheet worksheetReference, List<Restaurant> restaurant)
+        internal static void CreateRestaurantBillingCheck(ExcelWorksheet worksheetReference, List<Restaurant> restaurant)
         {
             //Create and Fill date Collum
             worksheetReference.Cells[1, 1].Value = "Datum";
@@ -220,7 +220,7 @@ namespace ButlerBot
             }
         }
 
-        public static List<Day> GetAndPrepareMeals(List<SalaryDeduction> salaryList)
+        internal static List<Day> GetAndPrepareMeals(List<SalaryDeduction> salaryList)
         {
             List<Day> order = new List<Day>();
             DateTime date = DateTime.Today;
@@ -230,7 +230,7 @@ namespace ButlerBot
             return order;
         }
 
-        public static List<Person> GetAndPreparePersons(List<SalaryDeduction> sal)
+        internal static List<Person> GetAndPreparePersons(List<SalaryDeduction> sal)
         {
             List<Person> persons = new List<Person>();
 
@@ -307,7 +307,7 @@ namespace ButlerBot
             {
                 BackendCommunication backendcom = new BackendCommunication();
                 HttpStatusCode taskUrl = backendcom.PutDocumentByteArray(container, resourceName, body, "q.planbutlerupdateexcel");
-                var sas = backendcom.GenerateStorageSasTokenWrite($"{container}/{resourceName}", Settings.StorageAccountUrl, Settings.StorageAccountKey);
+                var sas = string.Empty;//TODO backendcom.GenerateStorageSasTokenWrite($"{container}/{resourceName}", Settings.StorageAccountUrl, Settings.StorageAccountKey);
                 HttpClient client = new HttpClient();
                 HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Put, sas);
                 msg.Headers.Add("x-ms-blob-type", "BlockBlob");
