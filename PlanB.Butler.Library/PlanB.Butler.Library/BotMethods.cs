@@ -571,7 +571,8 @@ namespace BotLibraryV2
         /// <returns></returns>
         public static async Task<List<OrderBlob>> GetDailyOverview()
         {
-            var url = string.Empty; // TODO ButlerBot.Util.Settings.GetDailyOverviewFunc;
+             // TODO 
+            var url = ButlerBot.Util.Settings.GetDailyOverviewFunc;
             var response = await client.GetAsync(url);
             var result = await response.Content.ReadAsStringAsync();
             var tmp = JsonConvert.DeserializeObject<List<OrderBlob>>(result);
@@ -585,8 +586,8 @@ namespace BotLibraryV2
         /// <param name="user"></param>
         /// <returns></returns>
         public static async Task<List<OrderBlob>> GetDailyUserOverview(string user)
-        {
-            var url = string.Empty; //  TODO: ButlerBot.Util.Settings.GetDailyUserOverviewFunc;
+        {//  TODO:
+            var url = ButlerBot.Util.Settings.GetDailyUserOverviewFunc;
             client.DefaultRequestHeaders.Add("user", user);
             var response = await client.GetAsync(url);
             var result = await response.Content.ReadAsStringAsync();
@@ -601,8 +602,8 @@ namespace BotLibraryV2
         /// <param name="user"></param>
         /// <returns></returns>
         public static async Task<List<SalaryDeduction>> GetSalaryDeduction(string user)
-        {
-            var url = string.Empty; // TODO: ButlerBot.Util.Settings.GetSalaryDeduction;
+        { // TODO:
+            var url = ButlerBot.Util.Settings.GetSalaryDeduction;
             client.DefaultRequestHeaders.Add("user", user);
             var response = await client.GetAsync(url);
             var result = await response.Content.ReadAsStringAsync();

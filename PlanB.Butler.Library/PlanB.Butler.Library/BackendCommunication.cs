@@ -20,7 +20,7 @@
             {
                 string resource = container + "/" + resourceName;
                 // TODO Util?
-                string sasToken=""; //= this.GenerateStorageSasToken(resource, ButlerBot.Util.Settings.StorageAccountUrl, ButlerBot.Util.Settings.StorageAccountKey);
+                string sasToken= this.GenerateStorageSasToken(resource, ButlerBot.Util.Settings.StorageAccountUrl, ButlerBot.Util.Settings.StorageAccountKey);
                 var response = httpClient.GetAsync(sasToken).Result;
                 return (response.Content.ReadAsStringAsync().Result);
             }
@@ -85,7 +85,8 @@
             string label = $"{container}/{resourceName}";
             var brokerProperty = new JObject();
             brokerProperty.Add("Label", label);
-            var connectionString = "";// TODO ButlerBot.Util.Settings.serviceBusConnectionString;
+            // TODO.
+            var connectionString = ButlerBot.Util.Settings.serviceBusConnectionString;
             var sasToken = this.GenerateServiceBusSasToken(connectionString,queueName);
             var uri = $"https{connectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);
@@ -104,8 +105,8 @@
         {
             string label = $"{container}/{resourceName}";
             var brokerProperty = new JObject();
-            brokerProperty.Add("Label", label);
-            var connectionString = "";// TODO: ButlerBot.Util.Settings.serviceBusConnectionString;
+            brokerProperty.Add("Label", label);// TODO:
+            var connectionString = ButlerBot.Util.Settings.serviceBusConnectionString;
             var sasToken = this.GenerateServiceBusSasToken(connectionString,queueName);
             var uri = $"https{connectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);

@@ -83,12 +83,11 @@ namespace Post_Document
         [Singleton]
         [FunctionName(nameof(PostDocumentExcel))]
         public static void PostDocumentExcel([ServiceBusTrigger("q.planbutlerupdateexcel", Connection = "butlerSend")]Microsoft.Azure.ServiceBus.Message messageHeader,
-       [Blob("{Label}", FileAccess.ReadWrite, Connection = "StorageSend")]out string payload,
+       [Blob("{Label}", FileAccess.ReadWrite, Connection = "StorageSend")]out byte[] payload,
        ILogger log)
         {
             // Implement Logging after MVP.
-
-            payload = Encoding.Default.GetString(messageHeader.Body);
+            payload = messageHeader.Body;
         }
     }
 }

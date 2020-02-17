@@ -16,7 +16,8 @@ namespace BotLibraryTest
         [TestMethod]
         public void OnlyDefinedWorkdaysFail()
         {
-
+            var culture = new System.Globalization.CultureInfo("de-DE");
+            var day = culture.DateTimeFormat.GetDayName(DateTime.Today.DayOfWeek);
             var result =BotMethods.CalculateNextDay("test");
             Assert.AreNotEqual(DateTime.MinValue, result);
         }
