@@ -46,7 +46,7 @@ namespace ButlerBot
                 //excelPackage.SaveAs(file);
                 //byte[] arr = excelPackage.GetAsByteArray();
                 excelPackage.Save();
-                byte [] test = excelPackage.GetAsByteArray();
+                byte[] test = excelPackage.GetAsByteArray();
                 //   Return Excel File under the given Path.
                 string monthid = "";
                 if (DateTime.Now.Month < 10)
@@ -179,8 +179,6 @@ namespace ButlerBot
             //Create and Fill date Collum
             worksheetReference.Cells[1, 1].Value = "Datum";
             CreateDateCollum(worksheetReference, 3);
-
-            //Create and Fill employees Collum
             int counter = 2;
             foreach (var order in restaurant)
             {
@@ -193,21 +191,45 @@ namespace ButlerBot
                 double total = 0;
                 int count = 0;
                 int costumerCount = 0;
-                foreach (var test in order.Orders)
+                DateTime buffer = DateTime.Now;
+                string nameBuffer = "";
+                bool valid = false;
+                foreach (var item in order.Orders)
                 {
-                    row = test.Date.Day;
-                    count += test.Quantaty;
-                    total += test.Price + test.Grand;
-                    if (test.CompanyStatus == "Kunde")
+                    if (item.Date.ToString("yyyy-MM-dd") == buffer.ToString("yyyy-MM-dd"))
                     {
-                        costumerCount += test.Quantaty;
+                        row = item.Date.Day;
+                        count += item.Quantaty;
+                        total += item.Price;
+                        if (item.CompanyStatus == "Kunde")
+                        {
+                            costumerCount += item.Quantaty;
+                        }
                     }
+                    else
+                    {
+                        if (valid)
+                        {
+                            worksheetReference.Cells[row + 2, counter].Value = total;
+                            worksheetReference.Cells[row + 2, counter + 1].Value = count;
+                            worksheetReference.Cells[row + 2, counter + 2].Value = costumerCount;
+                            valid = false;
+                        }
+                        row = 0;
+                        total = 0;
+                        row += item.Date.Day;
+                        total += item.Price;
+                        buffer = item.Date;
+
+
+                    }
+
                 }
                 worksheetReference.Cells[row + 2, counter].Value = total;
                 worksheetReference.Cells[row + 2, counter + 1].Value = count;
                 worksheetReference.Cells[row + 2, counter + 2].Value = costumerCount;
-
                 counter += 3;
+
             }
 
             if (counter > 2)

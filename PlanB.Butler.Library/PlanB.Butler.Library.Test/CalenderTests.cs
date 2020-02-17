@@ -16,6 +16,7 @@ namespace BotLibraryTest
         [TestMethod]
         public void OnlyDefinedWorkdaysFail()
         {
+
             var result =BotMethods.CalculateNextDay("test");
             Assert.AreNotEqual(DateTime.MinValue, result);
         }

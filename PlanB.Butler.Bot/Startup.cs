@@ -26,6 +26,9 @@
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            services.AddMvc(options => options.EnableEndpointRouting = false);
+            services.AddOptions();
+
             // Create the Bot Framework Adapter with error handling enabled.
             services.AddSingleton<IBotFrameworkHttpAdapter, AdapterWithErrorHandler>();
 
@@ -83,7 +86,8 @@
             app.UseStaticFiles();
 
             // app.UseHttpsRedirection();
-            app.UseMvc();
+            
         }
+
     }
 }
