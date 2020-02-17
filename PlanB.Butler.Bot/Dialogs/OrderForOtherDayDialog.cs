@@ -25,6 +25,7 @@
         private static List<string> meal2ListWithMoney = new List<string>();
         private static int indexer = 0;
         private static string userName = string.Empty;
+        private static int daysDivVal;
 
         public OrderForOtherDayDialog()
             : base(nameof(OrderForOtherDayDialog))
@@ -103,14 +104,25 @@
         {
             stepContext.Values["mainChoise"] = ((FoundChoice)stepContext.Result).Value;
             string text = Convert.ToString(stepContext.Values["mainChoise"]);
-
+            daysDivVal = 0;
             for (int i = 0; i < weekDaysEN.Length; i++)
             {
                 if (text == weekDays[i])
                 {
-                    indexer = i;
+                    daysDivVal = i;
                 }
             }
+            if (daysDivVal == null)
+            {
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text("Es Tut mir Leid es muss ein Fehler unterlaufen sein. Bitte probiere noch einmal für einen anderen Tag Essen zu bestellen."), cancellationToken);
+                await stepContext.EndDialogAsync(null, cancellationToken);
+                return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
+            }
+            else
+            {
+                daysDivVal = daysDivVal - indexer;
+            }
+
 
             if (text != null)
             {
@@ -246,7 +258,6 @@
         {
             var order = new Order();
 
-            order.Date = DateTime.Now;
             order.CompanyStatus = "intern";
             order.Name = (string)stepContext.Values["name"];
             order.Restaurant = (string)stepContext.Values["restaurant"];
@@ -282,17 +293,10 @@
 
             order.Grand = grand;
             var bufferorder = order;
-            string day = stepContext.Values["mainChoise"].ToString();
-            for (int i = 0; i < weekDays.Length; i++)
-            {
-                if (day == weekDays[i])
-                {
-                    indexer = i;
-                }
-            }
-
-            HttpStatusCode statusOrder = BotMethods.UploadForOtherDay(order, weekDaysEN[indexer]);
-            HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeductionForAnotherDay(order, weekDaysEN[indexer]);
+            DateTime dateForOrder = DateTime.Now.AddDays(daysDivVal);
+            order.Date = dateForOrder;
+            HttpStatusCode statusOrder = BotMethods.UploadForOtherDay(order, dateForOrder);
+            HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeductionForAnotherDay(order, dateForOrder);
             HttpStatusCode statusMoney = BotMethods.UploadMoney(order);
             if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
             {

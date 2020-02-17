@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 [assembly: InternalsVisibleTo("PlanB.Butler.Library.Test")]
 namespace BotLibraryV2
 {
-        public class BotMethods
+    public class BotMethods
     {
         private static string[] weekDays = { "Montag", "Dienstag", "Mitwoch", "Donnerstag", "Freitag" };
         private static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
@@ -173,10 +173,9 @@ namespace BotLibraryV2
         /// <param name="order"></param>
         /// 
 
-        public static HttpStatusCode UploadForOtherDay(Order order, string day)
+        public static HttpStatusCode UploadForOtherDay(Order order, DateTime day)
         {
-            DateTime nextDay = CalculateNextDay(day);
-            string stringDate = nextDay.ToString("yyyy-MM-dd");
+            string stringDate = day.ToString("yyyy-MM-dd");
 
             try
             {
@@ -238,37 +237,10 @@ namespace BotLibraryV2
         /// 
         /// </summary>
         /// <param name="order"></param>
-        public static HttpStatusCode UploadOrderforSalaryDeductionForAnotherDay(Order order, string day)
+        public static HttpStatusCode UploadOrderforSalaryDeductionForAnotherDay(Order order, DateTime day)
         {
             SalaryDeduction salaryDeduction = new SalaryDeduction();
-            string[] weekDaysList = { "monday", "tuesday", "wednesday", "thursday", "friday" };
-            int indexDay = 0;
-            int indexCurentDay = 0;
-            string currentDay = DateTime.Now.DayOfWeek.ToString().ToLower();
-            DateTime date = DateTime.Now;
-            var stringDate = string.Empty;
-            for (int i = 0; i < weekDaysList.Length; i++)
-            {
-                if (currentDay == weekDaysList[i])
-                {
-                    indexCurentDay = i;
-                }
-                if (day.ToLower() == weekDaysList[i])
-                {
-                    indexDay = i;
-                }
-            }
-            if (indexDay == indexCurentDay)
-            {
-                stringDate = date.ToString("yyyy-MM-dd");
-            }
-            else
-            {
-                indexCurentDay = indexDay - indexCurentDay;
-                date = DateTime.Now.AddDays(indexCurentDay);
-                stringDate = date.ToString("yyyy-MM-dd");
-            }
-            order.Date = date;
+            order.Date = day;
             int dayNumber = order.Date.DayOfYear;
             try
             {
