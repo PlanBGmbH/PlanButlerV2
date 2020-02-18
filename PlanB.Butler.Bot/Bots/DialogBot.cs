@@ -1,4 +1,4 @@
-namespace ButlerBot
+namespace PlanB.Butler.Bot
 {
     using System.Threading;
     using System.Threading.Tasks;

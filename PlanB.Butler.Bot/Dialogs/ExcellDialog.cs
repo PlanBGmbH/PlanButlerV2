@@ -1,22 +1,34 @@
-﻿namespace ButlerBot
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using BotLibraryV2;
-    using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Dialogs;
-    using Microsoft.Bot.Builder.Dialogs.Choices;
-    using Newtonsoft.Json;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
+using BotLibraryV2;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Choices;
+using Microsoft.Extensions.Options;
+
+namespace PlanB.Butler.Bot
+{
+    /// <summary>
+    /// ExcellDialog.
+    /// </summary>
+    /// <seealso cref="Microsoft.Bot.Builder.Dialogs.ComponentDialog" />
     public class ExcellDialog : ComponentDialog
     {
         private static string[] months = { "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember" };
         private static string indexer = "0";
-        public ExcellDialog()
+
+        /// <summary>
+        /// The bot configuration.
+        /// </summary>
+        private readonly IOptions<BotConfig> botConfig;
+
+        public ExcellDialog(IOptions<BotConfig> config)
               : base(nameof(ExcellDialog))
         {
+            this.botConfig = config;
+
 
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
@@ -61,7 +73,7 @@
                     indexer = Convert.ToString(i + 1);
                 }
             }
-            var orderList = await BotMethods.GetSalaryDeduction(indexer);
+            var orderList = await BotMethods.GetSalaryDeduction(indexer, this.botConfig.Value.GetSalaryDeduction);
             bool test = ExcelGenerator.Run(orderList);
             await stepContext.EndDialogAsync();
             return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);

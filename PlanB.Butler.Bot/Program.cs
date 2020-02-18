@@ -3,7 +3,7 @@
 //
 // Generated with Bot Builder V4 SDK Template for Visual Studio EchoBot v4.5.0
 
-namespace ButlerBot
+namespace PlanB.Butler.Bot
 {
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;

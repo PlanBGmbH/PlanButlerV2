@@ -14,7 +14,7 @@ using BotLibraryV2;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
-namespace ButlerBot
+namespace PlanB.Butler.Bot
 {
     /// <summary>
     /// ExcelGenerator.
@@ -57,7 +57,9 @@ namespace ButlerBot
                 {
                     monthid = DateTime.Now.Month.ToString();
                 }
-                PutDocument("excel", "Monatsuebersicht_" + monthid + "_" + DateTime.Now.Year + ".xlsx", test);
+
+                // TODO: Make this work
+                PutDocument("excel", "Monatsuebersicht_" + monthid + "_" + DateTime.Now.Year + ".xlsx", test, string.Empty);
             }
 
             //FileStream fs = new FileStream("C:\\Users\\PeterS\\Desktop\\test.xlsx", FileMode.OpenOrCreate, FileAccess.ReadWrite);
@@ -323,12 +325,20 @@ namespace ButlerBot
             worksheetReference.Cells[startCollum, 1, dayCount + 1, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
         }
 
-        private static bool PutDocument(string container, string resourceName, byte[] body)
+        /// <summary>
+        /// Puts the document.
+        /// </summary>
+        /// <param name="container">The container.</param>
+        /// <param name="resourceName">Name of the resource.</param>
+        /// <param name="body">The body.</param>
+        /// <param name="serviceBusConnectionString">The service bus connection string.</param>
+        /// <returns></returns>
+        private static bool PutDocument(string container, string resourceName, byte[] body, string serviceBusConnectionString)
         {
             try
             {
                 BackendCommunication backendcom = new BackendCommunication();
-                HttpStatusCode taskUrl = backendcom.PutDocumentByteArray(container, resourceName, body, "q.planbutlerupdateexcel");
+                HttpStatusCode taskUrl = backendcom.PutDocumentByteArray(container, resourceName, body, "q.planbutlerupdateexcel", serviceBusConnectionString);
                 var sas = string.Empty;//TODO backendcom.GenerateStorageSasTokenWrite($"{container}/{resourceName}", Settings.StorageAccountUrl, Settings.StorageAccountKey);
                 HttpClient client = new HttpClient();
                 HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Put, sas);

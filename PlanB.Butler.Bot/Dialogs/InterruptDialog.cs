@@ -1,34 +1,37 @@
-﻿namespace ButlerBot
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Net;
-    using System.Net.Http;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using BotLibraryV2;
-    using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Dialogs;
-    using Microsoft.Bot.Builder.Teams;
-    using Microsoft.Bot.Connector.Teams;
-    using Microsoft.Bot.Schema;
-    using Microsoft.Bot.Schema.Teams;
-    using Microsoft.WindowsAzure.Storage;
-    using Microsoft.WindowsAzure.Storage.Blob;
-    using Newtonsoft.Json;
-    using OfficeOpenXml;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+
+using BotLibraryV2;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Schema;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+
+namespace PlanB.Butler.Bot
+{
+    /// <summary>
+    /// InterruptDialog.
+    /// </summary>
+    /// <seealso cref="Microsoft.Bot.Builder.Dialogs.ComponentDialog" />
     public class InterruptDialog : ComponentDialog
     {
         private static Plan plan = new Plan();
+        private readonly IOptions<BotConfig> botConfig;
 
-        public InterruptDialog(string v)
+        public InterruptDialog(string v, IOptions<BotConfig> config)
             : base(nameof(InterruptDialog))
         {
-            this.AddDialog(new OverviewDialog());   
-            this.AddDialog(new ExcellDialog());
+            this.botConfig = config;
+            this.AddDialog(new OverviewDialog(config));
+            this.AddDialog(new ExcellDialog(config));
         }
 
         protected override async Task<DialogTurnResult> OnBeginDialogAsync(DialogContext innerDc, object options, CancellationToken cancellationToken = default(CancellationToken))
@@ -77,7 +80,7 @@
                     int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
                     //orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
                     HttpRequestMessage req = new HttpRequestMessage();
-                    List<OrderBlob> tmp = await BotMethods.GetDailyOverview();
+                    List<OrderBlob> tmp = await BotMethods.GetDailyOverview(this.botConfig.Value.GetDailyOverviewFunc);
 
                     string orderlist = string.Empty;
 
@@ -105,7 +108,7 @@
                     // Get the Order from the BlobStorage, the current day ID and nameId from the user
                     OrderBlob orderBlob = new OrderBlob();
                     int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-                    orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                    orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
                     var nameID = orderBlob.OrderList.FindAll(x => x.Name == innerDc.Context.Activity.From.Name);
 
                     if (nameID.Count != 0)

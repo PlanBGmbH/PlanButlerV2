@@ -1,22 +1,34 @@
-﻿namespace ButlerBot
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using BotLibraryV2;
-    using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Dialogs;
-    using Microsoft.Bot.Builder.Dialogs.Choices;
-    using Newtonsoft.Json;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using BotLibraryV2;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+
+namespace PlanB.Butler.Bot
+{
+    /// <summary>
+    /// DailyCreditDialog.
+    /// </summary>
+    /// <seealso cref="Microsoft.Bot.Builder.Dialogs.ComponentDialog" />
     public class DailyCreditDialog : ComponentDialog
     {
-        public DailyCreditDialog()
+        /// <summary>
+        /// The bot configuration.
+        /// </summary>
+        private readonly IOptions<BotConfig> botConfig;
+
+        public DailyCreditDialog(IOptions<BotConfig> config)
             : base(nameof(DailyCreditDialog))
         {
+            this.botConfig = config;
+
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
             {
@@ -42,15 +54,15 @@
 
         private async Task<DialogTurnResult> GetMoneyStepAsync1(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var msg = "";
+            var msg = string.Empty;
 
             int dayNumber = DateTime.Now.DayOfYear;
-            SalaryDeduction money = JsonConvert.DeserializeObject<SalaryDeduction>(BotMethods.GetDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year + ".json"));
+            SalaryDeduction money = JsonConvert.DeserializeObject<SalaryDeduction>(BotMethods.GetDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
             var userId = money.Order.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
             try
             {
                 string name = stepContext.Values["name"].ToString();
-                var orderList = await BotMethods.GetDailyUserOverview(name);
+                var orderList = await BotMethods.GetDailyUserOverview(name, this.botConfig.Value.GetDailyUserOverviewFunc);
                 OrderBlob orderBlob = new OrderBlob();
 
                 msg += $"Heute beträgt die Belastung: {Environment.NewLine}";

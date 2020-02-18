@@ -1,20 +1,31 @@
-﻿namespace ButlerBot
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-     using BotLibraryV2;
-    using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Dialogs;
-    using Microsoft.Bot.Builder.Dialogs.Choices;
-    using Newtonsoft.Json;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+using BotLibraryV2;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Choices;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+
+namespace PlanB.Butler.Bot
+{
     public class CreditDialog : ComponentDialog
     {
-        public CreditDialog()
+        /// <summary>
+        /// The bot configuration.
+        /// </summary>
+        private readonly IOptions<BotConfig> botConfig;
+
+        public CreditDialog(IOptions<BotConfig> config)
             : base(nameof(CreditDialog))
         {
+            this.botConfig = config;
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
             {
@@ -54,7 +65,7 @@
 
             try
             {
-                MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(BotMethods.GetDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json"));
+                MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(BotMethods.GetDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
 
                 var userId = money.User.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
                 if (userId != -1)
@@ -93,7 +104,7 @@
                 try
                 {
                     var lastmonth = DateTime.Now.Month - 1;
-                    MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(BotMethods.GetDocument("moneylog", "money_" + lastmonth.ToString() + "_" + DateTime.Now.Year + ".json"));
+                    MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(BotMethods.GetDocument("moneylog", "money_" + lastmonth.ToString() + "_" + DateTime.Now.Year + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
 
                     var userId = money.User.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
                     if (userId != -1)

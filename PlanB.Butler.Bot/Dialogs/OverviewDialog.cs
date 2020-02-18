@@ -1,16 +1,26 @@
-﻿namespace ButlerBot
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using BotLibraryV2;
-    using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Dialogs;
-    using Microsoft.Bot.Builder.Dialogs.Choices;
-    using Microsoft.Bot.Schema;
-    using Newtonsoft.Json;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+using BotLibraryV2;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Choices;
+using Microsoft.Bot.Schema;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using PlanB.Butler.Bot;
+
+namespace PlanB.Butler.Bot
+{
+    /// <summary>
+    /// OverviewDialog.
+    /// </summary>
+    /// <seealso cref="Microsoft.Bot.Builder.Dialogs.ComponentDialog" />
     public class OverviewDialog : ComponentDialog
     {
         private static Plan plan = new Plan();
@@ -23,23 +33,36 @@
         private static string[] choices = { "Essen Bestellen", "Für einen anderen Tag Essen bestellen", "Bestellung entfernen", "Monatliche Belastung anzeigen", "Tagesbestellung" };
         private static ComponentDialog[] dialogs;
 
-        public OverviewDialog()
+        /// <summary>
+        /// The bot configuration.
+        /// </summary>
+        private readonly IOptions<BotConfig> botConfig;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OverviewDialog"/> class.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
+        public OverviewDialog(IOptions<BotConfig> config)
             : base(nameof(OverviewDialog))
         {
-            OrderDialog orderDialog = new OrderDialog();
-            NextOrder nextorderDialog = new NextOrder();
-            PlanDialog planDialog = new PlanDialog();
-            CreditDialog creditDialog = new CreditDialog();
-            OrderForOtherDayDialog orderForAnotherDay = new OrderForOtherDayDialog();
-            DeleteOrderDialog DeleteOrderDialog = new DeleteOrderDialog();
+            this.botConfig = config;
+
+            OrderDialog orderDialog = new OrderDialog(config);
+            NextOrder nextorderDialog = new NextOrder(config);
+            PlanDialog planDialog = new PlanDialog(config);
+            CreditDialog creditDialog = new CreditDialog(config);
+            OrderForOtherDayDialog orderForAnotherDay = new OrderForOtherDayDialog(config);
+            DeleteOrderDialog deleteOrderDialog = new DeleteOrderDialog(config);
             List<ComponentDialog> dialogsList = new List<ComponentDialog>();
-            DailyCreditDialog dailyCreditDialog = new DailyCreditDialog();   
-            ExcellDialog excellDialog = new ExcellDialog();
-            //dialogsList.Add(orderDialog);
+            DailyCreditDialog dailyCreditDialog = new DailyCreditDialog(config);
+            ExcellDialog excellDialog = new ExcellDialog(config);
+
+            // dialogsList.Add(orderDialog);
             dialogsList.Add(nextorderDialog);
             dialogsList.Add(orderForAnotherDay);
-            //dialogsList.Add(planDialog);
-            dialogsList.Add(DeleteOrderDialog);
+            
+            // dialogsList.Add(planDialog);
+            dialogsList.Add(deleteOrderDialog);
             dialogsList.Add(creditDialog);
             dialogsList.Add(dailyCreditDialog);
             dialogs = dialogsList.ToArray();
@@ -54,14 +77,14 @@
 
             // Add named dialogs to the DialogSet. These names are saved in the dialog state.
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
-            this.AddDialog(new OrderDialog());
-            this.AddDialog(new CreditDialog());
-            this.AddDialog(new PlanDialog());
-            this.AddDialog(new OrderForOtherDayDialog());
-            this.AddDialog(new DeleteOrderDialog());
-            this.AddDialog(new NextOrder());
-            this.AddDialog(new DailyCreditDialog());
-            this.AddDialog(new ExcellDialog());
+            this.AddDialog(new OrderDialog(config));
+            this.AddDialog(new CreditDialog(config));
+            this.AddDialog(new PlanDialog(config));
+            this.AddDialog(new OrderForOtherDayDialog(config));
+            this.AddDialog(new DeleteOrderDialog(config));
+            this.AddDialog(new NextOrder(config));
+            this.AddDialog(new DailyCreditDialog(config));
+            this.AddDialog(new ExcellDialog(config));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
             this.AddDialog(new ConfirmPrompt(nameof(ConfirmPrompt)));
@@ -70,6 +93,12 @@
             this.InitialDialogId = nameof(WaterfallDialog);
         }
 
+        /// <summary>
+        /// Initials the step asynchronous.
+        /// </summary>
+        /// <param name="stepContext">The step context.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
         private async Task<DialogTurnResult> InitialStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             await stepContext.Context.SendActivityAsync(MessageFactory.Text("Wähle eines der unteren Ereignisse aus oder schreibe Hilfe um zu erfahren was ich sonst noch alles kann."), cancellationToken);
@@ -88,9 +117,10 @@
                     indexer = i + 1;
                 }
             }
+
             try
             {
-                string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json");
+                string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
                 plan = JsonConvert.DeserializeObject<Plan>(food);
                 dayId = plan.Planday.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
                 valid = true;
@@ -99,21 +129,23 @@
             {
                 valid = false;
             }
+
             List<string> choise = new List<string>();
             var day = plan.Planday[dayId];
             if (day.Restaurant1 != null)
             {
                 choise.Add(day.Restaurant1);
             }
+
             if (day.Restaurant2 != null)
             {
                 choise.Add(day.Restaurant2);
             }
-            string msg = "";
+
+            string msg = string.Empty;
             bool temp = false;
             foreach (var item in choise)
             {
-
                 if (temp == false)
                 {
                     msg = $"Heute wird bei dem Restaurant: {item} Essen bestellt ";
@@ -123,9 +155,10 @@
                 {
                     msg += $"und bei dem Restaurant: {item}";
                 }
-
             }
+            
             await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg));
+            
             // Reply to the activity we received with an activity.
             var reply = MessageFactory.Attachment(attachments);
             List<string> choiceList = new List<string>();
@@ -144,6 +177,12 @@
             }, cancellationToken);
         }
 
+        /// <summary>
+        /// Forwards the step asynchronous.
+        /// </summary>
+        /// <param name="stepContext">The step context.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
         private async Task<DialogTurnResult> ForwardStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             stepContext.Values["mainChoise"] = ((FoundChoice)stepContext.Result).Value;
@@ -169,6 +208,12 @@
             }
         }
 
+        /// <summary>
+        /// Finals the step asynchronous.
+        /// </summary>
+        /// <param name="stepContext">The step context.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
         private async Task<DialogTurnResult> FinalStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             return await stepContext.EndDialogAsync(null, cancellationToken);

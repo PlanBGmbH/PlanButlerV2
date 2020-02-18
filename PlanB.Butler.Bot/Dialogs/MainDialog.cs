@@ -1,4 +1,4 @@
-﻿namespace ButlerBot
+﻿namespace PlanB.Butler.Bot
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -9,12 +9,14 @@
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Builder.Dialogs.Choices;
     using Microsoft.Bot.Schema;
+    using Microsoft.Extensions.Options;
     using Newtonsoft.Json.Linq;
+    using PlanB.Butler.Bot;
 
     public class MainDialog : InterruptDialog
     {
-        public MainDialog(IBotTelemetryClient telemetryClient)
-            : base(nameof(MainDialog))
+        public MainDialog(IBotTelemetryClient telemetryClient, IOptions<BotConfig> config)
+            : base(nameof(MainDialog), config)
         {
             // Set the telemetry client for this and all child dialogs.
             this.TelemetryClient = telemetryClient;

@@ -1,26 +1,38 @@
-﻿namespace BotLibraryV2
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Net;
-    using System.Net.Http;
-    using System.Security.Cryptography;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Web;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
+using System.Globalization;
+using System.Net;
+using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
+using System.Web;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+namespace BotLibraryV2
+{
+    /// <summary>
+    /// BackendCommunication.
+    /// </summary>
     public class BackendCommunication
     {
-        public string GetDocument(string container, string resourceName)
+        /// <summary>
+        /// Gets the document.
+        /// </summary>
+        /// <param name="container">The container.</param>
+        /// <param name="resourceName">Name of the resource.</param>
+        /// <param name="storageAccountUrl">The storage account URL.</param>
+        /// <param name="storageAccountKey">The storage account key.</param>
+        /// <returns></returns>
+        public string GetDocument(string container, string resourceName, string storageAccountUrl, string storageAccountKey)
         {
             using (HttpClient httpClient = new HttpClient())
             {
                 string resource = container + "/" + resourceName;
-                // TODO Util?
-                string sasToken= this.GenerateStorageSasToken(resource, ButlerBot.Util.Settings.StorageAccountUrl, ButlerBot.Util.Settings.StorageAccountKey);
+                string sasToken = this.GenerateStorageSasToken(resource, storageAccountUrl, storageAccountKey);
                 var response = httpClient.GetAsync(sasToken).Result;
                 return (response.Content.ReadAsStringAsync().Result);
             }
@@ -80,15 +92,14 @@
             return sasToken;
         }
 
-        public HttpStatusCode PutDocument(string container, string resourceName, string body, string queueName)
+        public HttpStatusCode PutDocument(string container, string resourceName, string body, string queueName, string serviceBusConnectionString)
         {
             string label = $"{container}/{resourceName}";
             var brokerProperty = new JObject();
             brokerProperty.Add("Label", label);
-            // TODO.
-            var connectionString = ButlerBot.Util.Settings.serviceBusConnectionString;
-            var sasToken = this.GenerateServiceBusSasToken(connectionString,queueName);
-            var uri = $"https{connectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
+
+            var sasToken = this.GenerateServiceBusSasToken(serviceBusConnectionString, queueName);
+            var uri = $"https{serviceBusConnectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);
             request.Headers.Add("Authorization", sasToken);
             request.Headers.Add("BrokerProperties", JsonConvert.SerializeObject(brokerProperty));
@@ -101,14 +112,22 @@
             }
         }
 
-        public HttpStatusCode PutDocumentByteArray(string container, string resourceName, byte[] body, string queueName)
+        /// <summary>
+        /// Puts the document byte array.
+        /// </summary>
+        /// <param name="container">The container.</param>
+        /// <param name="resourceName">Name of the resource.</param>
+        /// <param name="body">The body.</param>
+        /// <param name="queueName">Name of the queue.</param>
+        /// <param name="serviceBusConnectionString">The service bus connection string.</param>
+        /// <returns></returns>
+        public HttpStatusCode PutDocumentByteArray(string container, string resourceName, byte[] body, string queueName, string serviceBusConnectionString)
         {
             string label = $"{container}/{resourceName}";
             var brokerProperty = new JObject();
-            brokerProperty.Add("Label", label);// TODO:
-            var connectionString = ButlerBot.Util.Settings.serviceBusConnectionString;
-            var sasToken = this.GenerateServiceBusSasToken(connectionString,queueName);
-            var uri = $"https{connectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
+            brokerProperty.Add("Label", label);
+            var sasToken = this.GenerateServiceBusSasToken(serviceBusConnectionString, queueName);
+            var uri = $"https{serviceBusConnectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);
             request.Headers.Add("Authorization", sasToken);
             request.Headers.Add("BrokerProperties", JsonConvert.SerializeObject(brokerProperty));
@@ -120,7 +139,7 @@
             }
         }
 
-        public string GenerateServiceBusSasToken(string serviceBusConnectionString,string que)
+        public string GenerateServiceBusSasToken(string serviceBusConnectionString, string que)
         {
             var connectionString = serviceBusConnectionString;
             var sasKey = connectionString.Split(';')[2].Remove(0, 16);
@@ -145,6 +164,6 @@
 
             return sasToken;
         }
-       
+
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace ButlerBot
+﻿namespace PlanB.Butler.Bot
 {
     using System;
     using System.Collections.Generic;
@@ -9,14 +9,21 @@
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Builder.Dialogs.Choices;
     using Microsoft.Bot.Schema;
+    using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
 
     public class PlanDialog : ComponentDialog
     {
+        /// <summary>
+        /// The bot configuration.
+        /// </summary>
+        private readonly IOptions<BotConfig> botConfig;
 
-        public PlanDialog()
+        public PlanDialog(IOptions<BotConfig> config)
             : base(nameof(PlanDialog))
         {
+            this.botConfig = config;
+
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
             {
@@ -45,12 +52,12 @@
             }, cancellationToken);
         }
 
-        private static async Task<DialogTurnResult> SendPictureStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> SendPictureStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             stepContext.Values["restaurant"] = ((FoundChoice)stepContext.Result).Value;
             string restaurant = stepContext.Values["restaurant"].ToString();
 
-            var picture = BotMethods.GetDocument("pictures", restaurant.Replace(' ', '_') + ".txt");
+            var picture = BotMethods.GetDocument("pictures", restaurant.Replace(' ', '_') + ".txt", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
             if (!picture.Contains("BlobNotFound"))
             {
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text("Okay, hier der Essensplan von " + restaurant), cancellationToken);

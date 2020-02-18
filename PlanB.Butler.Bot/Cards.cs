@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-namespace ButlerBot
+namespace PlanB.Butler.Bot
 {
     using System.Collections.Generic;
     using System.IO;

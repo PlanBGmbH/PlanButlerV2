@@ -1,17 +1,24 @@
-﻿namespace ButlerBot
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Net;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using BotLibraryV2;
-    using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Dialogs;
-    using Microsoft.Bot.Builder.Dialogs.Choices;
-    using Microsoft.Bot.Schema;
-    using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
+using BotLibraryV2;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Choices;
+using Microsoft.Bot.Schema;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using PlanB.Butler.Bot;
+
+namespace PlanB.Butler.Bot
+{
+    /// <summary>
+    /// DeleteOrderDialog.
+    /// </summary>
+    /// <seealso cref="Microsoft.Bot.Builder.Dialogs.ComponentDialog" />
     public class DeleteOrderDialog : ComponentDialog
     {
         static Plan plan = new Plan();
@@ -26,13 +33,23 @@
         static string[] companyStatusD = { "Für mich", "Kunde", "Praktikant" };
         static Order obj = new Order();
 
+        /// <summary>
+        /// The bot configuration.
+        /// </summary>
+        private readonly IOptions<BotConfig> botConfig;
 
-        public DeleteOrderDialog()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeleteOrderDialog"/> class.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
+        public DeleteOrderDialog(IOptions<BotConfig> config)
             : base(nameof(DeleteOrderDialog))
         {
+            this.botConfig = config;
+
             // Get the Plan
-            string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json");
-            
+            string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
+
             plan = JsonConvert.DeserializeObject<Plan>(food);
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
@@ -48,7 +65,7 @@
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-            this.AddDialog(new NextOrder());
+            this.AddDialog(new NextOrder(config));
 
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);
@@ -170,7 +187,7 @@
                     date = DateTime.Now.AddDays(indexCurentDay);
                     stringDate = date.ToString("yyyy-MM-dd");
                 }
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json"));
+                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
                 var collection = orderBlob.OrderList.FindAll(x => x.Name == order.Name);
                 obj = collection.FindLast(x => x.CompanyStatus == order.CompanyStatus);
 
@@ -191,7 +208,7 @@
             }
         }
 
-        private static async Task<DialogTurnResult> DeleteOrderStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> DeleteOrderStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             stepContext.Values["choise"] = ((FoundChoice)stepContext.Result).Value;
             var text = stepContext.Values["choise"];
@@ -200,10 +217,10 @@
                 var bufferOrder = obj;
                 var order = bufferOrder;
 
-                DeleteOrder(order);
+                DeleteOrder(order, this.botConfig.Value.ServiceBusConnectionString);
 
-                DeleteOrderforSalaryDeduction(bufferOrder);
-                BotMethods.DeleteMoney(bufferOrder, weekDaysEN[indexer]);
+                DeleteOrderforSalaryDeduction(bufferOrder, this.botConfig.Value.ServiceBusConnectionString);
+                BotMethods.DeleteMoney(bufferOrder, weekDaysEN[indexer], this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
 
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Okay deine Bestellung wurde entfernt"), cancellationToken);
                 await stepContext.EndDialogAsync();
@@ -217,50 +234,56 @@
             }
         }
 
-        public static Order GetOrder(Order order)
+        public Order GetOrder(Order order)
         {
             OrderBlob orderBlob = new OrderBlob();
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-            orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
-          
+            orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
+
             var bufferOrder = orderBlob.OrderList.FindAll(x => x.Name == order.Name);
 
             var temp = bufferOrder.FindAll(x => x.CompanyStatus == order.CompanyStatus);
             var orderValue = temp[temp.Count - 1];
             return orderValue;
         }
-        public static void DeleteOrder(Order order)
+        public void DeleteOrder(Order order, string serviceBusConnectionString)
         {
             string date = order.Date.ToString("yyyy-MM-dd");
             OrderBlob orderBlob = new OrderBlob();
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
             try
             {
-                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + date + "_" + order.Name + ".json"));
+                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + date + "_" + order.Name + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
                 int orderID = orderBlob.OrderList.FindIndex(x => x.Name == order.Name);
                 orderBlob.OrderList.RemoveAt(orderID);
-                BotMethods.PutDocument("orders", "orders_" + date + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+                BotMethods.PutDocument("orders", "orders_" + date + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
             }
             catch (Exception ex) // enters if blob dont exist
             {
                 List<Order> orders = new List<Order>();
 
                 orders.Add(order);
-                BotMethods.PutDocument("orders", "orders_" + date + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder");
+                BotMethods.PutDocument("orders", "orders_" + date + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
             }
         }
-        public static void DeleteOrderforSalaryDeduction(Order order)
+
+        /// <summary>
+        /// Deletes the orderfor salary deduction.
+        /// </summary>
+        /// <param name="order">The order.</param>
+        /// <param name="serviceBusConnectionString">The service bus connection string.</param>
+        public void DeleteOrderforSalaryDeduction(Order order, string serviceBusConnectionString)
         {
             SalaryDeduction salaryDeduction = new SalaryDeduction();
             var dayId = order.Date.Date.DayOfYear;
-            salaryDeduction = JsonConvert.DeserializeObject<SalaryDeduction>(BotMethods.GetDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year + ".json"));
+            salaryDeduction = JsonConvert.DeserializeObject<SalaryDeduction>(BotMethods.GetDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
             var collection = salaryDeduction.Order.FindAll(x => x.Name == order.Name);
             var temp = collection.FindAll(x => x.CompanyStatus == order.CompanyStatus);
             salaryDeduction.Order.Remove(temp[temp.Count - 1]);
 
             try
             {
-                BotMethods.PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary");
+                BotMethods.PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary", serviceBusConnectionString);
             }
             catch // enters if blob dont exist
             {
@@ -272,7 +295,7 @@
                 orders.Add(order);
                 salaryDeduction.Order = orders;
 
-                BotMethods.PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary");
+                BotMethods.PutDocument("salarydeduction", "orders_" + dayId.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary", serviceBusConnectionString);
             }
         }
     }

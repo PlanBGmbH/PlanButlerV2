@@ -1,15 +1,15 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-//
-// Generated with Bot Builder V4 SDK Template for Visual Studio EchoBot v4.5.0
+// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-namespace ButlerBot.Controllers
+using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Integration.AspNet.Core;
+using Microsoft.Extensions.Options;
+
+namespace PlanB.Butler.Bot.Controllers
 {
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Integration.AspNet.Core;
-
     // This ASP Controller is created to handle a request. Dependency Injection will provide the Adapter and IBot
     // implementation at runtime. Multiple different IBot implementations running at different endpoints can be
     // achieved by specifying a more specific type for the bot constructor argument.
@@ -19,11 +19,13 @@ namespace ButlerBot.Controllers
     {
         private readonly IBotFrameworkHttpAdapter Adapter;
         private readonly IBot Bot;
+        private readonly IOptions<BotConfig> botConfig;
 
-        public BotController(IBotFrameworkHttpAdapter adapter, IBot bot)
+        public BotController(IBotFrameworkHttpAdapter adapter, IBot bot, IOptions<BotConfig> config)
         {
             this.Adapter = adapter;
             this.Bot = bot;
+            this.botConfig = config;
         }
 
         [HttpPost]

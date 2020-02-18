@@ -1,17 +1,22 @@
-﻿using System;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+
 using BotLibraryV2;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace ButlerBot
+namespace PlanB.Butler.Bot
 {
     /// <summary>
     /// NextOrder.
@@ -40,16 +45,20 @@ namespace ButlerBot
         private static HttpStatusCode statusSalary;
         private static HttpStatusCode statusMoney;
 
-
+        /// <summary>
+        /// The bot configuration.
+        /// </summary>
+        private readonly IOptions<BotConfig> botConfig;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NextOrder"/> class.
+        /// Initializes a new instance of the <see cref="NextOrder" /> class.
         /// NextOrderConstructor.
         /// </summary>
-        public NextOrder()
+        /// <param name="config">The configuration.</param>
+        public NextOrder(IOptions<BotConfig> config)
             : base(nameof(NextOrder))
         {
-
+            this.botConfig = config;
             for (int i = 0; i < weekDays.Length; i++)
             {
                 if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower())/* && DateTime.Now.Hour < 12*/
@@ -85,12 +94,12 @@ namespace ButlerBot
             this.InitialDialogId = nameof(WaterfallDialog);
         }
 
-        private static async Task<DialogTurnResult> CompanyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> CompanyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // Get the Plan
             try
             {
-                string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json");
+                string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
                 plan = JsonConvert.DeserializeObject<Plan>(food);
                 dayId = plan.Planday.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
                 valid = true;
@@ -355,7 +364,7 @@ namespace ButlerBot
             return await stepContext.NextAsync(null, cancellationToken);
         }
 
-        private static async Task<DialogTurnResult> SummaryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> SummaryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             DateTime date = DateTime.Now;
             var stringDate = date.ToString("yyyy-MM-dd");
@@ -375,7 +384,7 @@ namespace ButlerBot
 
                 try
                 {
-                    var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json"));
+                    var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
                     var nameId = orderblob.OrderList.FindIndex(x => x.Name == order.Name);
                     order.Grand = 0;
                     order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
@@ -394,9 +403,9 @@ namespace ButlerBot
 
 
                 var bufferorder = order;
-                HttpStatusCode statusOrder = BotMethods.UploadOrder(order);
-                HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
-                HttpStatusCode statusMoney = BotMethods.UploadMoney(bufferorder);
+                HttpStatusCode statusOrder = BotMethods.UploadOrder(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                HttpStatusCode statusMoney = BotMethods.UploadMoney(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                 if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
                 {
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Die Bestellung wurde gespeichert."), cancellationToken);
@@ -404,9 +413,9 @@ namespace ButlerBot
                 else
                 {
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
-                    BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
-                    BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer]);
-                    BotMethods.DeleteOrder(bufferorder);
+                    BotMethods.DeleteOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                    BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer], this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                    BotMethods.DeleteOrder(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                     await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                     return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                 }
@@ -451,9 +460,9 @@ namespace ButlerBot
                         tempOrder.Price = item.Price;
                         tempOrder.Grand = 0;
                         var bufferorder = tempOrder;
-                        statusOrder = BotMethods.UploadOrder(tempOrder);
-                        statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
-                        statusMoney = BotMethods.UploadMoney(bufferorder);
+                        statusOrder = BotMethods.UploadOrder(tempOrder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                        statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                        statusMoney = BotMethods.UploadMoney(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                         if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
                         {
 
@@ -461,9 +470,9 @@ namespace ButlerBot
                         else
                         {
                             await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
-                            BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
-                            BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer]);
-                            BotMethods.DeleteOrder(bufferorder);
+                            BotMethods.DeleteOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                            BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer], this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                            BotMethods.DeleteOrder(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                             await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                             return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                         }
@@ -489,9 +498,9 @@ namespace ButlerBot
                 order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
                 order.Grand = 0;
                 var bufferorder = order;
-                statusOrder = BotMethods.UploadOrder(order);
-                statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder);
-                statusMoney = BotMethods.UploadMoney(bufferorder);
+                statusOrder = BotMethods.UploadOrder(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                statusMoney = BotMethods.UploadMoney(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
             }
             await stepContext.EndDialogAsync(null, cancellationToken);
             return await stepContext.BeginDialogAsync(nameof(DailyCreditDialog), null, cancellationToken);

@@ -1,16 +1,26 @@
-﻿namespace ButlerBot
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
+
+using BotLibraryV2;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Choices;
+using Microsoft.Bot.Schema;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+
+namespace PlanB.Butler.Bot
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Net;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using BotLibraryV2;
-    using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Dialogs;
-    using Microsoft.Bot.Builder.Dialogs.Choices;
-    using Microsoft.Bot.Schema;
-    using Newtonsoft.Json;
+    /// <summary>
+    /// OrderForOtherDayDialog.
+    /// </summary>
+    /// <seealso cref="Microsoft.Bot.Builder.Dialogs.ComponentDialog" />
     public class OrderForOtherDayDialog : ComponentDialog
     {
         private static Plan plan = new Plan();
@@ -27,9 +37,16 @@
         private static string userName = string.Empty;
         private static int daysDivVal;
 
-        public OrderForOtherDayDialog()
+        /// <summary>
+        /// The bot configuration.
+        /// </summary>
+        private readonly IOptions<BotConfig> botConfig;
+
+        public OrderForOtherDayDialog(IOptions<BotConfig> config)
             : base(nameof(OrderForOtherDayDialog))
         {
+            this.botConfig = config;
+
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
                 {
@@ -45,7 +62,7 @@
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-            this.AddDialog(new NextOrder());
+            this.AddDialog(new NextOrder(config));
 
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);
@@ -54,7 +71,7 @@
         private async Task<DialogTurnResult> InitialStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // Get the Plan
-            string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json");
+            string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
             plan = JsonConvert.DeserializeObject<Plan>(food);
             // Cards are sent as Attachments in the Bot Framework.
             // So we need to create a list of attachments for the reply activity.
@@ -254,7 +271,7 @@
             return await stepContext.NextAsync(null, cancellationToken);
         }
 
-        private static async Task<DialogTurnResult> SummaryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> SummaryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var order = new Order();
 
@@ -267,7 +284,7 @@
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
             try
             {
-                var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+                var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
 
                 if (Convert.ToDouble(stepContext.Values["price"]) <= grand)
                 {
@@ -295,9 +312,9 @@
             var bufferorder = order;
             DateTime dateForOrder = DateTime.Now.AddDays(daysDivVal);
             order.Date = dateForOrder;
-            HttpStatusCode statusOrder = BotMethods.UploadForOtherDay(order, dateForOrder);
-            HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeductionForAnotherDay(order, dateForOrder);
-            HttpStatusCode statusMoney = BotMethods.UploadMoney(order);
+            HttpStatusCode statusOrder = BotMethods.UploadForOtherDay(order, dateForOrder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+            HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeductionForAnotherDay(order, dateForOrder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+            HttpStatusCode statusMoney = BotMethods.UploadMoney(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
             if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
             {
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Die Bestellung wurde gespeichert."), cancellationToken);
@@ -305,9 +322,9 @@
             else
             {
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner Bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
-                BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
-                BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer]);
-                BotMethods.DeleteOrder(bufferorder);
+                BotMethods.DeleteOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer], this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                BotMethods.DeleteOrder(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                 await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
             }

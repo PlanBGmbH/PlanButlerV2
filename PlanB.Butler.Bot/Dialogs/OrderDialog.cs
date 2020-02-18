@@ -1,4 +1,4 @@
-namespace ButlerBot
+namespace PlanB.Butler.Bot
 {
     using System;
     using System.Collections.Generic;
@@ -10,6 +10,7 @@ namespace ButlerBot
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Builder.Dialogs.Choices;
     using Microsoft.Bot.Schema;
+    using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
 
     public class OrderDialog : ComponentDialog
@@ -20,7 +21,12 @@ namespace ButlerBot
         private static bool valid;
         private static string dayName;
 
-        public OrderDialog()
+        /// <summary>
+        /// The bot configuration.
+        /// </summary>
+        private readonly IOptions<BotConfig> botConfig;
+
+        public OrderDialog(IOptions<BotConfig> config)
             : base(nameof(OrderDialog))
         {
             // This array defines how the Waterfall will execute.
@@ -39,18 +45,18 @@ namespace ButlerBot
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-            this.AddDialog(new NextOrder());
+            this.AddDialog(new NextOrder(config));
 
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);
         }
 
-        private static async Task<DialogTurnResult> TimeDayStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> TimeDayStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // Get the Plan
             try
             {
-                string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json");
+                string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
                 plan = JsonConvert.DeserializeObject<Plan>(food);
                 dayId = plan.Planday.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
                 valid = true;
@@ -59,10 +65,11 @@ namespace ButlerBot
             {
                 valid = false;
             }
+
             OrderBlob orderBlob = new OrderBlob();
-            var tmp = BotMethods.GetSalaryDeduction("2");
+            var tmp = BotMethods.GetSalaryDeduction("2", this.botConfig.Value.GetSalaryDeduction);
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-            orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json"));
+            orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
 
             var nameID = orderBlob.OrderList.FindIndex(x => x.Name == stepContext.Context.Activity.From.Name);
             if (DateTime.Now.Hour - 1 >= 12)
@@ -214,7 +221,7 @@ namespace ButlerBot
             });
         }
 
-        private static async Task<DialogTurnResult> SummaryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> SummaryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             stepContext.Values["Choise"] = ((FoundChoice)stepContext.Result).Value;
 
@@ -240,9 +247,9 @@ namespace ButlerBot
 
                 order.Grand = grand;
                 var bufferorder = order;
-                HttpStatusCode statusOrder = BotMethods.UploadOrder(order);
-                HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(order);
-                HttpStatusCode statusMoney = BotMethods.UploadMoney(order);
+                HttpStatusCode statusOrder = BotMethods.UploadOrder(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                HttpStatusCode statusMoney = BotMethods.UploadMoney(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                 if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
                 {
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Deine bestellung wurde gespeichert."), cancellationToken);
@@ -250,9 +257,9 @@ namespace ButlerBot
                 else
                 {
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Bei deiner bestellung ist etwas schief gegangen. Bitte bestellen sie noch einmal"), cancellationToken);
-                    BotMethods.DeleteOrderforSalaryDeduction(bufferorder);
-                    BotMethods.DeleteMoney(bufferorder, dayName);
-                    BotMethods.DeleteOrder(bufferorder);
+                    BotMethods.DeleteOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                    BotMethods.DeleteMoney(bufferorder, dayName, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                    BotMethods.DeleteOrder(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                     await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                     return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                 }
