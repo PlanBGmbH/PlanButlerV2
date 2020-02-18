@@ -1,16 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 namespace PlanB.Butler.Admin.Models
 {
-    public class Food
+    /// <summary>
+    /// Food.
+    /// </summary>
+    public class FoodModel
     {
-        public string restaurant { get; set; }
-        //public string pictureB64 { get; set; }
-        public string name { get; set; }
-        public double price { get; set; }
+        /// <summary>
+        /// Gets or sets the restaurant.
+        /// </summary>
+        /// <value>
+        /// The restaurant.
+        /// </value>
+        public string Restaurant { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the price.
+        /// </summary>
+        /// <value>
+        /// The price.
+        /// </value>
+        public double Price { get; set; }
     }
 }

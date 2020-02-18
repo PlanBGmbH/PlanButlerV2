@@ -1,13 +1,29 @@
-﻿using System;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PlanB.Butler.Admin.Models
 {
+    /// <summary>
+    /// OverviewModel.
+    /// </summary>
     public class OverviewModel
     {
-        public string title { get; set; }
-        public List<PlanModel> planday { get; set; }
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>
+        /// The title.
+        /// </value>
+        public string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the plan day.
+        /// </summary>
+        /// <value>
+        /// The plan day.
+        /// </value>
+        public List<PlanModel> PlanDay { get; set; }
     }
 }
