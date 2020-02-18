@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -172,7 +175,5 @@ namespace PlanB.Butler.Services
             await blob.UploadTextAsync(payload);
             await blob.SetMetadataAsync();
         }
-
-
     }
 }
