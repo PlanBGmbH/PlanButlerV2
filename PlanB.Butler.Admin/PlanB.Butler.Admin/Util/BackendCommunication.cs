@@ -1,31 +1,50 @@
-﻿namespace PlanB.Butler.Admin.Util
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+using System;
+using System.Globalization;
+using System.Net;
+using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
+using System.Web;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+namespace PlanB.Butler.Admin.Util
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Net;
-    using System.Net.Http;
-    using System.Security.Cryptography;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Web;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
-
-
+    /// <summary>
+    /// BackendCommunication.
+    /// </summary>
     public class BackendCommunication
     {
-        public string GetDocument(string container, string resourceName)
+        /// <summary>
+        /// Gets the document.
+        /// </summary>
+        /// <param name="container">The container.</param>
+        /// <param name="resourceName">Name of the resource.</param>
+        /// <param name="storageAccountUrl">The storage account URL.</param>
+        /// <param name="storageAccountKey">The storage account key.</param>
+        /// <returns>Document.</returns>
+        public string GetDocument(string container, string resourceName, string storageAccountUrl, string storageAccountKey)
         {
             using (HttpClient httpClient = new HttpClient())
             {
                 string resource = container + "/" + resourceName;
-                string sasToken = string.Empty; //TODO: this.GenerateStorageSasToken(resource, Settings.StorageAccountUrl, Settings.StorageAccountKey);
+                string sasToken = this.GenerateStorageSasToken(resource, storageAccountUrl, storageAccountKey);
                 var response = httpClient.GetAsync(sasToken).Result;
-                return (response.Content.ReadAsStringAsync().Result);
+                return response.Content.ReadAsStringAsync().Result;
             }
         }
 
+        /// <summary>
+        /// Generates the storage sas token.
+        /// </summary>
+        /// <param name="resourceName">Name of the resource.</param>
+        /// <param name="storageAccountUrl">The storage account URL.</param>
+        /// <param name="storageAccountKey">The storage account key.</param>
+        /// <returns>SasToken.</returns>
         public string GenerateStorageSasToken(string resourceName, string storageAccountUrl, string storageAccountKey)
         {
             var storageAccountName = storageAccountUrl.Remove(0, 8).Split('.')[0];
@@ -40,8 +59,8 @@
                 startTimeIso,
                 endTimeIso,
                 "/blob/" + storageAccountName + "/" + resourceName,
-                "",
-                "",
+                string.Empty,
+                string.Empty,
                 "https",
                 "2018-03-28");
             var sasToken = storageAccountUrl + resourceName +
@@ -53,14 +72,24 @@
             return sasToken;
         }
 
-        public HttpStatusCode PutDocument(string container, string resourceName, string body, string queueName)
+        /// <summary>
+        /// Puts the document.
+        /// </summary>
+        /// <param name="container">The container.</param>
+        /// <param name="resourceName">Name of the resource.</param>
+        /// <param name="body">The body.</param>
+        /// <param name="queueName">Name of the queue.</param>
+        /// <param name="serviceBusConnectionString">The service bus connection string.</param>
+        /// <returns>Document.</returns>
+        public HttpStatusCode PutDocument(string container, string resourceName, string body, string queueName, string serviceBusConnectionString)
         {
             string label = $"{container}/{resourceName}";
-            var brokerProperty = new JObject();
-            brokerProperty.Add("Label", label);
-            var connectionString = string.Empty; //TODO:Settings.serviceBusConnectionString;
-            var sasToken = this.GenerateServiceBusSasToken(connectionString);
-            var uri = $"https{connectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
+            var brokerProperty = new JObject
+            {
+                { "Label", label },
+            };
+            var sasToken = this.GenerateServiceBusSasToken(serviceBusConnectionString);
+            var uri = $"https{serviceBusConnectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);
             request.Headers.Add("Authorization", sasToken);
             request.Headers.Add("BrokerProperties", JsonConvert.SerializeObject(brokerProperty));
@@ -72,14 +101,24 @@
             }
         }
 
-        public HttpStatusCode PutDocumentStream(string container, string resourceName, System.IO.Stream body, string queueName)
+        /// <summary>
+        /// Puts the document stream.
+        /// </summary>
+        /// <param name="container">The container.</param>
+        /// <param name="resourceName">Name of the resource.</param>
+        /// <param name="body">The body.</param>
+        /// <param name="queueName">Name of the queue.</param>
+        /// <param name="serviceBusConnectionString">The service bus connection string.</param>
+        /// <returns>HttpStatusCode.</returns>
+        public HttpStatusCode PutDocumentStream(string container, string resourceName, System.IO.Stream body, string queueName, string serviceBusConnectionString)
         {
             string label = $"{container}/{resourceName}";
-            var brokerProperty = new JObject();
-            brokerProperty.Add("Label", label);
-            var connectionString = string.Empty; //TODO:Settings.serviceBusConnectionString;
-            var sasToken = this.GenerateServiceBusSasToken(connectionString);
-            var uri = $"https{connectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
+            var brokerProperty = new JObject
+            {
+                { "Label", label },
+            };
+            var sasToken = this.GenerateServiceBusSasToken(serviceBusConnectionString);
+            var uri = $"https{serviceBusConnectionString.Split(';')[0].ToString().Split('=')[1].Remove(0, 2)}/{queueName}/messages";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);
             request.Headers.Add("Authorization", sasToken);
             request.Headers.Add("BrokerProperties", JsonConvert.SerializeObject(brokerProperty));
@@ -91,6 +130,11 @@
             }
         }
 
+        /// <summary>
+        /// Generates the service bus sas token.
+        /// </summary>
+        /// <param name="serviceBusConnectionString">The service bus connection string.</param>
+        /// <returns>SasToken.</returns>
         public string GenerateServiceBusSasToken(string serviceBusConnectionString)
         {
             var connectionString = serviceBusConnectionString;
@@ -109,10 +153,8 @@
 
             var signature = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(stringToSign)));
 
-            //format the sas token
-
-            var sasToken = String.Format(CultureInfo.InvariantCulture, "SharedAccessSignature sr={0}&sig={1}&se={2}&skn={3}",
-                HttpUtility.UrlEncode(resourceUri), HttpUtility.UrlEncode(signature), expiry, sasKeyName);
+            // format the sas token
+            var sasToken = string.Format(CultureInfo.InvariantCulture, "SharedAccessSignature sr={0}&sig={1}&se={2}&skn={3}", HttpUtility.UrlEncode(resourceUri), HttpUtility.UrlEncode(signature), expiry, sasKeyName);
 
             return sasToken;
         }
