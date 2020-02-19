@@ -22,7 +22,7 @@ namespace PlanB.Butler.Services
         {
             Guid correlationId = Guid.NewGuid();
 
-            if (headers != null && headers.TryGetValue(Constants.ButlerCorrelationTraceName, out var headerValues))
+            if (headers != null && headers.TryGetValue(Constants.ButlerCorrelationTraceHeader, out var headerValues))
             {
                 if (Guid.TryParse(headerValues.FirstOrDefault(), out correlationId))
                 {
