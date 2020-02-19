@@ -74,7 +74,7 @@ namespace PlanB.Butler.Services
                     blob.Properties.ContentType = "application/json";
                     blob.Metadata.Add("date", date);
                     blob.Metadata.Add("restaurant", mealModel.Restaurant);
-                    blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                    blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
                     var meal = JsonConvert.SerializeObject(mealModel);
                     trace.Add("meal", meal);
 
@@ -166,18 +166,18 @@ namespace PlanB.Butler.Services
         /// </summary>
         /// <param name="req">The req.</param>
         /// <param name="id">The identifier.</param>
-        /// <param name="cloudBlobContainer">The cloud BLOB container.</param>
+        /// <param name="blob">The BLOB.</param>
         /// <param name="log">The log.</param>
         /// <param name="context">The context.</param>
         /// <returns>
         /// Meal by id.
         /// </returns>
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [FunctionName("GetMealsById")]
-        public static async Task<IActionResult> GetMealsById(
+        [FunctionName("GetMealById")]
+        public static async Task<IActionResult> GetMealById(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "meals/{id}")] HttpRequest req,
             string id,
-            [Blob("meals", FileAccess.ReadWrite, Connection = "StorageSend")] CloudBlobContainer cloudBlobContainer,
+            [Blob("meals/{id}.json", FileAccess.ReadWrite, Connection = "StorageSend")] string blob,
             ILogger log,
             ExecutionContext context)
         {
@@ -186,22 +186,11 @@ namespace PlanB.Butler.Services
             var trace = new Dictionary<string, string>();
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
 
-            List<MealModel> meals = new List<MealModel>();
+            MealModel mealModel = null;
 
             try
             {
-                BlobContinuationToken blobContinuationToken = null;
-                var options = new BlobRequestOptions();
-                var operationContext = new OperationContext();
-
-                var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(id, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
-                foreach (var item in blobs.Results)
-                {
-                    CloudBlockBlob blob = (CloudBlockBlob)item;
-                    var content = blob.DownloadTextAsync();
-                    var meal = JsonConvert.DeserializeObject<MealModel>(await content);
-                    meals.Add(meal);
-                }
+                mealModel = JsonConvert.DeserializeObject<MealModel>(blob);
 
                 log.LogInformation(correlationId, $"'{methodName}' - success", trace);
             }
@@ -216,11 +205,11 @@ namespace PlanB.Butler.Services
             }
             finally
             {
-                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogTrace(eventId, $"'{methodName}' - finished");
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
-            return (ActionResult)new OkObjectResult(meals);
+            return (ActionResult)new OkObjectResult(mealModel);
         }
     }
 }

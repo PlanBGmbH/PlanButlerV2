@@ -16,7 +16,7 @@ namespace PlanB.Butler.Services.Models
         /// <value>
         /// The identifier.
         /// </value>
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
 
         /// <summary>
         /// Gets or sets the date.
