@@ -1,35 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+using System;
+
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.AzureAD.UI;
-using Microsoft.AspNetCore.Authentication;
 
 namespace PlanB.Butler.Admin
 {
+    /// <summary>
+    /// Startup.
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// The configuration.
+        /// </summary>
+        private readonly IConfiguration configuration;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// </summary>
+        /// <param name="configuration">The configuration.</param>
+        /// <exception cref="ArgumentNullException">configuration.</exception>
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
         }
 
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services">The services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<AdminConfig>(this.configuration.GetSection("myConfiguration"));
+
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -38,7 +54,7 @@ namespace PlanB.Butler.Admin
             });
 
             services.AddAuthentication(AzureADDefaults.AuthenticationScheme)
-                    .AddAzureAD(options => Configuration.Bind("AzureAd", options));
+                    .AddAzureAD(options => this.configuration.Bind("AzureAd", options));
 
             services.Configure<OpenIdConnectOptions>(AzureADDefaults.OpenIdScheme, options =>
             {
@@ -57,7 +73,11 @@ namespace PlanB.Butler.Admin
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app">The application.</param>
+        /// <param name="env">The env.</param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -67,6 +87,7 @@ namespace PlanB.Butler.Admin
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }

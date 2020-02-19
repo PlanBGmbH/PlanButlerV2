@@ -10,6 +10,19 @@
     <DocumentationFile>bin\Debug\netcoreapp2.2\PlanB.Butler.Admin.xml</DocumentationFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Remove="stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="StyleCop.Analyzers.ruleset" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="StyleCop.Analyzers.ruleset" />
+    <AdditionalFiles Include="stylecop.json" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />
@@ -23,14 +36,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.0-preview2.19523.17" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <Reference Include="BotLibraryV2">
-      <HintPath>..\..\BotLibraryV2\BotLibraryV2\bin\Debug\netcoreapp3.0\BotLibraryV2.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
   </ItemGroup>
 
 </Project>
