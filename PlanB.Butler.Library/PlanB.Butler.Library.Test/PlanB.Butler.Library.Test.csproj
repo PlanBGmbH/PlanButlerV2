@@ -39,4 +39,19 @@
     <ProjectReference Include="..\PlanB.Butler.Library\PlanB.Butler.Library.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Dictionary\main.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>main.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Dictionary\main.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>main.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

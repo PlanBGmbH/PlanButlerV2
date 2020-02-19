@@ -93,7 +93,7 @@ namespace PlanB.Butler.Bot
                     nameof(ChoicePrompt),
                     new PromptOptions
                     {
-                        Prompt = MessageFactory.Text($"Wann möchtest du deine bestellung löschen?"),
+                        Prompt = MessageFactory.Text($"Wann möchtest du deine Bestellung löschen?"),
                         Choices = ChoiceFactory.ToChoices(currentWeekDays),
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);
