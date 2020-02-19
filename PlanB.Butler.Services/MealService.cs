@@ -63,7 +63,7 @@ namespace PlanB.Butler.Services
 
                 var date = mealModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-                var filename = $"{date}-{mealModel.Restaurant}-{correlationId}.json";
+                var filename = $"{date}-{mealModel.Restaurant}.json";
                 trace.Add($"filename", filename);
 
                 req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
@@ -88,6 +88,7 @@ namespace PlanB.Butler.Services
                 trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
                 trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
 
                 throw;
             }
@@ -107,10 +108,12 @@ namespace PlanB.Butler.Services
         /// <param name="cloudBlobContainer">The cloud BLOB container.</param>
         /// <param name="log">The log.</param>
         /// <param name="context">The context.</param>
-        /// <returns>All meals.</returns>
+        /// <returns>
+        /// All meals.
+        /// </returns>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [FunctionName("GetMeals")]
-        public static async Task<IActionResult> ReadMeals(
+        public static async Task<IActionResult> GetMeals(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "meals")] HttpRequest req,
             [Blob("meals", FileAccess.ReadWrite, Connection = "StorageSend")] CloudBlobContainer cloudBlobContainer,
             ILogger log,
@@ -121,18 +124,100 @@ namespace PlanB.Butler.Services
             var trace = new Dictionary<string, string>();
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
 
-            BlobContinuationToken blobContinuationToken = null;
-            var options = new BlobRequestOptions();
-            var operationContext = new OperationContext();
-
-            var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
             List<MealModel> meals = new List<MealModel>();
-            foreach (var item in blobs.Results)
+
+            try
             {
-                CloudBlockBlob blob = (CloudBlockBlob)item;
-                var content = blob.DownloadTextAsync();
-                var meal = JsonConvert.DeserializeObject<MealModel>(await content);
-                meals.Add(meal);
+                BlobContinuationToken blobContinuationToken = null;
+                var options = new BlobRequestOptions();
+                var operationContext = new OperationContext();
+
+                var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+                foreach (var item in blobs.Results)
+                {
+                    CloudBlockBlob blob = (CloudBlockBlob)item;
+                    var content = blob.DownloadTextAsync();
+                    var meal = JsonConvert.DeserializeObject<MealModel>(await content);
+                    meals.Add(meal);
+                }
+
+                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+            }
+            catch (Exception e)
+            {
+                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+
+                throw;
+            }
+            finally
+            {
+                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+            }
+
+            return (ActionResult)new OkObjectResult(meals);
+        }
+
+        /// <summary>
+        /// Gets the meal by id.
+        /// </summary>
+        /// <param name="req">The req.</param>
+        /// <param name="id">The identifier.</param>
+        /// <param name="cloudBlobContainer">The cloud BLOB container.</param>
+        /// <param name="log">The log.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>
+        /// Meal by id.
+        /// </returns>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [FunctionName("GetMealsById")]
+        public static async Task<IActionResult> GetMealsById(
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "meals/{id}")] HttpRequest req,
+            string id,
+            [Blob("meals", FileAccess.ReadWrite, Connection = "StorageSend")] CloudBlobContainer cloudBlobContainer,
+            ILogger log,
+            ExecutionContext context)
+        {
+            Guid correlationId = Util.ReadCorrelationId(req.Headers);
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            var trace = new Dictionary<string, string>();
+            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+
+            List<MealModel> meals = new List<MealModel>();
+
+            try
+            {
+                BlobContinuationToken blobContinuationToken = null;
+                var options = new BlobRequestOptions();
+                var operationContext = new OperationContext();
+
+                var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(id, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+                foreach (var item in blobs.Results)
+                {
+                    CloudBlockBlob blob = (CloudBlockBlob)item;
+                    var content = blob.DownloadTextAsync();
+                    var meal = JsonConvert.DeserializeObject<MealModel>(await content);
+                    meals.Add(meal);
+                }
+
+                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+            }
+            catch (Exception e)
+            {
+                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+
+                throw;
+            }
+            finally
+            {
+                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
             return (ActionResult)new OkObjectResult(meals);
