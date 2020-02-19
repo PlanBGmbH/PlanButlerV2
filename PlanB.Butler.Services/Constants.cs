@@ -9,19 +9,13 @@ namespace PlanB.Butler.Services
     internal static class Constants
     {
         /// <summary>
-        /// Gets or sets the name of the butler correlation trace.
+        /// The butler correlation trace name.
         /// </summary>
-        /// <value>
-        /// The name of the butler correlation trace.
-        /// </value>
-        internal static string ButlerCorrelationTraceName { get; set; }
+        internal const string ButlerCorrelationTraceName = "Butler-Correlation-Id";
 
         /// <summary>
-        /// Gets or sets the butler correlation trace header.
-        /// </summary>
-        /// <value>
         /// The butler correlation trace header.
-        /// </value>
-        internal static string ButlerCorrelationTraceHeader { get; set; }
+        /// </summary>
+        internal const string ButlerCorrelationTraceHeader = "ButlerCorrelationId";
     }
 }
