@@ -7,12 +7,12 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 
-namespace PlanB.Butler.Services.GetServiceInfo
+namespace PlanB.Butler.Services.ServiceInfo
 {
     /// <summary>
-    /// GetServiceInfo.
+    /// ServiceInfo.
     /// </summary>
-    public static class GetServiceInfo
+    public static class ServiceInformation
     {
         /// <summary>
         /// Runs the specified req.
@@ -20,9 +20,9 @@ namespace PlanB.Butler.Services.GetServiceInfo
         /// <param name="req">The req.</param>
         /// <param name="log">The log.</param>
         /// <returns>ServiceInfo.</returns>
-        [FunctionName(nameof(GetServiceInfo))]
+        [FunctionName(nameof(ServiceInformation))]
         public static IActionResult Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "serviceinformation")] HttpRequest req,
             ILogger log)
         {
             var serviceInfo = new

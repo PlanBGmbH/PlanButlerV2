@@ -6,10 +6,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>bin\Debug\netcoreapp3.0\</OutputPath>
-    <DocumentationFile>bin\Debug\netcoreapp3.0\Post Document.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netcoreapp3.0\PlanB.Butler.Services.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netcoreapp3.0\Post Document.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netcoreapp3.0\PlanB.Butler.Services.xml</DocumentationFile>
     <OutputPath>bin\Release\netcoreapp3.0\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
@@ -23,6 +23,7 @@
     <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AzureFunctions.Extensions.Swashbuckle" Version="1.4.4" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="3.0.3" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.8" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.29" />
