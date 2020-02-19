@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
 using AzureFunctions.Extensions.Swashbuckle.Attribute;
@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using PlanB.Butler.Services.Extensions;
@@ -36,8 +37,8 @@ namespace PlanB.Butler.Services
         /// <returns>
         /// IActionResult.
         /// </returns>
-        [FunctionName(nameof(Meals))]
-        public static async Task<IActionResult> Meals(
+        [FunctionName("CreateMeal")]
+        public static async Task<IActionResult> CreateMeal(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "meals")]
             [RequestBodyType(typeof(MealModel), "Meal request")]HttpRequest req,
             [Blob("meals", FileAccess.ReadWrite, Connection = "StorageSend")] CloudBlobContainer cloudBlobContainer,
@@ -54,14 +55,29 @@ namespace PlanB.Butler.Services
                 string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
                 trace.Add("requestBody", requestBody);
 
-                string filename = correlationId.ToString() + ".json";
+                MealModel mealModel = JsonConvert.DeserializeObject<MealModel>(requestBody);
+                if (mealModel.Id == null || mealModel.Id.Equals(Guid.Empty))
+                {
+                    mealModel.Id = correlationId;
+                }
+
+                var date = mealModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                var filename = $"{date}-{mealModel.Restaurant}-{correlationId}.json";
                 trace.Add($"filename", filename);
+
                 req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
 
                 CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
                 if (blob != null)
                 {
                     blob.Properties.ContentType = "application/json";
+                    blob.Metadata.Add("date", date);
+                    blob.Metadata.Add("restaurant", mealModel.Restaurant);
+                    blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                    var meal = JsonConvert.SerializeObject(mealModel);
+                    trace.Add("meal", meal);
+
                     Task task = blob.UploadTextAsync(requestBody);
                 }
 
@@ -82,6 +98,44 @@ namespace PlanB.Butler.Services
             }
 
             return new OkResult();
+        }
+
+        /// <summary>
+        /// Reads the meals.
+        /// </summary>
+        /// <param name="req">The req.</param>
+        /// <param name="cloudBlobContainer">The cloud BLOB container.</param>
+        /// <param name="log">The log.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>All meals.</returns>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [FunctionName("GetMeals")]
+        public static async Task<IActionResult> ReadMeals(
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "meals")] HttpRequest req,
+            [Blob("meals", FileAccess.ReadWrite, Connection = "StorageSend")] CloudBlobContainer cloudBlobContainer,
+            ILogger log,
+            ExecutionContext context)
+        {
+            Guid correlationId = Util.ReadCorrelationId(req.Headers);
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            var trace = new Dictionary<string, string>();
+            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+
+            BlobContinuationToken blobContinuationToken = null;
+            var options = new BlobRequestOptions();
+            var operationContext = new OperationContext();
+
+            var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+            List<MealModel> meals = new List<MealModel>();
+            foreach (var item in blobs.Results)
+            {
+                CloudBlockBlob blob = (CloudBlockBlob)item;
+                var content = blob.DownloadTextAsync();
+                var meal = JsonConvert.DeserializeObject<MealModel>(await content);
+                meals.Add(meal);
+            }
+
+            return (ActionResult)new OkObjectResult(meals);
         }
     }
 }
