@@ -15,6 +15,16 @@ jobs:
         dotnet-version: 3.0.100
     - name: Build with dotnet
       run: dotnet build PlanB.Butler.sln --configuration Release
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 2.2.108
     - name: Test with dotnet
       run: dotnet test PlanB.Butler.Library/PlanB.Butler.Library.Test/PlanB.Butler.Library.Test.csproj
 
