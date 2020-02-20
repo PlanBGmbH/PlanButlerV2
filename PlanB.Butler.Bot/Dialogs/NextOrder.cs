@@ -32,8 +32,8 @@ namespace PlanB.Butler.Bot
         private static string leftQuantity = " ";
         private static string companyStatus = " ";
         private static string companyName = " ";
-        private static string[] weekDays = { "Montag", "Dienstag", "Mitwoch", "Donnerstag", "Freitag" };
-        private static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
+        private static CultureInfo culture = new CultureInfo("de-DE");
+        private static DayOfWeek[] weekDays = { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday };
         private static List<Order> orderList = new List<Order>();
         private static List<string> meal1List = new List<string>();
         private static List<string> meal1ListwithMoney = new List<string>();
@@ -72,21 +72,24 @@ namespace PlanB.Butler.Bot
         /// NextOrderConstructor.
         /// </summary>
         /// <param name="config">The configuration.</param>
-        public NextOrder(IOptions<BotConfig> config)
+        public NextOrder(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(NextOrder))
         {
             this.botConfig = config;
+
             for (int i = 0; i < weekDays.Length; i++)
             {
-                if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower())/* && DateTime.Now.Hour < 12*/
+                if (weekDays[i].ToString().ToLower() == DateTime.Now.DayOfWeek.ToString().ToLower() && DateTime.Now.Hour < 12)
                 {
                     indexer = i;
                 }
-                else if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower() && weekDaysEN[i] != "friday")
+                else if (weekDays[i].ToString().ToLower() == DateTime.Now.DayOfWeek.ToString().ToLower() && weekDays[i].ToString().ToLower() != "friday")
                 {
                     indexer = i + 1;
                 }
             }
+           
+
 
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
@@ -102,7 +105,7 @@ namespace PlanB.Butler.Bot
             };
 
             // Add named dialogs to the DialogSet. These names are saved in the dialog state.
-            this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
+            this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps) { TelemetryClient = telemetryClient });
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
             this.AddDialog(new ConfirmPrompt(nameof(ConfirmPrompt)));
@@ -438,7 +441,7 @@ namespace PlanB.Butler.Bot
                 {
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text(error2), cancellationToken);
                     BotMethods.DeleteOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-                    BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer], this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                    BotMethods.DeleteMoney(bufferorder, weekDays[indexer].ToString().ToLower(), this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                     BotMethods.DeleteOrder(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                     await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                     return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
@@ -495,7 +498,7 @@ namespace PlanB.Butler.Bot
                         {
                             await stepContext.Context.SendActivityAsync(MessageFactory.Text(error2), cancellationToken);
                             BotMethods.DeleteOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-                            BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer], this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                            BotMethods.DeleteMoney(bufferorder, weekDays[indexer].ToString().ToLower(), this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                             BotMethods.DeleteOrder(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                             await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                             return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
