@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,6 +19,18 @@ namespace PlanB.Butler.Bot
 {
     public class CreditDialog : ComponentDialog
     {
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+        private static string name = rm.GetString("name");
+        private static string monthBurden = rm.GetString("monthBurden");
+        private static string euro = rm.GetString("euro");
+        private static string noOrderMonth = rm.GetString("noOrderMonth");
+        private static string yes = rm.GetString("yes");
+        private static string no = rm.GetString("no");
+        private static string noBillMonth = rm.GetString("noBillMonth");
+        private static string noBillLastMonth = rm.GetString("noBillLastMonth");
+        private static string lastMonthBurden = rm.GetString("lastMonthBruden");
+
+
         /// <summary>
         /// The bot configuration.
         /// </summary>
@@ -52,7 +66,7 @@ namespace PlanB.Butler.Bot
             }
             else
             {
-                return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text($"Bitte gib deinen Namen ein.") }, cancellationToken);
+                return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text(name) }, cancellationToken);
             }
         }
 
@@ -70,7 +84,7 @@ namespace PlanB.Butler.Bot
                 var userId = money.User.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
                 if (userId != -1)
                 {
-                    await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Diesen Monat beträgt deine Belastung: {money.User[userId].Owe}€"), cancellationToken);
+                    await stepContext.Context.SendActivityAsync(MessageFactory.Text($"{monthBurden} {money.User[userId].Owe} {euro}"), cancellationToken);
                     await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                     return await stepContext.BeginDialogAsync(nameof(OverviewDialog));
                 }
@@ -78,8 +92,8 @@ namespace PlanB.Butler.Bot
                 {
                     return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
                     {
-                        Prompt = MessageFactory.Text("Du hast diesen Monat noch nichts bestellt, soll ich für letzten Monat nachschauen?"),
-                        Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
+                        Prompt = MessageFactory.Text(noOrderMonth),
+                        Choices = ChoiceFactory.ToChoices(new List<string> { yes, no }),
                         Style = ListStyle.HeroCard,
                     });
                 }
@@ -88,8 +102,8 @@ namespace PlanB.Butler.Bot
             {
                 return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
                 {
-                    Prompt = MessageFactory.Text("Diesen Monat liegt noch keine Rechnung vor, soll ich für letzten Monat nachschauen?"),
-                    Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
+                    Prompt = MessageFactory.Text(noBillMonth),
+                    Choices = ChoiceFactory.ToChoices(new List<string> { yes, no }),
                     Style = ListStyle.HeroCard,
                 });
             }
@@ -109,16 +123,16 @@ namespace PlanB.Butler.Bot
                     var userId = money.User.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
                     if (userId != -1)
                     {
-                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Letzten Monat betrugt deine Belastung: {money.User[userId].Owe}€"), cancellationToken);
+                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"{lastMonthBurden} {money.User[userId].Owe} { euro}"), cancellationToken);
                     }
                     else
                     {
-                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Ich hab für letzten Monat auch keine Rechnung von dir gefunden. Leider kann ich dir nicht weiterhelfen.\n:("), cancellationToken);
+                        await stepContext.Context.SendActivityAsync(MessageFactory.Text(noBillMonth), cancellationToken);
                     }
                 }
                 catch
                 {
-                    await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Letzten Monat gab es auch keine Rechnung.\n:("), cancellationToken);
+                    await stepContext.Context.SendActivityAsync(MessageFactory.Text(noBillLastMonth), cancellationToken);
                 }
             }
 

@@ -117,20 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="allCostumer" xml:space="preserve">
-    <value>Insgesamt werden für den Kunden </value>
-    <comment>+calculated</comment>
-  </data>
-  <data name="allMe" xml:space="preserve">
-    <value>Insgesamt werden Ihnen </value>
-    <comment>+calculated</comment>
-  </data>
-  <data name="allTrainee" xml:space="preserve">
-    <value>Insgesamt werden für den Prakitkanten </value>
-    <comment>+calculated</comment>
-  </data>
   <data name="amountFood" xml:space="preserve">
     <value>Wie viele Essen möchten Sie bestellen?</value>
+  </data>
+  <data name="andAtRestauarant" xml:space="preserve">
+    <value>und bei dem Restaraunt</value>
   </data>
   <data name="at" xml:space="preserve">
     <value>bei</value>
@@ -154,10 +145,19 @@
   <data name="delete2" xml:space="preserve">
     <value>gelöscht werden?</value>
   </data>
+  <data name="deleteDayOrder" xml:space="preserve">
+    <value>Für welchen Tag möchten Sie ihre Bestellung löschen?</value>
+  </data>
+  <data name="deleteOrder" xml:space="preserve">
+    <value>Bestellung entfernen</value>
+  </data>
   <data name="deleteSuccess" xml:space="preserve">
     <value>Ihre Bestellung wurde entfernt.</value>
   </data>
   <data name="error" xml:space="preserve">
+    <value>fehler</value>
+  </data>
+  <data name="error1" xml:space="preserve">
     <value>Da ist wohl etwas schiefgegangen. Bitte beginnen Sie nochmal von vorn .</value>
   </data>
   <data name="error2" xml:space="preserve">
@@ -190,7 +190,7 @@
   <data name="intership" xml:space="preserve">
     <value>intership</value>
   </data>
-  <data name="lastMonthBruden" xml:space="preserve">
+  <data name="lastMonthBurden" xml:space="preserve">
     <value>Letzten Monat betrug ihre Belastung:</value>
   </data>
   <data name="me" xml:space="preserve">
@@ -200,7 +200,7 @@
     <value>Montag</value>
   </data>
   <data name="monthBurden" xml:space="preserve">
-    <value>Diesen Monat liegt ihre Belastung bei: </value>
+    <value>Diesen Monat beträgt ihre Belastung: </value>
   </data>
   <data name="name" xml:space="preserve">
     <value>Bitte geben Sie ihren Namen ein.</value>
@@ -211,11 +211,11 @@
   <data name="no" xml:space="preserve">
     <value>Nein</value>
   </data>
+  <data name="noBillLastMonth" xml:space="preserve">
+    <value>Es liegt für den letzten Monat ebenfalls keine Rechnung vor. Leider kann ich Ihnen nicht weiterhelfen.</value>
+  </data>
   <data name="noBillMonth" xml:space="preserve">
     <value>Es liegt für diesen Monat noch keine Rechnung vor. Soll ich für letzten Monat nachschauen?</value>
-  </data>
-  <data name="noBillToday" xml:space="preserve">
-    <value>Es liegt für den letzten Monat ebenfalls keine Rechnung vor. Leider kann ich Ihnen nicht weiterhelfen.</value>
   </data>
   <data name="noOrderMonth" xml:space="preserve">
     <value>Sie haben diesen Monat noch nichts bestellt. Soll ich für letzten Monat nachschauen.</value>
@@ -230,11 +230,11 @@
   <data name="order2" xml:space="preserve">
     <value>bestellen.</value>
   </data>
+  <data name="orderCostumer" xml:space="preserve">
+    <value>Für den Kunden wurde:</value>
+  </data>
   <data name="ordered" xml:space="preserve">
     <value>bestellt</value>
-  </data>
-  <data name="orderExternal" xml:space="preserve">
-    <value>Für den Externen wurde:</value>
   </data>
   <data name="orderFood" xml:space="preserve">
     <value>Essen bestellen</value>
@@ -242,23 +242,23 @@
   <data name="orderMe" xml:space="preserve">
     <value>Für Sie wurde:</value>
   </data>
+  <data name="orderOtherDay" xml:space="preserve">
+    <value>Für einen anderen Tag bestellen</value>
+  </data>
   <data name="orderTrainee" xml:space="preserve">
     <value>Für den Prakikanten wurde:</value>
   </data>
   <data name="orderWhen" xml:space="preserve">
     <value>Für welchen Tag möchten Sie Essen bestellen?</value>
   </data>
-  <data name="queryDayDelete" xml:space="preserve">
-    <value>Für welchen Tag möchten Sie ihre Bestellung löschen?</value>
-  </data>
-  <data name="queryOrder" xml:space="preserve">
+  <data name="orderWho" xml:space="preserve">
     <value>Für wen möchten Sie bestellen?</value>
   </data>
   <data name="remove" xml:space="preserve">
     <value>Bestellung entfernen</value>
   </data>
   <data name="restaurant" xml:space="preserve">
-    <value>Danke! Bei welchem Restauarant möchten Sie bestellen?</value>
+    <value>Bei welchem Restauarant möchten Sie bestellen?</value>
   </data>
   <data name="saturday" xml:space="preserve">
     <value>Samstag</value>
@@ -266,8 +266,20 @@
   <data name="saveOrder" xml:space="preserve">
     <value>Ihre Bestellung wurde gespeichert.</value>
   </data>
-  <data name="showMonthBruden" xml:space="preserve">
-    <value>Montaliche Belastung anzeigen</value>
+  <data name="showMonthBurden" xml:space="preserve">
+    <value>Monatliche Belastung anzeigen</value>
+  </data>
+  <data name="sumCostumer" xml:space="preserve">
+    <value>Insgesamt werden für den Kunden </value>
+    <comment>+calculated</comment>
+  </data>
+  <data name="sumMe" xml:space="preserve">
+    <value>Insgesamt werden Ihnen </value>
+    <comment>+calculated</comment>
+  </data>
+  <data name="sumTrainee" xml:space="preserve">
+    <value>Insgesamt werden für den Prakitkanten </value>
+    <comment>+calculated</comment>
   </data>
   <data name="sunday" xml:space="preserve">
     <value>Sonntag</value>
@@ -281,9 +293,12 @@
   <data name="todayBurden" xml:space="preserve">
     <value>Heute beträgt die Belastung:</value>
   </data>
-  <data name="todayRestaurant" xml:space="preserve">
+  <data name="todaysRestaurant" xml:space="preserve">
     <value>Heute wird bei dem Restaurant </value>
     <comment>+ ordered</comment>
+  </data>
+  <data name="tooLate" xml:space="preserve">
+    <value>Es ist nach 12 Uhr. Bitte bestellen Sie für einen anderen Tag.</value>
   </data>
   <data name="trainee" xml:space="preserve">
     <value>Praktikant</value>
@@ -297,9 +312,6 @@
   <data name="whatNow" xml:space="preserve">
     <value>Was möchten Sie tun?</value>
   </data>
-  <data name="wrongInput" xml:space="preserve">
-    <value>Tut mir Leid. Ich habe Sie nicht verstanden. Bitte benutzen Sie Befehle, welche mir bekannt sind.</value>
-  </data>
   <data name="yes" xml:space="preserve">
     <value>Ja</value>
   </data>
@@ -308,5 +320,6 @@
   </data>
   <data name="youOrderedToday2" xml:space="preserve">
     <value>und bei dem Restaurant.</value>
+    <comment>+ordered</comment>
   </data>
 </root>

@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
+using System.Reflection;
+using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +21,22 @@ namespace PlanB.Butler.Bot
     /// <seealso cref="Microsoft.Bot.Builder.Dialogs.ComponentDialog" />
     public class DailyCreditDialog : ComponentDialog
     {
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+        private static string todayBurden = rm.GetString("todayBurden");
+        private static string orderMe = rm.GetString("orderMe");
+        private static string orderCostumer = rm.GetString("orderCostumer");
+        private static string orderTrainee = rm.GetString("orderTrainee");
+        private static string youOrderedToday = rm.GetString("youOrderedToday");
+        private static string at = rm.GetString("at");
+        private static string ordered = rm.GetString("ordered");
+        private static string sumMe = rm.GetString("sumMe");
+        private static string sumCostumer = rm.GetString("sumCostumer");
+        private static string sumTrainee = rm.GetString("sumTrainee");
+        private static string euro = rm.GetString("euro");
+        private static string calculated = rm.GetString("calculated");
+
+
+
         /// <summary>
         /// The bot configuration.
         /// </summary>
@@ -65,13 +83,13 @@ namespace PlanB.Butler.Bot
                 var orderList = await BotMethods.GetDailyUserOverview(name, this.botConfig.Value.GetDailyUserOverviewFunc);
                 OrderBlob orderBlob = new OrderBlob();
 
-                msg += $"Heute beträgt die Belastung: {Environment.NewLine}";
+                msg += $"{todayBurden} {Environment.NewLine}";
                 string message = string.Empty;
-                string orders = $"Für dich wurde:{Environment.NewLine}";
+                string orders = $"{orderMe} {Environment.NewLine}";
                 double sum = 0;
-                string corders = $"Für den Externen: {Environment.NewLine}";
+                string corders = $"{orderCostumer}  {Environment.NewLine}";
                 double csum = 0;
-                string iorders = $"Für den Praktikanten: {Environment.NewLine}";
+                string iorders = $"{orderTrainee}  {Environment.NewLine}";
                 double isum = 0;
                 bool check = false;
                 bool cchecker = false;
@@ -98,7 +116,7 @@ namespace PlanB.Butler.Bot
 
                             if (check = false)
                             {
-                                message = $"Du hast heute {items.Meal} bei {items.Restaurant} bestellt.";
+                                message = $"{youOrderedToday} {items.Meal} {at} {items.Restaurant} {ordered}";
                             }
                             orders += $"{items.Name} \t/ {items.Restaurant} \t/ {items.Meal} \t/ {items.Price}€  {Environment.NewLine}";
                             sum += Convert.ToDouble(items.Price);
@@ -108,16 +126,16 @@ namespace PlanB.Butler.Bot
                 }
                 if (check)
                 {
-                    orders += $"Insgesammt werden dir {sum}€ berechnet{Environment.NewLine}";
+                    orders += $"{sumMe} {sum} {euro} {calculated} {Environment.NewLine}";
                 }
                 if (cchecker)
                 {
                     orders += corders;
-                    corders += $"Insgsammt wird für die Kunden  {csum}€ berechnet{Environment.NewLine}";
+                    corders += $"{sumCostumer} {csum} {euro} {calculated} {Environment.NewLine}";
                 }
                 if (ichecker)
                 {
-                    iorders += $"Insgsammt wird für die Praktikanten  {isum}€ berechnet{Environment.NewLine}";
+                    iorders += $"{sumTrainee}  {isum} {euro} {calculated} {Environment.NewLine}";
                     orders += iorders;
                 }
                 msg += $"{orders}";

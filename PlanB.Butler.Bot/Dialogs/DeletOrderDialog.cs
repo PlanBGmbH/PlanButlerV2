@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Reflection;
+using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,6 +34,20 @@ namespace PlanB.Butler.Bot
         static string[] companyStatus = { "intern", "extern", "internship" };
         static string[] companyStatusD = { "Für mich", "Kunde", "Praktikant" };
         static Order obj = new Order();
+
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+        private static string deleteDayOrder = rm.GetString("deleteDayOrder");
+        private static string errorOtherDay2 = rm.GetString("errorOtherDay2");
+        private static string orderWho = rm.GetString("orderWho");
+        private static string me = rm.GetString("me");
+        private static string trainee = rm.GetString("trainee");
+        private static string costumer = rm.GetString("costumer");
+        private static string delete1 = rm.GetString("delete1");
+        private static string delete2 = rm.GetString("delete2");
+        private static string yes = rm.GetString("yes");
+        private static string no = rm.GetString("no");
+        private static string noOrderToday = rm.GetString("noOrderToday");
+        private static string deleteSuccess = rm.GetString("deleteSuccess");
 
         /// <summary>
         /// The bot configuration.
@@ -93,14 +109,14 @@ namespace PlanB.Butler.Bot
                     nameof(ChoicePrompt),
                     new PromptOptions
                     {
-                        Prompt = MessageFactory.Text($"Wann möchtest du deine Bestellung löschen?"),
+                        Prompt = MessageFactory.Text(deleteDayOrder),
                         Choices = ChoiceFactory.ToChoices(currentWeekDays),
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text("Tut mir Leid. Ich habe dich nicht verstanden. Bitte benutze Befehle, die ich kenne."), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(errorOtherDay2), cancellationToken);
 
                 return await stepContext.EndDialogAsync(null, cancellationToken);
             }
@@ -127,8 +143,8 @@ namespace PlanB.Butler.Bot
                nameof(ChoicePrompt),
                new PromptOptions
                {
-                   Prompt = MessageFactory.Text("Für wen willst du bestellen?"),
-                   Choices = ChoiceFactory.ToChoices(new List<string> { "Für mich", "Praktikant", "Kunde" }),
+                   Prompt = MessageFactory.Text(orderWho),
+                   Choices = ChoiceFactory.ToChoices(new List<string> { me, costumer, trainee }),
                    Style = ListStyle.HeroCard,
                }, cancellationToken);
         }
@@ -195,14 +211,14 @@ namespace PlanB.Butler.Bot
                     nameof(ChoicePrompt),
                     new PromptOptions
                     {
-                        Prompt = MessageFactory.Text($"Soll {obj.Meal}  gelöscht werden?"),
-                        Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
+                        Prompt = MessageFactory.Text($"{delete1} {obj.Meal} {delete2}"),
+                        Choices = ChoiceFactory.ToChoices(new List<string> { yes, no }),
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);
             }
             catch (Exception ex)
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text($"An diesem Tag gibt es keine Bestellung.\n:("), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(noOrderToday), cancellationToken);
                 await stepContext.EndDialogAsync(null, cancellationToken);
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
             }
@@ -222,13 +238,13 @@ namespace PlanB.Butler.Bot
                 DeleteOrderforSalaryDeduction(bufferOrder, this.botConfig.Value.ServiceBusConnectionString);
                 BotMethods.DeleteMoney(bufferOrder, weekDaysEN[indexer], this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
 
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Okay deine Bestellung wurde entfernt"), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(deleteSuccess), cancellationToken);
                 await stepContext.EndDialogAsync();
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog));
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text("Okay deine Bestellung wurde entfernt."), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(deleteSuccess), cancellationToken);
                 await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
             }
