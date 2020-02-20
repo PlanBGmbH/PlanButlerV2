@@ -49,10 +49,28 @@
     <ProjectReference Include="..\PlanB.Butler.Library\PlanB.Butler.Library\PlanB.Butler.Library.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Dictionary\main.Designer.cs">
+      <DependentUpon>main.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
     <ItemGroup>
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Dictionary\main.de-IT.resx">
+        <SubType>Designer</SubType>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Dictionary\main.resx">
+        <LastGenOutput>main.Designer.cs</LastGenOutput>
+        <Generator>PublicResXFileCodeGenerator</Generator>
+      </EmbeddedResource>
+    </ItemGroup>
 
 </Project>

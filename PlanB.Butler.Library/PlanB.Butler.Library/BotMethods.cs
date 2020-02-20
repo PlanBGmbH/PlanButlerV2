@@ -12,10 +12,6 @@ namespace BotLibraryV2
 {
     public class BotMethods
     {
-        private static string[] weekDays = { "Montag", "Dienstag", "Mitwoch", "Donnerstag", "Freitag" };
-        private static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
-        private static int indexer = 0;
-        private static string dayName;
         static HttpClient client = new HttpClient();
 
         /// <summary>
@@ -208,7 +204,7 @@ namespace BotLibraryV2
                     orderBlob.OrderList = new List<Order>();
                     order.Date = DateTime.Now;
                     orderBlob.OrderList.Add(order);
-                    HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder",serviceBusConnectionString);
+                    HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
                     return status;
                 }
                 catch (Exception ex)
