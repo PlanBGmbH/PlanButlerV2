@@ -88,7 +88,7 @@ namespace PlanB.Butler.Bot
                     indexer = i + 1;
                 }
             }
-           
+
 
 
             // This array defines how the Waterfall will execute.

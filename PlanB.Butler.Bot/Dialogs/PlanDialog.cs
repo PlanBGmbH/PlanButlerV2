@@ -19,7 +19,7 @@
         /// </summary>
         private readonly IOptions<BotConfig> botConfig;
 
-        public PlanDialog(IOptions<BotConfig> config)
+        public PlanDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(PlanDialog))
         {
             this.botConfig = config;

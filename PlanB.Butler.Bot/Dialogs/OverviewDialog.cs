@@ -57,20 +57,20 @@ namespace PlanB.Butler.Bot
         /// Initializes a new instance of the <see cref="OverviewDialog"/> class.
         /// </summary>
         /// <param name="config">The configuration.</param>
-        public OverviewDialog(IOptions<BotConfig> config)
+        public OverviewDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(OverviewDialog))
         {
             this.botConfig = config;
 
-            OrderDialog orderDialog = new OrderDialog(config);
-            NextOrder nextorderDialog = new NextOrder(config);
-            PlanDialog planDialog = new PlanDialog(config);
-            CreditDialog creditDialog = new CreditDialog(config);
-            OrderForOtherDayDialog orderForAnotherDay = new OrderForOtherDayDialog(config);
-            DeleteOrderDialog deleteOrderDialog = new DeleteOrderDialog(config);
+            OrderDialog orderDialog = new OrderDialog(config , telemetryClient );
+            NextOrder nextorderDialog = new NextOrder(config, telemetryClient);
+            PlanDialog planDialog = new PlanDialog(config, telemetryClient);
+            CreditDialog creditDialog = new CreditDialog(config, telemetryClient);
+            OrderForOtherDayDialog orderForAnotherDay = new OrderForOtherDayDialog(config, telemetryClient);
+            DeleteOrderDialog deleteOrderDialog = new DeleteOrderDialog(config, telemetryClient);
             List<ComponentDialog> dialogsList = new List<ComponentDialog>();
-            DailyCreditDialog dailyCreditDialog = new DailyCreditDialog(config);
-            ExcellDialog excellDialog = new ExcellDialog(config);
+            DailyCreditDialog dailyCreditDialog = new DailyCreditDialog(config, telemetryClient);
+            ExcellDialog excellDialog = new ExcellDialog(config, telemetryClient);
 
             // dialogsList.Add(orderDialog);
             dialogsList.Add(nextorderDialog);
@@ -92,14 +92,14 @@ namespace PlanB.Butler.Bot
 
             // Add named dialogs to the DialogSet. These names are saved in the dialog state.
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
-            this.AddDialog(new OrderDialog(config));
-            this.AddDialog(new CreditDialog(config));
-            this.AddDialog(new PlanDialog(config));
-            this.AddDialog(new OrderForOtherDayDialog(config));
-            this.AddDialog(new DeleteOrderDialog(config));
-            this.AddDialog(new NextOrder(config));
-            this.AddDialog(new DailyCreditDialog(config));
-            this.AddDialog(new ExcellDialog(config));
+            this.AddDialog(new OrderDialog(config,telemetryClient));
+            this.AddDialog(new CreditDialog(config, telemetryClient));
+            this.AddDialog(new PlanDialog(config, telemetryClient));
+            this.AddDialog(new OrderForOtherDayDialog(config, telemetryClient));
+            this.AddDialog(new DeleteOrderDialog(config, telemetryClient));
+            this.AddDialog(new NextOrder(config, telemetryClient));
+            this.AddDialog(new DailyCreditDialog(config, telemetryClient));
+            this.AddDialog(new ExcellDialog(config, telemetryClient));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
             this.AddDialog(new ConfirmPrompt(nameof(ConfirmPrompt)));

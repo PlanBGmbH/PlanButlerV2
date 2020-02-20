@@ -61,7 +61,7 @@ namespace PlanB.Butler.Bot
         /// Initializes a new instance of the <see cref="DeleteOrderDialog"/> class.
         /// </summary>
         /// <param name="config">The configuration.</param>
-        public DeleteOrderDialog(IOptions<BotConfig> config)
+        public DeleteOrderDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(DeleteOrderDialog))
         {
             this.botConfig = config;
@@ -84,7 +84,7 @@ namespace PlanB.Butler.Bot
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-            this.AddDialog(new NextOrder(config));
+            this.AddDialog(new NextOrder(config, telemetryClient));
 
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);

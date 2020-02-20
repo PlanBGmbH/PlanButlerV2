@@ -59,7 +59,7 @@ namespace PlanB.Butler.Bot
         /// </summary>
         private readonly IOptions<BotConfig> botConfig;
 
-        public OrderForOtherDayDialog(IOptions<BotConfig> config)
+        public OrderForOtherDayDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(OrderForOtherDayDialog))
         {
             this.botConfig = config;
@@ -79,7 +79,7 @@ namespace PlanB.Butler.Bot
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-            this.AddDialog(new NextOrder(config));
+            this.AddDialog(new NextOrder(config, telemetryClient));
 
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);
