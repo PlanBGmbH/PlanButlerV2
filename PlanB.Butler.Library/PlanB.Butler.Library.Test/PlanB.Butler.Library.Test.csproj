@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Bot.Builder" Version="4.7.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.0.0" />
     <PackageReference Include="MSTest.TestFramework" Version="2.0.0" />
@@ -40,17 +41,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Dictionary\main.Designer.cs">
+    <Compile Update="DictionaryTest\resourceTest.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>main.resx</DependentUpon>
+      <DependentUpon>resourceTest.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Dictionary\main.resx">
+    <EmbeddedResource Update="DictionaryTest\resourceTest.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>main.Designer.cs</LastGenOutput>
+      <LastGenOutput>resourceTest.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

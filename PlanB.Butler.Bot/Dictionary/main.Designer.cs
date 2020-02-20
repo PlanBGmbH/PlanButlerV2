@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PlanB.Butler.Library.Test.Dictionary {
+namespace PlanB.Butler.Bot.Dictionary {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PlanB.Butler.Library.Test.Dictionary.main", typeof(main).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PlanB.Butler.Bot.Dictionary.main", typeof(main).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,38 +61,20 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Insgesamt werden für den Kunden .
-        /// </summary>
-        public static string allCostumer {
-            get {
-                return ResourceManager.GetString("allCostumer", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Insgesamt werden Ihnen .
-        /// </summary>
-        public static string allMe {
-            get {
-                return ResourceManager.GetString("allMe", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Insgesamt werden für den Prakitkanten .
-        /// </summary>
-        public static string allTrainee {
-            get {
-                return ResourceManager.GetString("allTrainee", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Wie viele Essen möchten Sie bestellen?.
         /// </summary>
         public static string amountFood {
             get {
                 return ResourceManager.GetString("amountFood", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to und bei dem Restaraunt.
+        /// </summary>
+        public static string andAtRestauarant {
+            get {
+                return ResourceManager.GetString("andAtRestauarant", resourceCulture);
             }
         }
         
@@ -160,6 +142,24 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Für welchen Tag möchten Sie ihre Bestellung löschen?.
+        /// </summary>
+        public static string deleteDayOrder {
+            get {
+                return ResourceManager.GetString("deleteDayOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bestellung entfernen.
+        /// </summary>
+        public static string deleteOrder {
+            get {
+                return ResourceManager.GetString("deleteOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ihre Bestellung wurde entfernt..
         /// </summary>
         public static string deleteSuccess {
@@ -169,11 +169,20 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Da ist wohl etwas schiefgegangen. Bitte beginnen Sie nochmal von vorn ..
+        ///   Looks up a localized string similar to fehler.
         /// </summary>
         public static string error {
             get {
                 return ResourceManager.GetString("error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Da ist wohl etwas schiefgegangen. Bitte beginnen Sie nochmal von vorn ..
+        /// </summary>
+        public static string error1 {
+            get {
+                return ResourceManager.GetString("error1", resourceCulture);
             }
         }
         
@@ -270,9 +279,9 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         /// <summary>
         ///   Looks up a localized string similar to Letzten Monat betrug ihre Belastung:.
         /// </summary>
-        public static string lastMonthBruden {
+        public static string lastMonthBurden {
             get {
-                return ResourceManager.GetString("lastMonthBruden", resourceCulture);
+                return ResourceManager.GetString("lastMonthBurden", resourceCulture);
             }
         }
         
@@ -295,7 +304,7 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Diesen Monat liegt ihre Belastung bei: .
+        ///   Looks up a localized string similar to Diesen Monat beträgt ihre Belastung: .
         /// </summary>
         public static string monthBurden {
             get {
@@ -331,20 +340,20 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Es liegt für den letzten Monat ebenfalls keine Rechnung vor. Leider kann ich Ihnen nicht weiterhelfen..
+        /// </summary>
+        public static string noBillLastMonth {
+            get {
+                return ResourceManager.GetString("noBillLastMonth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Es liegt für diesen Monat noch keine Rechnung vor. Soll ich für letzten Monat nachschauen?.
         /// </summary>
         public static string noBillMonth {
             get {
                 return ResourceManager.GetString("noBillMonth", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Es liegt für den letzten Monat ebenfalls keine Rechnung vor. Leider kann ich Ihnen nicht weiterhelfen..
-        /// </summary>
-        public static string noBillToday {
-            get {
-                return ResourceManager.GetString("noBillToday", resourceCulture);
             }
         }
         
@@ -385,20 +394,20 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Für den Kunden wurde:.
+        /// </summary>
+        public static string orderCostumer {
+            get {
+                return ResourceManager.GetString("orderCostumer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to bestellt.
         /// </summary>
         public static string ordered {
             get {
                 return ResourceManager.GetString("ordered", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Für den Externen wurde:.
-        /// </summary>
-        public static string orderExternal {
-            get {
-                return ResourceManager.GetString("orderExternal", resourceCulture);
             }
         }
         
@@ -421,6 +430,15 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Für einen anderen Tag bestellen.
+        /// </summary>
+        public static string orderOtherDay {
+            get {
+                return ResourceManager.GetString("orderOtherDay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Für den Prakikanten wurde:.
         /// </summary>
         public static string orderTrainee {
@@ -439,20 +457,11 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Für welchen Tag möchten Sie ihre Bestellung löschen?.
-        /// </summary>
-        public static string queryDayDelete {
-            get {
-                return ResourceManager.GetString("queryDayDelete", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Für wen möchten Sie bestellen?.
         /// </summary>
-        public static string queryOrder {
+        public static string orderWho {
             get {
-                return ResourceManager.GetString("queryOrder", resourceCulture);
+                return ResourceManager.GetString("orderWho", resourceCulture);
             }
         }
         
@@ -466,7 +475,7 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Danke! Bei welchem Restauarant möchten Sie bestellen?.
+        ///   Looks up a localized string similar to Bei welchem Restauarant möchten Sie bestellen?.
         /// </summary>
         public static string restaurant {
             get {
@@ -493,11 +502,38 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Montaliche Belastung anzeigen.
+        ///   Looks up a localized string similar to Monatliche Belastung anzeigen.
         /// </summary>
-        public static string showMonthBruden {
+        public static string showMonthBurden {
             get {
-                return ResourceManager.GetString("showMonthBruden", resourceCulture);
+                return ResourceManager.GetString("showMonthBurden", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insgesamt werden für den Kunden .
+        /// </summary>
+        public static string sumCostumer {
+            get {
+                return ResourceManager.GetString("sumCostumer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insgesamt werden Ihnen .
+        /// </summary>
+        public static string sumMe {
+            get {
+                return ResourceManager.GetString("sumMe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insgesamt werden für den Prakitkanten .
+        /// </summary>
+        public static string sumTrainee {
+            get {
+                return ResourceManager.GetString("sumTrainee", resourceCulture);
             }
         }
         
@@ -540,9 +576,18 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         /// <summary>
         ///   Looks up a localized string similar to Heute wird bei dem Restaurant .
         /// </summary>
-        public static string todayRestaurant {
+        public static string todaysRestaurant {
             get {
-                return ResourceManager.GetString("todayRestaurant", resourceCulture);
+                return ResourceManager.GetString("todaysRestaurant", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Es ist nach 12 Uhr. Bitte bestellen Sie für einen anderen Tag..
+        /// </summary>
+        public static string tooLate {
+            get {
+                return ResourceManager.GetString("tooLate", resourceCulture);
             }
         }
         
@@ -579,15 +624,6 @@ namespace PlanB.Butler.Library.Test.Dictionary {
         public static string whatNow {
             get {
                 return ResourceManager.GetString("whatNow", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Tut mir Leid. Ich habe Sie nicht verstanden. Bitte benutzen Sie Befehle, welche mir bekannt sind..
-        /// </summary>
-        public static string wrongInput {
-            get {
-                return ResourceManager.GetString("wrongInput", resourceCulture);
             }
         }
         
