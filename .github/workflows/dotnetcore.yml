@@ -26,5 +26,5 @@ jobs:
       with:
         dotnet-version: 2.2.108
     - name: Test with dotnet
-      run: dotnet test ./PlanB.Butler.Library/PlanB.Butler.Library.Test/PlanB.Butler.Library.Test.csproj --configuration Release
+      run: dotnet test PlanB.Butler.Library/PlanB.Butler.Library.Test/PlanB.Butler.Library.Test.csproj --configuration Release
 
