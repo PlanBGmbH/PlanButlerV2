@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
+using System.Globalization;
 
 namespace PlanB.Butler.Services.Models
 {
@@ -11,12 +12,28 @@ namespace PlanB.Butler.Services.Models
     public class MealModel
     {
         /// <summary>
-        /// Gets or sets the identifier.
+        /// Gets the identifier.
         /// </summary>
         /// <value>
         /// The identifier.
         /// </value>
-        public Guid? Id { get; set; }
+        public string Id
+        {
+            get
+            {
+                var date = this.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                var id = $"{date}-{this.Restaurant}.json";
+                return id;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the correlation identifier.
+        /// </summary>
+        /// <value>
+        /// The correlation identifier.
+        /// </value>
+        public Guid? CorrelationId { get; set; }
 
         /// <summary>
         /// Gets or sets the date.
