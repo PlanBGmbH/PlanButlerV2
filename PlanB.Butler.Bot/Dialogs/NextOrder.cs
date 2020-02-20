@@ -61,7 +61,7 @@ namespace PlanB.Butler.Bot
         private static string error1 = rm.GetString("error1");
         private static string error2 = rm.GetString("error2");
         private static string saveOrder = rm.GetString("saveOrder");
-        
+
         /// <summary>
         /// The bot configuration.
         /// </summary>
@@ -177,7 +177,7 @@ namespace PlanB.Butler.Bot
                     {
                         return await stepContext.PromptAsync(
                                                      nameof(TextPrompt),
-                                                     new PromptOptions { Prompt = MessageFactory.Text(company) }, 
+                                                     new PromptOptions { Prompt = MessageFactory.Text(company) },
                                                      cancellationToken);
                     }
                     else
@@ -210,7 +210,7 @@ namespace PlanB.Butler.Bot
 
         private static async Task<DialogTurnResult> RestaurantStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            
+
 
             if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde" || stepContext.Values["companyStatus"].ToString().ToLower() == "extern")
             {
@@ -285,7 +285,7 @@ namespace PlanB.Butler.Bot
 
         private static async Task<DialogTurnResult> FoodStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            
+
 
             if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde")
             {
@@ -389,7 +389,7 @@ namespace PlanB.Butler.Bot
 
         private async Task<DialogTurnResult> SummaryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            
+
             DateTime date = DateTime.Now;
             var stringDate = date.ToString("yyyy-MM-dd");
 

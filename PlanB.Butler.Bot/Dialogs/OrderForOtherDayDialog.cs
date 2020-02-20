@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Reflection;
 using System.Resources;
@@ -28,9 +29,7 @@ namespace PlanB.Butler.Bot
         private static Plan plan = new Plan();
         private static int valueDay;
         private const double grand = 3.30;
-        private static string dayName;
-        private static string[] weekDays = { "Montag", "Dienstag", "Mitwoch", "Donnerstag", "Freitag" };
-        private static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
+        private static string dayName;       
         private static List<string> meal1List = new List<string>();
         private static List<string> meal1ListwithMoney = new List<string>();
         private static List<string> meal2List = new List<string>();
@@ -38,6 +37,8 @@ namespace PlanB.Butler.Bot
         private static int indexer = 0;
         private static string userName = string.Empty;
         private static int daysDivVal;
+        private static CultureInfo culture = new CultureInfo("de-DE");
+        private static DayOfWeek[] weekDays = { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday };
 
         private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
         private static string orderWhen = rm.GetString("orderWhen");
@@ -99,19 +100,18 @@ namespace PlanB.Butler.Bot
 
             for (int i = 0; i < weekDays.Length; i++)
             {
-                if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower() && DateTime.Now.Hour < 12)
+                if (weekDays[i].ToString().ToLower() == DateTime.Now.DayOfWeek.ToString().ToLower() && DateTime.Now.Hour < 12)
                 {
                     indexer = i;
                 }
-                else if (weekDaysEN[i] == DateTime.Now.DayOfWeek.ToString().ToLower() && weekDaysEN[i] != "friday")
+                else if (weekDays[i].ToString().ToLower() == DateTime.Now.DayOfWeek.ToString().ToLower() && weekDays[i].ToString().ToLower() != "friday")
                 {
                     indexer = i + 1;
                 }
             }
-
             for (int i = indexer; i < weekDays.Length; i++)
             {
-                currentWeekDays.Add(weekDays[i]);
+                currentWeekDays.Add(culture.DateTimeFormat.GetDayName(weekDays[i]));
             }
 
             if (currentWeekDays != null)
@@ -134,15 +134,15 @@ namespace PlanB.Butler.Bot
         }
 
         private async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        { 
+        {
             stepContext.Values["mainChoise"] = ((FoundChoice)stepContext.Result).Value;
             string text = Convert.ToString(stepContext.Values["mainChoise"]);
             daysDivVal = 0;
-            for (int i = 0; i < weekDaysEN.Length; i++)
+            for (int i = 0; i < weekDays.Length; i++)
             {
-                if (text == weekDays[i])
+                if (text.ToString().ToLower() == culture.DateTimeFormat.GetDayName(weekDays[i]).ToString().ToLower())
                 {
-                    daysDivVal = i;
+                    daysDivVal = (int)weekDays[i];
                 }
             }
             if (daysDivVal == null)
@@ -153,14 +153,14 @@ namespace PlanB.Butler.Bot
             }
             else
             {
-                daysDivVal = daysDivVal - indexer;
+                daysDivVal = daysDivVal - indexer - 1;
             }
 
 
             if (text != null)
             {
-                valueDay = plan.Planday.FindIndex(x => x.Name == weekDaysEN[indexer]);
-                dayName = weekDaysEN[indexer];
+                valueDay = plan.Planday.FindIndex(x => x.Name == weekDays[indexer].ToString().ToLower());
+                dayName = weekDays[indexer].ToString().ToLower();
 
                 if (stepContext.Context.Activity.From.Name != "User")
                 {
@@ -238,7 +238,7 @@ namespace PlanB.Butler.Bot
         }
 
         private static async Task<DialogTurnResult> PriceStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {          
+        {
             var obj = ((FoundChoice)stepContext.Result).Value;
             if (stepContext.Values["rest1"].ToString() == "yes")
             {
@@ -287,7 +287,8 @@ namespace PlanB.Butler.Bot
         private async Task<DialogTurnResult> SummaryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var order = new Order();
-
+            DateTime date = DateTime.Now;
+            var stringDate = date.ToString("yyyy-MM-dd");
             order.CompanyStatus = "intern";
             order.Name = (string)stepContext.Values["name"];
             order.Restaurant = (string)stepContext.Values["restaurant"];
@@ -297,17 +298,10 @@ namespace PlanB.Butler.Bot
             int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
             try
             {
-                var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
+                var orderblob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
 
-                if (Convert.ToDouble(stepContext.Values["price"]) <= grand)
-                {
-                    order.Price = 0;
-                }
-                else
-                {
-                    order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
-                }
-                order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
+                order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]), 2);
+                order.Grand = 0;
             }
             catch (Exception)
             {
@@ -323,6 +317,7 @@ namespace PlanB.Butler.Bot
 
             order.Grand = grand;
             var bufferorder = order;
+
             DateTime dateForOrder = DateTime.Now.AddDays(daysDivVal);
             order.Date = dateForOrder;
             HttpStatusCode statusOrder = BotMethods.UploadForOtherDay(order, dateForOrder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
@@ -336,7 +331,7 @@ namespace PlanB.Butler.Bot
             {
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text(error2), cancellationToken);
                 BotMethods.DeleteOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-                BotMethods.DeleteMoney(bufferorder, weekDaysEN[indexer], this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                BotMethods.DeleteMoney(bufferorder, weekDays[valueDay].ToString().ToLower(), this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                 BotMethods.DeleteOrder(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                 await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
