@@ -56,9 +56,9 @@ namespace PlanB.Butler.Services
                 trace.Add("requestBody", requestBody);
 
                 MealModel mealModel = JsonConvert.DeserializeObject<MealModel>(requestBody);
-                if (mealModel.Id == null || mealModel.Id.Equals(Guid.Empty))
+                if (mealModel.CorrelationId == null || mealModel.CorrelationId.Equals(Guid.Empty))
                 {
-                    mealModel.Id = correlationId;
+                    mealModel.CorrelationId = correlationId;
                 }
 
                 var date = mealModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
@@ -128,14 +128,22 @@ namespace PlanB.Butler.Services
 
             try
             {
+                string startDate = req.Query["startDate"];
+                string endDate = req.Query["endDate"];
+                string restaurant = req.Query["restaurant"];
+                string prefix = string.Empty;
+
+                prefix = CreateBlobPrefix(startDate, endDate);
+
                 BlobContinuationToken blobContinuationToken = null;
                 var options = new BlobRequestOptions();
                 var operationContext = new OperationContext();
 
-                var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+                var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(prefix, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
                 foreach (var item in blobs.Results)
                 {
                     CloudBlockBlob blob = (CloudBlockBlob)item;
+
                     var content = blob.DownloadTextAsync();
                     var meal = JsonConvert.DeserializeObject<MealModel>(await content);
                     meals.Add(meal);
@@ -174,7 +182,7 @@ namespace PlanB.Butler.Services
         /// </returns>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [FunctionName("GetMealById")]
-        public static async Task<IActionResult> GetMealById(
+        public static IActionResult GetMealById(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "meals/{id}")] HttpRequest req,
             string id,
             [Blob("meals/{id}.json", FileAccess.ReadWrite, Connection = "StorageSend")] string blob,
@@ -190,6 +198,8 @@ namespace PlanB.Butler.Services
 
             try
             {
+                trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                trace.Add("id", id);
                 mealModel = JsonConvert.DeserializeObject<MealModel>(blob);
 
                 log.LogInformation(correlationId, $"'{methodName}' - success", trace);
@@ -210,6 +220,38 @@ namespace PlanB.Butler.Services
             }
 
             return (ActionResult)new OkObjectResult(mealModel);
+        }
+
+        /// <summary>
+        /// Creates the BLOB prefix.
+        /// </summary>
+        /// <param name="startDate">The start date.</param>
+        /// <param name="endDate">The end date.</param>
+        /// <returns>Prefix.</returns>
+        internal static string CreateBlobPrefix(string startDate, string endDate)
+        {
+            string prefix = string.Empty;
+            if (string.IsNullOrEmpty(startDate) || string.IsNullOrEmpty(endDate))
+            {
+                return prefix;
+            }
+
+            if (startDate.Length == endDate.Length)
+            {
+                for (int i = 0; i < startDate.Length; i++)
+                {
+                    if (startDate[i] == endDate[i])
+                    {
+                        prefix += startDate[i];
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return prefix;
         }
     }
 }
