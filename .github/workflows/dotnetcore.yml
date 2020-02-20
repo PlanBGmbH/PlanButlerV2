@@ -15,3 +15,6 @@ jobs:
         dotnet-version: 3.0.100
     - name: Build with dotnet
       run: dotnet build PlanB.Butler.sln --configuration Release
+    - name: Test with dotnet
+      run: dotnet test **/*Test.csproj
+
