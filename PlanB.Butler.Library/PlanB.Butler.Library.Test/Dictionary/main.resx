@@ -1,0 +1,312 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="allCostumer" xml:space="preserve">
+    <value>Insgesamt werden für den Kunden </value>
+    <comment>+calculated</comment>
+  </data>
+  <data name="allMe" xml:space="preserve">
+    <value>Insgesamt werden Ihnen </value>
+    <comment>+calculated</comment>
+  </data>
+  <data name="allTrainee" xml:space="preserve">
+    <value>Insgesamt werden für den Prakitkanten </value>
+    <comment>+calculated</comment>
+  </data>
+  <data name="amountFood" xml:space="preserve">
+    <value>Wie viele Essen möchten Sie bestellen?</value>
+  </data>
+  <data name="at" xml:space="preserve">
+    <value>bei</value>
+  </data>
+  <data name="calculated" xml:space="preserve">
+    <value>berechnet</value>
+  </data>
+  <data name="company" xml:space="preserve">
+    <value>Für welche Firma soll Essen bestellt werden? Bitte geben Sie zusätzlich den Namen des Kunden/der Kunden an.</value>
+  </data>
+  <data name="costumer" xml:space="preserve">
+    <value>Kunde</value>
+  </data>
+  <data name="daysOrder" xml:space="preserve">
+    <value>Tagesbestellung</value>
+  </data>
+  <data name="delete1" xml:space="preserve">
+    <value>Soll </value>
+    <comment>+delete2</comment>
+  </data>
+  <data name="delete2" xml:space="preserve">
+    <value>gelöscht werden?</value>
+  </data>
+  <data name="deleteSuccess" xml:space="preserve">
+    <value>Ihre Bestellung wurde entfernt.</value>
+  </data>
+  <data name="error" xml:space="preserve">
+    <value>Da ist wohl etwas schiefgegangen. Bitte beginnen Sie nochmal von vorn .</value>
+  </data>
+  <data name="error2" xml:space="preserve">
+    <value>Bei deiner Bestellung ist etwas schiefgegangen. Bitte bestellen Sie noch einmal.</value>
+  </data>
+  <data name="errorOtherDay" xml:space="preserve">
+    <value>Es tut mir Leid, es muss ein Fehler unterlaufen sein. Bitte versuchen Sie es noch einmal.</value>
+  </data>
+  <data name="errorOtherDay2" xml:space="preserve">
+    <value>Tut mir Leid. Ich konnte Sie nicht verstehen. Bitte benutzen Sie Befehle, welche mir bekannt sind.</value>
+  </data>
+  <data name="euro" xml:space="preserve">
+    <value>€</value>
+  </data>
+  <data name="external" xml:space="preserve">
+    <value>extern</value>
+  </data>
+  <data name="food" xml:space="preserve">
+    <value>Welches Essen möchten Sie bestellen?</value>
+  </data>
+  <data name="friday" xml:space="preserve">
+    <value>Freitag</value>
+  </data>
+  <data name="help" xml:space="preserve">
+    <value>Wähle Sie eines der unten stehenden Ereignissen aus oder schreibe "Hilfe" um zu erfahren was ich sonst noch alles kann.</value>
+  </data>
+  <data name="internally" xml:space="preserve">
+    <value>intern</value>
+  </data>
+  <data name="intership" xml:space="preserve">
+    <value>intership</value>
+  </data>
+  <data name="lastMonthBruden" xml:space="preserve">
+    <value>Letzten Monat betrug ihre Belastung:</value>
+  </data>
+  <data name="me" xml:space="preserve">
+    <value>Für mich</value>
+  </data>
+  <data name="monday" xml:space="preserve">
+    <value>Montag</value>
+  </data>
+  <data name="monthBurden" xml:space="preserve">
+    <value>Diesen Monat liegt ihre Belastung bei: </value>
+  </data>
+  <data name="name" xml:space="preserve">
+    <value>Bitte geben Sie ihren Namen ein.</value>
+  </data>
+  <data name="nameTrainee" xml:space="preserve">
+    <value>Wie ist der Namen des Praktikanten?</value>
+  </data>
+  <data name="no" xml:space="preserve">
+    <value>Nein</value>
+  </data>
+  <data name="noBillMonth" xml:space="preserve">
+    <value>Es liegt für diesen Monat noch keine Rechnung vor. Soll ich für letzten Monat nachschauen?</value>
+  </data>
+  <data name="noBillToday" xml:space="preserve">
+    <value>Es liegt für den letzten Monat ebenfalls keine Rechnung vor. Leider kann ich Ihnen nicht weiterhelfen.</value>
+  </data>
+  <data name="noOrderMonth" xml:space="preserve">
+    <value>Sie haben diesen Monat noch nichts bestellt. Soll ich für letzten Monat nachschauen.</value>
+  </data>
+  <data name="noOrderToday" xml:space="preserve">
+    <value>An diesem Tag liegt keine Bestellung vor.</value>
+  </data>
+  <data name="order1" xml:space="preserve">
+    <value>Sie möchten bei</value>
+    <comment>+order2</comment>
+  </data>
+  <data name="order2" xml:space="preserve">
+    <value>bestellen.</value>
+  </data>
+  <data name="ordered" xml:space="preserve">
+    <value>bestellt</value>
+  </data>
+  <data name="orderExternal" xml:space="preserve">
+    <value>Für den Externen wurde:</value>
+  </data>
+  <data name="orderFood" xml:space="preserve">
+    <value>Essen bestellen</value>
+  </data>
+  <data name="orderMe" xml:space="preserve">
+    <value>Für Sie wurde:</value>
+  </data>
+  <data name="orderTrainee" xml:space="preserve">
+    <value>Für den Prakikanten wurde:</value>
+  </data>
+  <data name="orderWhen" xml:space="preserve">
+    <value>Für welchen Tag möchten Sie Essen bestellen?</value>
+  </data>
+  <data name="queryDayDelete" xml:space="preserve">
+    <value>Für welchen Tag möchten Sie ihre Bestellung löschen?</value>
+  </data>
+  <data name="queryOrder" xml:space="preserve">
+    <value>Für wen möchten Sie bestellen?</value>
+  </data>
+  <data name="remove" xml:space="preserve">
+    <value>Bestellung entfernen</value>
+  </data>
+  <data name="restaurant" xml:space="preserve">
+    <value>Danke! Bei welchem Restauarant möchten Sie bestellen?</value>
+  </data>
+  <data name="saturday" xml:space="preserve">
+    <value>Samstag</value>
+  </data>
+  <data name="saveOrder" xml:space="preserve">
+    <value>Ihre Bestellung wurde gespeichert.</value>
+  </data>
+  <data name="showMonthBruden" xml:space="preserve">
+    <value>Montaliche Belastung anzeigen</value>
+  </data>
+  <data name="sunday" xml:space="preserve">
+    <value>Sonntag</value>
+  </data>
+  <data name="thanks" xml:space="preserve">
+    <value>Danke</value>
+  </data>
+  <data name="thursday" xml:space="preserve">
+    <value>Donnerstag</value>
+  </data>
+  <data name="todayBurden" xml:space="preserve">
+    <value>Heute beträgt die Belastung:</value>
+  </data>
+  <data name="todayRestaurant" xml:space="preserve">
+    <value>Heute wird bei dem Restaurant </value>
+    <comment>+ ordered</comment>
+  </data>
+  <data name="trainee" xml:space="preserve">
+    <value>Praktikant</value>
+  </data>
+  <data name="tuesday" xml:space="preserve">
+    <value>Dienstag</value>
+  </data>
+  <data name="wednesday" xml:space="preserve">
+    <value>Mittwoch</value>
+  </data>
+  <data name="whatNow" xml:space="preserve">
+    <value>Was möchten Sie tun?</value>
+  </data>
+  <data name="wrongInput" xml:space="preserve">
+    <value>Tut mir Leid. Ich habe Sie nicht verstanden. Bitte benutzen Sie Befehle, welche mir bekannt sind.</value>
+  </data>
+  <data name="yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+  <data name="youOrderedToday" xml:space="preserve">
+    <value>Sie haben heute </value>
+  </data>
+  <data name="youOrderedToday2" xml:space="preserve">
+    <value>und bei dem Restaurant.</value>
+  </data>
+</root>

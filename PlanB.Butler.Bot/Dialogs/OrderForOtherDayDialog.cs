@@ -111,7 +111,7 @@ namespace PlanB.Butler.Bot
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text("Tut mir Leid. Ich habe dich nicht verstanden. Bitte benutze Befehle, die ich kenne."), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text("fehler"), cancellationToken);
 
                 return await stepContext.EndDialogAsync(null, cancellationToken);
             }
