@@ -24,15 +24,3 @@ jobs:
         dotnet-version: 2.2.108
     - name: Test with dotnet
       run: dotnet test PlanB.Butler.Library/PlanB.Butler.Library.Test/PlanB.Butler.Library.Test.csproj --configuration Release
-
-  test-services:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.0.100
-    - name: Test with dotnet
-      run: dotnet test PlanB.Butler.Services/PlanB.Butler.Services.Test/PlanB.Butler.Services.Test.csproj --configuration Release
-
