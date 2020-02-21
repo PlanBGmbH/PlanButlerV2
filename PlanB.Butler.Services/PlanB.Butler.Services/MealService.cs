@@ -28,6 +28,16 @@ namespace PlanB.Butler.Services
     public static class MealService
     {
         /// <summary>
+        /// The meta date.
+        /// </summary>
+        private const string MetaDate = "date";
+
+        /// <summary>
+        /// The meta restaurant.
+        /// </summary>
+        private const string MetaRestaurant = "restaurant";
+
+        /// <summary>
         /// Create meal.
         /// </summary>
         /// <param name="req">The req.</param>
@@ -72,8 +82,8 @@ namespace PlanB.Butler.Services
                 if (blob != null)
                 {
                     blob.Properties.ContentType = "application/json";
-                    blob.Metadata.Add("date", date);
-                    blob.Metadata.Add("restaurant", mealModel.Restaurant);
+                    blob.Metadata.Add(MetaDate, date);
+                    blob.Metadata.Add(MetaRestaurant, mealModel.Restaurant);
                     blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
                     var meal = JsonConvert.SerializeObject(mealModel);
                     trace.Add("meal", meal);
@@ -128,25 +138,68 @@ namespace PlanB.Butler.Services
 
             try
             {
-                string startDate = req.Query["startDate"];
-                string endDate = req.Query["endDate"];
-                string restaurant = req.Query["restaurant"];
+                string startDateQuery = req.Query["startDate"];
+                string endDateQuery = req.Query["endDate"];
+                string restaurantQuery = req.Query["restaurant"];
                 string prefix = string.Empty;
 
-                prefix = CreateBlobPrefix(startDate, endDate);
+                bool checkForDate = false;
+                DateTime start = DateTime.MinValue;
+                DateTime end = DateTime.MinValue;
+
+                if (!(string.IsNullOrEmpty(startDateQuery) && string.IsNullOrEmpty(endDateQuery)))
+                {
+                    checkForDate = true;
+                    DateTime.TryParse(startDateQuery, out start);
+                    DateTime.TryParse(endDateQuery, out end);
+                }
+
+                if (checkForDate)
+                {
+                    prefix = CreateBlobPrefix(startDateQuery, endDateQuery);
+                }
 
                 BlobContinuationToken blobContinuationToken = null;
                 var options = new BlobRequestOptions();
                 var operationContext = new OperationContext();
 
-                var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(prefix, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
-                foreach (var item in blobs.Results)
+                List<IListBlobItem> cloudBlockBlobs = new List<IListBlobItem>();
+                do
+                {
+                    var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(prefix, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+                    blobContinuationToken = blobs.ContinuationToken;
+                    cloudBlockBlobs.AddRange(blobs.Results);
+                }
+                while (blobContinuationToken != null);
+
+                foreach (var item in cloudBlockBlobs)
                 {
                     CloudBlockBlob blob = (CloudBlockBlob)item;
-
-                    var content = blob.DownloadTextAsync();
-                    var meal = JsonConvert.DeserializeObject<MealModel>(await content);
-                    meals.Add(meal);
+                    if (checkForDate)
+                    {
+                        await blob.FetchAttributesAsync();
+                        if (blob.Metadata.ContainsKey(MetaDate))
+                        {
+                            var mealMetaDate = blob.Metadata[MetaDate];
+                            DateTime mealDate = DateTime.MinValue;
+                            if (DateTime.TryParse(mealMetaDate, out mealDate))
+                            {
+                                var isDateInRange = IsDateInRange(start, end, mealDate);
+                                if (isDateInRange)
+                                {
+                                    var blobContent = blob.DownloadTextAsync();
+                                    var blobMeal = JsonConvert.DeserializeObject<MealModel>(await blobContent);
+                                    meals.Add(blobMeal);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var content = blob.DownloadTextAsync();
+                        var meal = JsonConvert.DeserializeObject<MealModel>(await content);
+                        meals.Add(meal);
+                    }
                 }
 
                 log.LogInformation(correlationId, $"'{methodName}' - success", trace);
@@ -220,6 +273,53 @@ namespace PlanB.Butler.Services
             }
 
             return (ActionResult)new OkObjectResult(mealModel);
+        }
+
+        /// <summary>
+        /// Determines whether the date in range compared to start and end.
+        /// </summary>
+        /// <param name="start">The start.</param>
+        /// <param name="end">The end.</param>
+        /// <param name="toCheck">To check.</param>
+        /// <returns>
+        ///   <c>true</c> if date is in range; otherwise, <c>false</c>.
+        /// </returns>
+        internal static bool IsDateInRange(DateTime start, DateTime end, DateTime toCheck)
+        {
+            if (toCheck < start)
+            {
+                return false;
+            }
+
+            if (end < toCheck)
+            {
+                return false;
+            }
+
+            if (start.Equals(toCheck))
+            {
+                return true;
+            }
+
+            if (end.Equals(toCheck))
+            {
+                return true;
+            }
+
+            if (start.Equals(end) && start.Equals(toCheck))
+            {
+                return true;
+            }
+
+            long difference = toCheck.Ticks - start.Ticks;
+            long sum = start.Ticks + difference;
+
+            if (sum < end.Ticks)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
