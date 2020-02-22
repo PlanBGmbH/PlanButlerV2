@@ -48,6 +48,8 @@ namespace PlanB.Butler.Services
         /// IActionResult.
         /// </returns>
         [FunctionName("CreateMeal")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         public static async Task<IActionResult> CreateMeal(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "meals")]
             [RequestBodyType(typeof(MealModel), "Meal request")]HttpRequest req,
@@ -60,6 +62,7 @@ namespace PlanB.Butler.Services
             var trace = new Dictionary<string, string>();
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
 
+            IActionResult actionResult = null;
             try
             {
                 string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -92,6 +95,7 @@ namespace PlanB.Butler.Services
                 }
 
                 log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                actionResult = new OkResult();
             }
             catch (Exception e)
             {
@@ -99,7 +103,14 @@ namespace PlanB.Butler.Services
                 trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+                ErrorModel errorModel = new ErrorModel()
+                {
+                    CorrelationId = correlationId,
+                    Details = e.StackTrace,
+                    Message = e.Message,
+                };
 
+                actionResult = new BadRequestObjectResult(errorModel);
                 throw;
             }
             finally
@@ -108,7 +119,7 @@ namespace PlanB.Butler.Services
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
-            return new OkResult();
+            return actionResult;
         }
 
         /// <summary>
@@ -121,7 +132,7 @@ namespace PlanB.Butler.Services
         /// <returns>
         /// All meals.
         /// </returns>
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<MealModel>), StatusCodes.Status200OK)]
         [FunctionName("GetMeals")]
         public static async Task<IActionResult> GetMeals(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "meals")] HttpRequest req,
@@ -233,7 +244,8 @@ namespace PlanB.Butler.Services
         /// <returns>
         /// Meal by id.
         /// </returns>
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(MealModel), StatusCodes.Status200OK)]
         [FunctionName("GetMealById")]
         public static IActionResult GetMealById(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "meals/{id}")] HttpRequest req,
