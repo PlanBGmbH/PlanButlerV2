@@ -133,6 +133,7 @@ namespace PlanB.Butler.Services
         /// All meals.
         /// </returns>
         [ProducesResponseType(typeof(List<MealModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [FunctionName("GetMeals")]
         public static async Task<IActionResult> GetMeals(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "meals")] HttpRequest req,
@@ -144,6 +145,7 @@ namespace PlanB.Butler.Services
             var methodName = MethodBase.GetCurrentMethod().Name;
             var trace = new Dictionary<string, string>();
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            IActionResult actionResult = null;
 
             List<MealModel> meals = new List<MealModel>();
 
@@ -214,6 +216,7 @@ namespace PlanB.Butler.Services
                 }
 
                 log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                actionResult = new OkObjectResult(meals);
             }
             catch (Exception e)
             {
@@ -222,7 +225,13 @@ namespace PlanB.Butler.Services
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
 
-                throw;
+                ErrorModel errorModel = new ErrorModel()
+                {
+                    CorrelationId = correlationId,
+                    Details = e.StackTrace,
+                    Message = e.Message,
+                };
+                actionResult = new BadRequestObjectResult(meals);
             }
             finally
             {
@@ -230,7 +239,7 @@ namespace PlanB.Butler.Services
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
-            return (ActionResult)new OkObjectResult(meals);
+            return actionResult;
         }
 
         /// <summary>
@@ -244,7 +253,7 @@ namespace PlanB.Butler.Services
         /// <returns>
         /// Meal by id.
         /// </returns>
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(MealModel), StatusCodes.Status200OK)]
         [FunctionName("GetMealById")]
         public static IActionResult GetMealById(
@@ -258,6 +267,7 @@ namespace PlanB.Butler.Services
             var methodName = MethodBase.GetCurrentMethod().Name;
             var trace = new Dictionary<string, string>();
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            IActionResult actionResult = null;
 
             MealModel mealModel = null;
 
@@ -268,6 +278,7 @@ namespace PlanB.Butler.Services
                 mealModel = JsonConvert.DeserializeObject<MealModel>(blob);
 
                 log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                actionResult = new OkObjectResult(mealModel);
             }
             catch (Exception e)
             {
@@ -276,7 +287,13 @@ namespace PlanB.Butler.Services
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
 
-                throw;
+                ErrorModel errorModel = new ErrorModel()
+                {
+                    CorrelationId = correlationId,
+                    Details = e.StackTrace,
+                    Message = e.Message,
+                };
+                actionResult = new BadRequestObjectResult(mealModel);
             }
             finally
             {
@@ -284,7 +301,7 @@ namespace PlanB.Butler.Services
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
-            return (ActionResult)new OkObjectResult(mealModel);
+            return actionResult;
         }
 
         /// <summary>
