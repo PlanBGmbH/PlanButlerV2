@@ -130,6 +130,12 @@ namespace PlanB.Butler.Services
             }
         }
 
+        /// <summary>
+        /// This Function is executed when a service bus trigger is received.
+        /// </summary>
+        /// <param name="messageHeader">.</param>
+        /// <param name="blob">Blob.</param>
+        /// <param name="log">log.</param>
         [Singleton]
         [FunctionName(nameof(PostDocumentSalary))]
         public static async void PostDocumentSalary(
@@ -158,6 +164,12 @@ namespace PlanB.Butler.Services
             await blob.SetMetadataAsync();
         }
 
+        /// <summary>
+        /// PostDocumentExcel.
+        /// </summary>
+        /// <param name="messageHeader">messageHeader.</param>
+        /// <param name="payload">payload as byte[].</param>
+        /// <param name="log">log.</param>
         [Singleton]
         [FunctionName(nameof(PostDocumentExcel))]
         public static void PostDocumentExcel(

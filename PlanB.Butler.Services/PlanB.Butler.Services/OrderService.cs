@@ -12,13 +12,13 @@ using System.Threading.Tasks;
 using BotLibraryV2;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PlanB.Butler.Services.Extensions;
@@ -65,7 +65,6 @@ namespace PlanB.Butler.Services
             var cloudBlobContainer = cloudBlobClient.GetContainerReference("orders");
             BlobContinuationToken blobContinuationToken = null;
             List<OrderBlob> orderBlob = new List<OrderBlob>();
-            List<string> blobitems = new List<string>();
             var blobs = await container.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
 
             foreach (var item in blobs.Results)
@@ -119,11 +118,9 @@ namespace PlanB.Butler.Services
             var operationContext = new OperationContext();
             var options = new BlobRequestOptions();
             var cloudBlobClient = storageAccount.CreateCloudBlobClient();
-            var cloudBlobContainer = cloudBlobClient.GetContainerReference("orders");
 
             BlobContinuationToken blobContinuationToken = null;
             List<OrderBlob> orderBlob = new List<OrderBlob>();
-            List<string> blobitems = new List<string>();
             var blobs = await container.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
 
             foreach (var item in blobs.Results)
@@ -161,25 +158,49 @@ namespace PlanB.Butler.Services
            ILogger log,
            ExecutionContext context)
         {
-            string payload = Encoding.Default.GetString(messageHeader.Body);
-            OrderBlob orderBlob = new OrderBlob();
-            orderBlob.OrderList = new List<Order>();
-            orderBlob = JsonConvert.DeserializeObject<OrderBlob>(payload);
-            string name = string.Empty;
-            DateTime date = DateTime.Now;
-            foreach (var item in orderBlob.OrderList)
+            Guid correlationId = new Guid($"orderqueue {messageHeader.Label}");
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            var trace = new Dictionary<string, string>();
+            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            try
             {
-                name = item.Name;
-                date = item.Date;
-                break;
+                string payload = Encoding.Default.GetString(messageHeader.Body);
+                OrderBlob orderBlob = new OrderBlob();
+                orderBlob.OrderList = new List<Order>();
+                orderBlob = JsonConvert.DeserializeObject<OrderBlob>(payload);
+                string name = string.Empty;
+                DateTime date = DateTime.Now;
+                foreach (var item in orderBlob.OrderList)
+                {
+                    name = item.Name;
+                    date = item.Date;
+                    break;
+                }
+
+                var stringDate = date.ToString("yyyy-MM-dd");
+
+                blob.Metadata.Add("user", name);
+                blob.Metadata.Add("date", stringDate);
+                await blob.UploadTextAsync(payload);
+                await blob.SetMetadataAsync();
+                trace.Add("data", payload);
+                trace.Add("date", date.ToString());
+                trace.Add("name", name);
+                trace.Add("requestbody", messageHeader.Body.ToString());
             }
-
-            var stringDate = date.ToString("yyyy-MM-dd");
-
-            blob.Metadata.Add("user", name);
-            blob.Metadata.Add("date", stringDate);
-            await blob.UploadTextAsync(payload);
-            await blob.SetMetadataAsync();
+            catch (Exception e)
+            {
+                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+                throw;
+            }
+            finally
+            {
+                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+            }
         }
 
         /// <summary>
@@ -199,8 +220,7 @@ namespace PlanB.Butler.Services
             {
                 throw new ArgumentNullException(nameof(log));
             }
-            
-            HttpRequest tmp = input;
+
             Message msg = new Message();
             Guid correlationId = Util.ReadCorrelationId(input.Headers);
             var methodName = MethodBase.GetCurrentMethod().Name;
@@ -230,8 +250,11 @@ namespace PlanB.Butler.Services
 
                 var stringDate = date.ToString("yyyy-MM-dd");
                 msg.Label = $"{name}_{stringDate}";
-
-                
+                trace.Add("name", name);
+                trace.Add("jsondata", json);
+                trace.Add("date", stringDate);
+                trace.Add("label", msg.Label);
+                trace.Add("name", name);
             }
             catch (Exception e)
             {
