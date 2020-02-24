@@ -4,18 +4,24 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 using BotLibraryV2;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using PlanB.Butler.Services.Extensions;
 
 namespace PlanB.Butler.Services
 {
@@ -150,8 +156,8 @@ namespace PlanB.Butler.Services
         [Singleton]
         [FunctionName(nameof(PostDocumentOrder))]
         public static async void PostDocumentOrder(
-           [ServiceBusTrigger("q.planbutlerupdateorder", Connection = "butlerSend")]Microsoft.Azure.ServiceBus.Message messageHeader,
-           [Blob("{Label}", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
+           [ServiceBusTrigger("q.planbutlerupdateorder", Connection = "butlerSend")]Message messageHeader,
+           [Blob("orders/{Label}.json", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
            ILogger log,
            ExecutionContext context)
         {
@@ -174,6 +180,74 @@ namespace PlanB.Butler.Services
             blob.Metadata.Add("date", stringDate);
             await blob.UploadTextAsync(payload);
             await blob.SetMetadataAsync();
+        }
+
+        /// <summary>
+        /// Reads the meals.
+        /// </summary>
+        /// <param name="input">The Input from the Trigger.</param>
+        /// <param name="log">The log.</param>
+        /// <returns>
+        /// All meals.
+        /// </returns>
+        [Singleton]
+        [FunctionName("CreateOrder")]
+        [return: ServiceBus("q.planbutlerupdateorder", Connection = "ServiceBusConnection")]
+        public static Message PostOrderToQueue([HttpTrigger(AuthorizationLevel.Function, "POST", Route = "orders")] HttpRequest input, ILogger log)
+        {
+            if (log is null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
+            
+            HttpRequest tmp = input;
+            Message msg = new Message();
+            Guid correlationId = Util.ReadCorrelationId(input.Headers);
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            var trace = new Dictionary<string, string>();
+            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            try
+            {
+                byte[] result;
+                using (var streamReader = new MemoryStream())
+                {
+                    input.Body.CopyTo(streamReader);
+                    result = streamReader.ToArray();
+                }
+
+                msg.Body = result;
+
+                string json = System.Text.Encoding.Default.GetString(result);
+                OrderBlob orderBlob = JsonConvert.DeserializeObject<OrderBlob>(json);
+                string name = string.Empty;
+                DateTime date = DateTime.Now;
+                foreach (var item in orderBlob.OrderList)
+                {
+                    name = item.Name;
+                    date = item.Date;
+                    break;
+                }
+
+                var stringDate = date.ToString("yyyy-MM-dd");
+                msg.Label = $"{name}_{stringDate}";
+
+                
+            }
+            catch (Exception e)
+            {
+                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+                throw;
+            }
+            finally
+            {
+                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+            }
+
+            return msg;
         }
     }
 }
