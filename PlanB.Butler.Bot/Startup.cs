@@ -6,6 +6,7 @@ using System;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.ApplicationInsights;
@@ -77,7 +78,12 @@ namespace PlanB.Butler.Bot
             services.AddSingleton<ITelemetryInitializer, TelemetryBotIdInitializer>();
 
             // Create the telemetry middleware to initialize telemetry gathering
-            services.AddSingleton<TelemetryInitializerMiddleware>();
+            services.AddSingleton<TelemetryInitializerMiddleware>(sp =>
+            {
+                var httpContextAccessor = sp.GetService<IHttpContextAccessor>();
+                var loggerMiddleware = sp.GetService<TelemetryLoggerMiddleware>();
+                return new TelemetryInitializerMiddleware(httpContextAccessor, loggerMiddleware, logActivityTelemetry: true);
+            });
 
             // Create the telemetry middleware (used by the telemetry initializer) to track conversation events
             services.AddSingleton<TelemetryLoggerMiddleware>(sp =>
