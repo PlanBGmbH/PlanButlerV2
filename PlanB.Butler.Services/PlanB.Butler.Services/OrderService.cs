@@ -157,7 +157,7 @@ namespace PlanB.Butler.Services
         [FunctionName(nameof(PostDocumentOrder))]
         public static async void PostDocumentOrder(
            [ServiceBusTrigger("q.planbutlerupdateorder", Connection = "butlerSend")]Message messageHeader,
-           [Blob("orders/{Label}", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
+           [Blob("orders/{Label}.json", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
            ILogger log,
            ExecutionContext context)
         {
