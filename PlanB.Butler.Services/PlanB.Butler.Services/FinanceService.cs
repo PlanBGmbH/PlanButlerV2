@@ -110,8 +110,8 @@ namespace PlanB.Butler.Services
             }
             catch (Exception e)
             {
-                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
                 trace.Add("MessageId", messageHeader.MessageId);
                 trace.Add("DeliveryCount", messageHeader.SystemProperties.DeliveryCount.ToString());
                 if (messageHeader.SystemProperties.DeliveryCount == 1)
@@ -125,7 +125,7 @@ namespace PlanB.Butler.Services
             }
             finally
             {
-                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogTrace(eventId, $"'{methodName}' - finished");
                 log.LogInformation(correlationId, $"'{methodName}' - {messageHeader.SystemProperties.DeliveryCount} - finished", trace);
             }
         }

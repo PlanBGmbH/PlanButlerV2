@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PlanB.Butler.Services.Extensions;
+using PlanB.Butler.Services.Models;
 
 namespace PlanB.Butler.Services
 {
@@ -97,15 +99,15 @@ namespace PlanB.Butler.Services
             }
             catch (Exception e)
             {
-                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
                 throw;
             }
             finally
             {
-                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogTrace(eventId, $"'{methodName}' - finished");
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
@@ -168,15 +170,15 @@ namespace PlanB.Butler.Services
             }
             catch (Exception e)
             {
-                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
                 throw;
             }
             finally
             {
-                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogTrace(eventId, $"'{methodName}' - finished");
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
@@ -230,87 +232,91 @@ namespace PlanB.Butler.Services
             }
             catch (Exception e)
             {
-                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
                 throw;
             }
             finally
             {
-                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogTrace(eventId, $"'{methodName}' - finished");
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
         }
 
         /// <summary>
-        /// Reads the meals.
+        /// Creates the order.
         /// </summary>
-        /// <param name="input">The Input from the Trigger.</param>
+        /// <param name="input">The input.</param>
+        /// <param name="outputMessage">The output message.</param>
         /// <param name="log">The log.</param>
-        /// <returns>
-        /// All meals.
-        /// </returns>
+        /// <returns>IActionResult.</returns>
+        /// <exception cref="ArgumentNullException">log.</exception>
         [Singleton]
         [FunctionName("CreateOrder")]
-        [return: ServiceBus("q.planbutlerupdateorder", Connection = "ServiceBusConnection")]
-        public static Message PostOrderToQueue([HttpTrigger(AuthorizationLevel.Function, "POST", Route = "orders")] HttpRequest input, ILogger log)
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        public static IActionResult CreateOrder(
+            [HttpTrigger(AuthorizationLevel.Function, "POST", Route = "orders")] HttpRequest input,
+            [ServiceBus("q.planbutlerupdateorder", Connection = "ServiceBusConnection")] out Message outputMessage,
+            ILogger log)
         {
             if (log is null)
             {
                 throw new ArgumentNullException(nameof(log));
             }
 
-            Message msg = new Message();
             Guid correlationId = Util.ReadCorrelationId(input.Headers);
             var methodName = MethodBase.GetCurrentMethod().Name;
             var trace = new Dictionary<string, string>();
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            IActionResult actionResult = null;
+            outputMessage = null;
+
             try
             {
-                byte[] result;
-                using (var streamReader = new MemoryStream())
-                {
-                    input.Body.CopyTo(streamReader);
-                    result = streamReader.ToArray();
-                }
-
-                msg.Body = result;
-
-                string json = System.Text.Encoding.Default.GetString(result);
-                OrderBlob orderBlob = JsonConvert.DeserializeObject<OrderBlob>(json);
-                string name = string.Empty;
-                DateTime date = DateTime.Now;
-                foreach (var item in orderBlob.OrderList)
-                {
-                    name = item.Name;
-                    date = item.Date;
-                    break;
-                }
-
-                var stringDate = date.ToString("yyyy-MM-dd");
-                msg.Label = $"{name}_{stringDate}";
-                trace.Add("name", name);
-                trace.Add("jsondata", json);
+                trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                var body = input.ReadAsStringAsync().Result;
+                trace.Add("body", body);
+                OrdersModel orders = JsonConvert.DeserializeObject<OrdersModel>(body);
+                var stringDate = orders.Date.ToString("yyyy-MM-dd");
                 trace.Add("date", stringDate);
-                trace.Add("label", msg.Label);
-                trace.Add("name", name);
+
+                byte[] bytes = Encoding.ASCII.GetBytes(body);
+                outputMessage = new Message(bytes)
+                {
+                    Label = $"{orders.LoginName}_{stringDate}",
+                    CorrelationId = correlationId.ToString(),
+                };
+
+                trace.Add("loginname", orders.LoginName);
+                trace.Add("label", outputMessage.Label);
+                actionResult = new AcceptedResult();
+                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
             }
             catch (Exception e)
             {
-                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
-                throw;
+                ErrorModel errorModel = new ErrorModel()
+                {
+                    CorrelationId = correlationId,
+                    Details = e.StackTrace,
+                    Message = e.Message,
+                };
+                actionResult = new BadRequestObjectResult(errorModel);
             }
             finally
             {
-                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogTrace(eventId, $"'{methodName}' - finished");
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
-            return msg;
+            return actionResult;
         }
     }
 }
