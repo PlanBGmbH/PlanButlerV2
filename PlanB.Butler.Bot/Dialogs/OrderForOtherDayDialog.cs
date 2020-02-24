@@ -54,6 +54,7 @@ namespace PlanB.Butler.Bot
         private static string error1 = rm.GetString("error1");
         private static string error2 = rm.GetString("error2");
         private static string save = rm.GetString("save");
+        private IBotTelemetryClient telemetryClient;
         /// <summary>
         /// The bot configuration.
         /// </summary>
@@ -62,6 +63,7 @@ namespace PlanB.Butler.Bot
         public OrderForOtherDayDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(OrderForOtherDayDialog))
         {
+            this.telemetryClient = telemetryClient;
             this.botConfig = config;
 
             // This array defines how the Waterfall will execute.
@@ -289,6 +291,7 @@ namespace PlanB.Butler.Bot
             var order = new Order();
             DateTime date = DateTime.Now;
             var stringDate = date.ToString("yyyy-MM-dd");
+            order.Date = date;
             order.CompanyStatus = "intern";
             order.Name = (string)stepContext.Values["name"];
             order.Restaurant = (string)stepContext.Values["restaurant"];
@@ -317,12 +320,15 @@ namespace PlanB.Butler.Bot
 
             order.Grand = grand;
             var bufferorder = order;
-
+            var state = new Dictionary<string, string>();
+            string orderJson = JsonConvert.SerializeObject(order);
+            state.Add("Order", orderJson);
+            this.telemetryClient.TrackTrace("Order", Severity.Information, state);
             DateTime dateForOrder = DateTime.Now.AddDays(daysDivVal);
             order.Date = dateForOrder;
-            HttpStatusCode statusOrder = BotMethods.UploadForOtherDay(order, dateForOrder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-            HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeductionForAnotherDay(order, dateForOrder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-            HttpStatusCode statusMoney = BotMethods.UploadMoney(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+            HttpStatusCode statusOrder = await BotMethods.UploadForOtherDay(order, dateForOrder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+            HttpStatusCode statusSalary = await BotMethods.UploadOrderforSalaryDeductionForAnotherDay(order, dateForOrder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+            HttpStatusCode statusMoney = await BotMethods.UploadMoney(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
             if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
             {
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text(save), cancellationToken);

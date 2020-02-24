@@ -73,8 +73,8 @@ namespace PlanB.Butler.Services
             }
             catch (Exception e)
             {
-                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
 
@@ -84,11 +84,11 @@ namespace PlanB.Butler.Services
                     Details = e.StackTrace,
                     Message = e.Message,
                 };
-                actionResult = new BadRequestObjectResult(restaurant);
+                actionResult = new BadRequestObjectResult(errorModel);
             }
             finally
             {
-                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogTrace(eventId, $"'{methodName}' - finished");
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
@@ -147,8 +147,8 @@ namespace PlanB.Butler.Services
             }
             catch (Exception e)
             {
-                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
                 ErrorModel errorModel = new ErrorModel()
@@ -163,7 +163,7 @@ namespace PlanB.Butler.Services
             }
             finally
             {
-                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogTrace(eventId, $"'{methodName}' - finished");
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 

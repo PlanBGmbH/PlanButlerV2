@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Net.Mime;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -48,6 +49,7 @@ namespace PlanB.Butler.Services
         /// IActionResult.
         /// </returns>
         [FunctionName("CreateMeal")]
+        [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         public static async Task<IActionResult> CreateMeal(
@@ -94,13 +96,13 @@ namespace PlanB.Butler.Services
                     Task task = blob.UploadTextAsync(requestBody);
                 }
 
-                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
                 actionResult = new OkResult();
+                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
             }
             catch (Exception e)
             {
-                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
                 ErrorModel errorModel = new ErrorModel()
@@ -115,7 +117,7 @@ namespace PlanB.Butler.Services
             }
             finally
             {
-                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogTrace(eventId, $"'{methodName}' - finished");
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
@@ -220,8 +222,8 @@ namespace PlanB.Butler.Services
             }
             catch (Exception e)
             {
-                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
 
@@ -231,11 +233,11 @@ namespace PlanB.Butler.Services
                     Details = e.StackTrace,
                     Message = e.Message,
                 };
-                actionResult = new BadRequestObjectResult(meals);
+                actionResult = new BadRequestObjectResult(errorModel);
             }
             finally
             {
-                log.LogTrace(eventId, $"'{methodName}' - busobjkey finished");
+                log.LogTrace(eventId, $"'{methodName}' - finished");
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
@@ -282,8 +284,8 @@ namespace PlanB.Butler.Services
             }
             catch (Exception e)
             {
-                trace.Add(string.Format("{0} - {1}", MethodBase.GetCurrentMethod().Name, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", MethodBase.GetCurrentMethod().Name, "rejected"), e.StackTrace);
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
 
