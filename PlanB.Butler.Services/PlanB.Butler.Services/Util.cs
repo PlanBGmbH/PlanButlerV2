@@ -32,10 +32,5 @@ namespace PlanB.Butler.Services
 
             return correlationId;
         }
-
-        internal static Guid ReadCorrelationId(object headers)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -34,6 +34,7 @@ namespace PlanB.Butler.Services
         /// Gets the daily order overview.
         /// </summary>
         /// <param name="req">The req.</param>
+        /// <param name="blob">binding to the blob.</param>
         /// <param name="log">The log.</param>
         /// <param name="context">The context.</param>
         /// <returns>
@@ -41,8 +42,8 @@ namespace PlanB.Butler.Services
         /// </returns>
         [FunctionName(nameof(GetDailyOrderOverview))]
         public static async Task<string> GetDailyOrderOverview(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]
-            HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
+            [Blob("orders/{Label}.json", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
             ILogger log,
             ExecutionContext context)
         {
@@ -62,36 +63,21 @@ namespace PlanB.Butler.Services
             List<OrderBlob> orderBlob = new List<OrderBlob>();
             try
             {
-                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
-                CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-                CloudBlobContainer container = blobClient.GetContainerReference("orders");
-                BlobContinuationToken token = new BlobContinuationToken();
-                var operationContext = new OperationContext();
-                var options = new BlobRequestOptions();
-                var cloudBlobClient = storageAccount.CreateCloudBlobClient();
-                var cloudBlobContainer = cloudBlobClient.GetContainerReference("orders");
-                BlobContinuationToken blobContinuationToken = null;
-                var blobs = await container.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
-
                 string stringDate = string.Empty;
                 string blobData = string.Empty;
-                foreach (var item in blobs.Results)
+
+                await blob.FetchAttributesAsync();
+                DateTime date = DateTime.Now;
+                stringDate = date.ToString("yyyy-MM-dd");
+                if (blob.Metadata.Contains(new KeyValuePair<string, string>("date", stringDate)))
                 {
-                    CloudBlockBlob blob = (CloudBlockBlob)item;
+                    Order order = new Order();
                     await blob.FetchAttributesAsync();
-                    DateTime date = DateTime.Now;
-                    stringDate = date.ToString("yyyy-MM-dd");
-                    if (blob.Metadata.Contains(new KeyValuePair<string, string>("date", stringDate)))
-                    {
-                        Order order = new Order();
-                        await blob.FetchAttributesAsync();
-                        var blobDownload = blob.DownloadTextAsync();
-                        blobData = blobDownload.Result;
-                        orderBlob.Add(JsonConvert.DeserializeObject<OrderBlob>(blobData));
-                    }
+                    var blobDownload = blob.DownloadTextAsync();
+                    blobData = blobDownload.Result;
+                    orderBlob.Add(JsonConvert.DeserializeObject<OrderBlob>(blobData));
                 }
 
-                trace.Add("blobClient", blobClient.Credentials.KeyName);
                 trace.Add("date", stringDate);
                 trace.Add("data", blobData);
                 trace.Add("requestbody", req.Body.ToString());
