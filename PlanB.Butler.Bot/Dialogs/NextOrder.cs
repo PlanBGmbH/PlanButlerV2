@@ -530,15 +530,9 @@ namespace PlanB.Butler.Bot
                 statusMoney = await BotMethods.UploadMoney(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
             }
             var state = new Dictionary<string, string>();
-            state.Add("Date", order.Date.ToString("yyyy-MM-dd"));
-            state.Add("CompanyStatus", order.CompanyStatus);
-            state.Add("CompanyName", order.CompanyName);
-            state.Add("Name", order.Name);
-            state.Add("Restaurant", order.Restaurant);
-            state.Add("Meal", order.Meal);
-            state.Add("Price", order.Price.ToString());
+            string orderJson = JsonConvert.SerializeObject(order);
+            state.Add("Order", orderJson);
             this.telemetryClient.TrackTrace("Order", Severity.Information, state);
-            this.telemetryClient.Flush();
             await stepContext.EndDialogAsync(null, cancellationToken);
             return await stepContext.BeginDialogAsync(nameof(DailyCreditDialog), null, cancellationToken);
 
