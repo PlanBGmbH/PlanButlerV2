@@ -66,7 +66,7 @@ namespace PlanB.Butler.Bot
         /// The bot configuration.
         /// </summary>
         private readonly IOptions<BotConfig> botConfig;
-
+        private IBotTelemetryClient telemetryClient;
         /// <summary>
         /// Initializes a new instance of the <see cref="NextOrder" /> class.
         /// NextOrderConstructor.
@@ -76,6 +76,7 @@ namespace PlanB.Butler.Bot
             : base(nameof(NextOrder))
         {
             this.botConfig = config;
+            this.telemetryClient = telemetryClient;
 
             for (int i = 0; i < weekDays.Length; i++)
             {
@@ -428,7 +429,6 @@ namespace PlanB.Butler.Bot
                         order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
                 }
 
-
                 var bufferorder = order;
                 HttpStatusCode statusOrder = BotMethods.UploadOrder(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                 HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
@@ -529,6 +529,16 @@ namespace PlanB.Butler.Bot
                 statusSalary = BotMethods.UploadOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                 statusMoney = BotMethods.UploadMoney(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
             }
+            var state = new Dictionary<string, string>();
+            state.Add("Date", order.Date.ToString("yyyy-MM-dd"));
+            state.Add("CompanyStatus", order.CompanyStatus);
+            state.Add("CompanyName", order.CompanyName);
+            state.Add("Name", order.Name);
+            state.Add("Restaurant", order.Restaurant);
+            state.Add("Meal", order.Meal);
+            state.Add("Price", order.Price.ToString());
+            this.telemetryClient.TrackTrace("Order", Severity.Information, state);
+            this.telemetryClient.Flush();
             await stepContext.EndDialogAsync(null, cancellationToken);
             return await stepContext.BeginDialogAsync(nameof(DailyCreditDialog), null, cancellationToken);
 

@@ -54,6 +54,7 @@ namespace PlanB.Butler.Bot
         private static string error1 = rm.GetString("error1");
         private static string error2 = rm.GetString("error2");
         private static string save = rm.GetString("save");
+        private IBotTelemetryClient telemetryClient;
         /// <summary>
         /// The bot configuration.
         /// </summary>
@@ -62,6 +63,7 @@ namespace PlanB.Butler.Bot
         public OrderForOtherDayDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(OrderForOtherDayDialog))
         {
+            this.telemetryClient = telemetryClient;
             this.botConfig = config;
 
             // This array defines how the Waterfall will execute.
@@ -289,6 +291,7 @@ namespace PlanB.Butler.Bot
             var order = new Order();
             DateTime date = DateTime.Now;
             var stringDate = date.ToString("yyyy-MM-dd");
+            order.Date = date;
             order.CompanyStatus = "intern";
             order.Name = (string)stepContext.Values["name"];
             order.Restaurant = (string)stepContext.Values["restaurant"];
@@ -317,7 +320,16 @@ namespace PlanB.Butler.Bot
 
             order.Grand = grand;
             var bufferorder = order;
-
+            var state = new Dictionary<string, string>();
+            state.Add("Date", order.Date.ToString("yyyy-MM-dd"));
+            state.Add("CompanyStatus", order.CompanyStatus);
+            state.Add("CompanyName", order.CompanyName);
+            state.Add("Name", order.Name);
+            state.Add("Restaurant", order.Restaurant);
+            state.Add("Meal", order.Meal);
+            state.Add("Price", order.Price.ToString());
+            this.telemetryClient.TrackTrace("Order", Severity.Information, state);
+            this.telemetryClient.Flush();
             DateTime dateForOrder = DateTime.Now.AddDays(daysDivVal);
             order.Date = dateForOrder;
             HttpStatusCode statusOrder = BotMethods.UploadForOtherDay(order, dateForOrder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);

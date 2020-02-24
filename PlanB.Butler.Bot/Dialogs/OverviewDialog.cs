@@ -62,7 +62,7 @@ namespace PlanB.Butler.Bot
         {
             this.botConfig = config;
 
-            OrderDialog orderDialog = new OrderDialog(config , telemetryClient );
+            OrderDialog orderDialog = new OrderDialog(config, telemetryClient );
             NextOrder nextorderDialog = new NextOrder(config, telemetryClient);
             PlanDialog planDialog = new PlanDialog(config, telemetryClient);
             CreditDialog creditDialog = new CreditDialog(config, telemetryClient);
@@ -75,7 +75,7 @@ namespace PlanB.Butler.Bot
             // dialogsList.Add(orderDialog);
             dialogsList.Add(nextorderDialog);
             dialogsList.Add(orderForAnotherDay);
-            
+
             // dialogsList.Add(planDialog);
             dialogsList.Add(deleteOrderDialog);
             dialogsList.Add(creditDialog);
@@ -118,7 +118,6 @@ namespace PlanB.Butler.Bot
     private async Task<DialogTurnResult> InitialStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             await stepContext.Context.SendActivityAsync(MessageFactory.Text(help), cancellationToken);
-
             // Cards are sent as Attachments in the Bot Framework.
             // So we need to create a list of attachments for the reply activity.
             var attachments = new List<Attachment>();
