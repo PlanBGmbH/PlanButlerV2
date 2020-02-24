@@ -43,7 +43,7 @@ namespace PlanB.Butler.Services
         [FunctionName(nameof(GetDailyOrderOverview))]
         public static async Task<string> GetDailyOrderOverview(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
-            [Blob("orders/{Label}.json", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
+            [Blob("orders", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlobContainer blob,
             ILogger log,
             ExecutionContext context)
         {
@@ -51,6 +51,8 @@ namespace PlanB.Butler.Services
             Guid correlationId = Util.ReadCorrelationId(req.Headers);
             var methodName = MethodBase.GetCurrentMethod().Name;
             var trace = new Dictionary<string, string>();
+            List<OrderBlob> orders = new List<OrderBlob>();
+            List<IListBlobItem> cloudBlockBlobs = new List<IListBlobItem>();
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
             var config = new ConfigurationBuilder()
                 .SetBasePath(context.FunctionAppDirectory)
@@ -63,19 +65,30 @@ namespace PlanB.Butler.Services
             List<OrderBlob> orderBlob = new List<OrderBlob>();
             try
             {
+                Microsoft.Extensions.Primitives.StringValues date = string.Empty;
+                req.Headers.TryGetValue(date, out date);
+
+                BlobContinuationToken blobContinuationToken = null;
+                var options = new BlobRequestOptions();
+                var operationContext = new OperationContext();
+
+                do
+                {
+                    var blobs = await blob.ListBlobsSegmentedAsync(date.ToString(), true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+                    blobContinuationToken = blobs.ContinuationToken;
+                    cloudBlockBlobs.AddRange(blobs.Results);
+                }
+                while (blobContinuationToken != null);
                 string stringDate = string.Empty;
                 string blobData = string.Empty;
 
-                await blob.FetchAttributesAsync();
-                DateTime date = DateTime.Now;
-                stringDate = date.ToString("yyyy-MM-dd");
-                if (blob.Metadata.Contains(new KeyValuePair<string, string>("date", stringDate)))
+                foreach (var item in cloudBlockBlobs)
                 {
-                    Order order = new Order();
-                    await blob.FetchAttributesAsync();
-                    var blobDownload = blob.DownloadTextAsync();
-                    blobData = blobDownload.Result;
-                    orderBlob.Add(JsonConvert.DeserializeObject<OrderBlob>(blobData));
+                    CloudBlockBlob blobs = (CloudBlockBlob)item;
+                    var blobContent = blobs.DownloadTextAsync();
+                    var orderItem = JsonConvert.DeserializeObject<OrderBlob>(await blobContent);
+                    orders.Add(orderItem);
+
                 }
 
                 trace.Add("date", stringDate);
@@ -96,7 +109,7 @@ namespace PlanB.Butler.Services
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
-            return JsonConvert.SerializeObject(orderBlob);
+            return JsonConvert.SerializeObject(cloudBlockBlobs);
         }
 
         /// <summary>
