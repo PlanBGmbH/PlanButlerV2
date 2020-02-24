@@ -321,15 +321,9 @@ namespace PlanB.Butler.Bot
             order.Grand = grand;
             var bufferorder = order;
             var state = new Dictionary<string, string>();
-            state.Add("Date", order.Date.ToString("yyyy-MM-dd"));
-            state.Add("CompanyStatus", order.CompanyStatus);
-            state.Add("CompanyName", order.CompanyName);
-            state.Add("Name", order.Name);
-            state.Add("Restaurant", order.Restaurant);
-            state.Add("Meal", order.Meal);
-            state.Add("Price", order.Price.ToString());
+            string orderJson = JsonConvert.SerializeObject(order);
+            state.Add("Order", orderJson);
             this.telemetryClient.TrackTrace("Order", Severity.Information, state);
-            this.telemetryClient.Flush();
             DateTime dateForOrder = DateTime.Now.AddDays(daysDivVal);
             order.Date = dateForOrder;
             HttpStatusCode statusOrder = BotMethods.UploadForOtherDay(order, dateForOrder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
