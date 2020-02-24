@@ -40,9 +40,19 @@ namespace BotLibraryV2
         /// <param name="que">The que.</param>
         /// <param name="serviceBusConnectionString">The service bus connection string.</param>
         /// <returns></returns>
-        public static HttpStatusCode PutDocument(string container, string resourceName, string body, string que, string serviceBusConnectionString)
+        public static async Task<HttpStatusCode> PutDocument(string container, string resourceName, string body, string que, string serviceBusConnectionString)
         {
             BackendCommunication backendcom = new BackendCommunication();
+           //client.DefaultRequestHeaders.Add("body", serviceBusConnectionString);
+ 
+            var content = new StringContent(body.ToString());
+
+
+            HttpResponseMessage responseMessage = await client.PostAsync("http://localhost:7071/api/orders", content);
+
+            var tmp = 0;
+
+
             HttpStatusCode taskUrl = backendcom.PutDocument(container, resourceName, body, que, serviceBusConnectionString);
             return taskUrl;
         }
@@ -51,7 +61,7 @@ namespace BotLibraryV2
         /// 
         /// </summary>
         /// <param name="order"></param>
-        public static HttpStatusCode UploadMoney(Order order, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
+        public static async Task<HttpStatusCode> UploadMoney(Order order, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
         {
             try
             {
@@ -63,7 +73,7 @@ namespace BotLibraryV2
                     User user = new User() { Name = order.Name, Owe = order.Price };
                     _money.User.Add(user);
 
-                    HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney", serviceBusConnectionString);
+                    HttpStatusCode status = await PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney", serviceBusConnectionString);
                     return status;
                 }
                 else // enters if everything is normal
@@ -72,7 +82,7 @@ namespace BotLibraryV2
                     newOwe += order.Price;
                     _money.User[userId].Owe = newOwe;
 
-                    HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney", serviceBusConnectionString);
+                    HttpStatusCode status = await PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney", serviceBusConnectionString);
                     return status;
                 }
             }
@@ -83,7 +93,7 @@ namespace BotLibraryV2
                 users.Add(user);
                 MoneyLog money = new MoneyLog() { Monthnumber = DateTime.Now.Month, Title = "moneylog", User = users };
 
-                HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(money), "q.planbutlerupdatemoney", serviceBusConnectionString);
+                HttpStatusCode status = await PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(money), "q.planbutlerupdatemoney", serviceBusConnectionString);
                 return status;
             }
         }
@@ -95,7 +105,7 @@ namespace BotLibraryV2
         /// <param name="storageAccountKey">The storage account key.</param>
         /// <param name="serviceBusConnectionString">The service bus connection string.</param>
         /// <returns></returns>
-        public static HttpStatusCode UploadOrder(Order order, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
+        public static async Task<HttpStatusCode> UploadOrder(Order order, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
         {
 
             DateTime date = DateTime.Now;
@@ -110,7 +120,7 @@ namespace BotLibraryV2
 
 
                 orderBlob.OrderList.Add(order);
-                HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
+                HttpStatusCode status = await BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
                 return status;
 
             }
@@ -122,7 +132,7 @@ namespace BotLibraryV2
                     orderBlob.OrderList = new List<Order>();
                     orderBlob.OrderList.Add(order);
 
-                    HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
+                    HttpStatusCode status = await BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
                     return status;
                 }
                 catch (Exception ex)
@@ -183,7 +193,7 @@ namespace BotLibraryV2
         /// <param name="storageAccountKey">The storage account key.</param>
         /// <param name="serviceBusConnectionString">The service bus connection string.</param>
         /// <returns></returns>
-        public static HttpStatusCode UploadForOtherDay(Order order, DateTime day, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
+        public static async Task<HttpStatusCode> UploadForOtherDay(Order order, DateTime day, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
         {
             string stringDate = day.ToString("yyyy-MM-dd");
 
@@ -193,7 +203,7 @@ namespace BotLibraryV2
                 orderBlob.OrderList = new List<Order>();
                 orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", storageAccountUrl, storageAccountKey));
                 orderBlob.OrderList.Add(order);
-                HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
+                HttpStatusCode status = await BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
                 return status;
             }
             catch
@@ -204,7 +214,7 @@ namespace BotLibraryV2
                     orderBlob.OrderList = new List<Order>();
                     order.Date = DateTime.Now;
                     orderBlob.OrderList.Add(order);
-                    HttpStatusCode status = BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
+                    HttpStatusCode status = await BotMethods.PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
                     return status;
                 }
                 catch (Exception ex)
@@ -223,7 +233,7 @@ namespace BotLibraryV2
         /// <param name="storageAccountKey">The storage account key.</param>
         /// <param name="serviceBusConnectionString">The service bus connection string.</param>
         /// <returns></returns>
-        public static HttpStatusCode UploadOrderforSalaryDeduction(Order order, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
+        public static async Task<HttpStatusCode> UploadOrderforSalaryDeduction(Order order, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
         {
             SalaryDeduction salaryDeduction = new SalaryDeduction();
             int dayNumber = order.Date.DayOfYear;
@@ -231,7 +241,7 @@ namespace BotLibraryV2
             {
                 salaryDeduction = JsonConvert.DeserializeObject<SalaryDeduction>(GetDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year + ".json", storageAccountUrl, storageAccountKey));
                 salaryDeduction.Order.Add(order);
-                HttpStatusCode status = PutDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary", serviceBusConnectionString);
+                HttpStatusCode status = await PutDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary", serviceBusConnectionString);
                 return status;
             }
             catch // enters if blob dont exist
@@ -244,7 +254,7 @@ namespace BotLibraryV2
                 orders.Add(order);
                 salaryDeduction.Order = orders;
 
-                HttpStatusCode status = PutDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary", serviceBusConnectionString);
+                HttpStatusCode status = await PutDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary", serviceBusConnectionString);
                 return status;
             }
         }
@@ -257,7 +267,7 @@ namespace BotLibraryV2
         /// <param name="storageAccountKey">The storage account key.</param>
         /// <param name="serviceBusConnectionString">The service bus connection string.</param>
         /// <returns></returns>
-        public static HttpStatusCode UploadOrderforSalaryDeductionForAnotherDay(Order order, DateTime day, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
+        public static async Task<HttpStatusCode> UploadOrderforSalaryDeductionForAnotherDay(Order order, DateTime day, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
         {
             SalaryDeduction salaryDeduction = new SalaryDeduction();
             order.Date = day;
@@ -266,7 +276,7 @@ namespace BotLibraryV2
             {
                 salaryDeduction = JsonConvert.DeserializeObject<SalaryDeduction>(GetDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year + ".json", storageAccountUrl, storageAccountKey));
                 salaryDeduction.Order.Add(order);
-                HttpStatusCode status = PutDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary", serviceBusConnectionString);
+                HttpStatusCode status = await PutDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary", serviceBusConnectionString);
                 return status;
             }
             catch // enters if blob dont exist
@@ -279,7 +289,7 @@ namespace BotLibraryV2
                 orders.Add(order);
                 salaryDeduction.Order = orders;
 
-                HttpStatusCode status = PutDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary", serviceBusConnectionString);
+                HttpStatusCode status = await PutDocument("salarydeduction", "orders_" + dayNumber.ToString() + "_" + DateTime.Now.Year.ToString() + ".json", JsonConvert.SerializeObject(salaryDeduction), "q.planbutlerupdatesalary", serviceBusConnectionString);
                 return status;
             }
         }
@@ -320,7 +330,7 @@ namespace BotLibraryV2
         /// <param name="storageAccountKey">The storage account key.</param>
         /// <param name="serviceBusConnectionString">The service bus connection string.</param>
         /// <returns></returns>
-        public static HttpStatusCode UploadMoneyCompany(Order order, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
+        public static async Task<HttpStatusCode> UploadMoneyCompany(Order order, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
         {
             try
             {
@@ -336,7 +346,7 @@ namespace BotLibraryV2
                         User user = new User() { Name = order.Name, Owe = order.Price };
                         _money.User.Add(user);
 
-                        HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney", serviceBusConnectionString);
+                        HttpStatusCode status = await PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney", serviceBusConnectionString);
                         return status;
                     }
                     else // enters if everything is normal
@@ -345,7 +355,7 @@ namespace BotLibraryV2
                         newOwe += order.Price;
                         _money.User[userId].Owe = newOwe;
 
-                        HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney", serviceBusConnectionString);
+                        HttpStatusCode status = await PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney", serviceBusConnectionString);
                         return status;
                     }
                 }
@@ -359,7 +369,7 @@ namespace BotLibraryV2
                         User user = new User() { Name = order.CompanyName, Owe = order.Price };
                         _money.User.Add(user);
 
-                        HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney", serviceBusConnectionString);
+                        HttpStatusCode status = await PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney", serviceBusConnectionString);
                         return status;
                     }
                     else // enters if everything is normal
@@ -368,7 +378,7 @@ namespace BotLibraryV2
                         newOwe += order.Price;
                         _money.User[userId].Owe = newOwe;
 
-                        HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney", serviceBusConnectionString);
+                        HttpStatusCode status = await PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(_money), "q.planbutlerupdatemoney", serviceBusConnectionString);
                         return status;
                     }
                 }
@@ -381,7 +391,7 @@ namespace BotLibraryV2
                 users.Add(user);
                 MoneyLog money = new MoneyLog() { Monthnumber = DateTime.Now.Month, Title = "moneylog", User = users };
 
-                HttpStatusCode status = PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(money), "q.planbutlerupdatemoney", serviceBusConnectionString);
+                HttpStatusCode status = await PutDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", JsonConvert.SerializeObject(money), "q.planbutlerupdatemoney", serviceBusConnectionString);
                 return status;
             }
         }
@@ -453,7 +463,7 @@ namespace BotLibraryV2
         /// <param name="storageAccountKey">The storage account key.</param>
         /// <param name="serviceBusConnectionString">The service bus connection string.</param>
         /// <returns></returns>
-        public static HttpStatusCode UploadOrderforAnotherDay(Order order, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
+        public static async Task<HttpStatusCode> UploadOrderforAnotherDay(Order order, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
         {
 
             DateTime date = DateTime.Now;
@@ -468,7 +478,7 @@ namespace BotLibraryV2
                 List<Order> orders = new List<Order>();
                 orders.Add(order);
 
-                HttpStatusCode status = PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
+                HttpStatusCode status = await PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
                 return status;
 
             }
@@ -480,7 +490,7 @@ namespace BotLibraryV2
 
 
 
-                HttpStatusCode status = PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
+                HttpStatusCode status = await PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
                 return status;
             }
         }
@@ -582,7 +592,7 @@ namespace BotLibraryV2
         /// <param name="storageAccountKey">The storage account key.</param>
         /// <param name="serviceBusConnectionString">The service bus connection string.</param>
         /// <returns></returns>
-        public static HttpStatusCode NextOrderUpload(Order order, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
+        public static async Task<HttpStatusCode> NextOrderUpload(Order order, string storageAccountUrl, string storageAccountKey, string serviceBusConnectionString)
         {
             DateTime date = DateTime.Now;
             var stringDate = date.ToString("yyyy-MM-dd");
@@ -594,7 +604,7 @@ namespace BotLibraryV2
                 List<Order> orders = new List<Order>();
                 orders.Add(order);
 
-                HttpStatusCode status = PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
+                HttpStatusCode status = await PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
                 return status;
             }
             catch // enters if blob dont exist
@@ -603,7 +613,7 @@ namespace BotLibraryV2
 
                 orders.Add(order);
 
-                HttpStatusCode status = PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
+                HttpStatusCode status = await PutDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", JsonConvert.SerializeObject(orderBlob), "q.planbutlerupdateorder", serviceBusConnectionString);
                 return status;
             }
         }
