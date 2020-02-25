@@ -292,9 +292,7 @@ namespace PlanB.Butler.Services
                 foreach (var item in cloudBlockBlobs)
                 {
                     CloudBlockBlob blobs = (CloudBlockBlob)item;
-                    string user = string.Empty;
-                    blobs.Metadata.TryGetValue("user", out user);
-                    if (user == username)
+                    if (blobs.Metadata.Contains(new KeyValuePair<string, string>("user", username)))
                     {
                         var blobContent = blobs.DownloadTextAsync();
                         var orderItem = JsonConvert.DeserializeObject<OrderBlob>(await blobContent);

@@ -182,7 +182,7 @@ namespace PlanB.Butler.Bot
                 }
                 else
                 {
-                    return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text(name) }, cancellationToken);
+                    return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text(OtherDayDialogNamePrompt) }, cancellationToken);
                 }
             }
             else
