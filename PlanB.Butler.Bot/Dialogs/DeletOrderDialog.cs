@@ -59,7 +59,7 @@ namespace PlanB.Butler.Bot
         /// Initializes a new instance of the <see cref="DeleteOrderDialog"/> class.
         /// </summary>
         /// <param name="config">The configuration.</param>
-        public DeleteOrderDialog(IOptions<BotConfig> config)
+        public DeleteOrderDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(DeleteOrderDialog))
         {
             this.botConfig = config;
