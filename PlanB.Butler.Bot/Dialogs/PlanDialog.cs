@@ -16,14 +16,23 @@
 
     public class PlanDialog : ComponentDialog
     {
+        /// <summary>
+        /// PlanDialogMenuCardPrompt.
+        /// PlanDialogMenuCard
+        /// PlanDialogOtherMenuCard
+        /// PlanDialogNoMenuCard
+        /// PlanDialogYes
+        /// PlanDialogNo.
+        /// </summary>
 
+        private static readonly string PlanDialogMenuCardPrompt = rm.GetString("PlanDialog_MenuCardPrompt");
+        private static readonly string PlanDialogMenuCard = rm.GetString("PlanDialog_MenuCard");
+        private static readonly string PlanDialogOtherMenuCard = rm.GetString("PlanDialog_OtherMenuCard");
+        private static readonly string PlanDialogNoMenuCard = rm.GetString("PlanDialog_NoMenuCard");
+        private static readonly string PlanDialogYes = rm.GetString("yes");
+        private static readonly string PlanDialogNo = rm.GetString("no");
         private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
-        private static string PlanDialog_MenuCardPrompt = rm.GetString("PlanDialog_MenuCardPrompt");
-        private static string PlanDialog_MenuCard = rm.GetString("PlanDialog_MenuCard");
-        private static string PlanDialog_OtherMenuCard = rm.GetString("PlanDialog_OtherMenuCard");
-        private static string PlanDialog_NoMenuCard= rm.GetString("PlanDialog_NoMenuCard");
-        private static string yes = rm.GetString("yes");
-        private static string no = rm.GetString("no");
+
         /// <summary>
         /// The bot configuration.
         /// </summary>
@@ -56,7 +65,7 @@
         {
             return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
             {
-                Prompt = MessageFactory.Text(PlanDialog_MenuCardPrompt),
+                Prompt = MessageFactory.Text(PlanDialogMenuCardPrompt),
                 Choices = ChoiceFactory.ToChoices(new List<string> { "Bieg", "Delphi", "Leib und Seele", "Liederhalle", "Feasy",  "La Boussola"}),
                 Style = ListStyle.HeroCard,
             }, cancellationToken);
@@ -67,12 +76,12 @@
             stepContext.Values["restaurant"] = ((FoundChoice)stepContext.Result).Value;
             string restaurant = stepContext.Values["restaurant"].ToString();
 
-            var PlanDialog_NoMenuCard1 = MessageFactory.Text(string.Format(PlanDialog_NoMenuCard, restaurant));
+            var PlanDialog_NoMenuCard1 = MessageFactory.Text(string.Format(PlanDialogNoMenuCard, restaurant));
          
             var picture = BotMethods.GetDocument("pictures", restaurant.Replace(' ', '_') + ".txt", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
             if (!picture.Contains("BlobNotFound"))
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(PlanDialog_MenuCard + restaurant), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(PlanDialogMenuCard + restaurant), cancellationToken);
                 await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(new Attachment("image/png", picture)), cancellationToken);
             }
             else
@@ -82,8 +91,8 @@
 
             return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
             {
-                Prompt = MessageFactory.Text(PlanDialog_OtherMenuCard),
-                Choices = ChoiceFactory.ToChoices(new List<string> { yes, no }),
+                Prompt = MessageFactory.Text(PlanDialogOtherMenuCard),
+                Choices = ChoiceFactory.ToChoices(new List<string> { PlanDialogYes, PlanDialogNo }),
                 Style = ListStyle.HeroCard,
             });
         }

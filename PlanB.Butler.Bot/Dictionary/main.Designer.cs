@@ -273,9 +273,9 @@ namespace PlanB.Butler.Bot.Dictionary {
         /// <summary>
         ///   Looks up a localized string similar to Bei deiner Bestellung ist etwas schiefgegangen. Bitte bestellen Sie noch einmal..
         /// </summary>
-        public static string NextOrderDialog_Error2 {
+        public static string NextOrderDialog_Error1 {
             get {
-                return ResourceManager.GetString("NextOrderDialog_Error2", resourceCulture);
+                return ResourceManager.GetString("NextOrderDialog_Error1", resourceCulture);
             }
         }
         
