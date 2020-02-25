@@ -15,9 +15,12 @@
 
     public class TeamsBot<T> : DialogBot<T> where T : Dialog
     {
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
-        private static string TeamBots_WelcomeMessage = rm.GetString("TeamBots_WelcomeMessage");
+        /// <summary>
+        /// TeamsBotsWelcomeMessage.
+        /// </summary>
        
+        private static readonly string TeamBotsWelcomeMessage = rm.GetString("TeamBots_WelcomeMessage");
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
         public TeamsBot(ConversationState conversationState, UserState userState, T dialog, ILogger<DialogBot<T>> logger)
             : base(conversationState, userState, dialog, logger)
         {
@@ -25,7 +28,7 @@
 
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
-            await turnContext.SendActivityAsync(TeamBots_WelcomeMessage, cancellationToken: cancellationToken);
+            await turnContext.SendActivityAsync(TeamBotsWelcomeMessage, cancellationToken: cancellationToken);
         }
 
         protected override async Task OnSigninVerifyStateAsync(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)

@@ -25,8 +25,13 @@ namespace PlanB.Butler.Bot
     /// <seealso cref="Microsoft.Bot.Builder.Dialogs.ComponentDialog" />
     public class InterruptDialog : ComponentDialog
     {
+        /// <summary>
+        /// InterruptDialogHelpText.
+        /// </summary>
+
+        private static readonly string InterruptDialogHelpText = rm.GetString("InterruptDialog_HelpText");
         private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
-        private static string InterruptDialog_HelpText = rm.GetString("InterruptDialog_HelpText");
+
 
         private static Plan plan = new Plan();
         private readonly IOptions<BotConfig> botConfig;
@@ -71,7 +76,7 @@ namespace PlanB.Butler.Bot
                 if (text == "help" || text == "hilfe")
                 {
                     // Help message!                   
-                    await innerDc.Context.SendActivityAsync(MessageFactory.Text(InterruptDialog_HelpText), cancellationToken);
+                    await innerDc.Context.SendActivityAsync(MessageFactory.Text(InterruptDialogHelpText), cancellationToken);
                     await innerDc.EndDialogAsync(cancellationToken: cancellationToken);
                     return await innerDc.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                 }

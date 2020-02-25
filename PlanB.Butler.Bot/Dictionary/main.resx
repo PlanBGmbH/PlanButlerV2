@@ -193,7 +193,7 @@
   <data name="NextOrderDialog_Error" xml:space="preserve">
     <value>Da ist wohl etwas schiefgegangen. Bitte beginnen Sie nochmal von vorn .</value>
   </data>
-  <data name="NextOrderDialog_Error2" xml:space="preserve">
+  <data name="NextOrderDialog_Error1" xml:space="preserve">
     <value>Bei deiner Bestellung ist etwas schiefgegangen. Bitte bestellen Sie noch einmal.</value>
   </data>
   <data name="NextOrderDialog_FoodPrompt" xml:space="preserve">
