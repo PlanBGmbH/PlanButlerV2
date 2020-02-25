@@ -43,12 +43,12 @@ namespace PlanB.Butler.Bot
         private static string NextOrderDialog_Costumer = rm.GetString("NextOrderDialog_Costumer");
         private static string DeletDialog_NoOrder = rm.GetString("DeletDialog_NoOrder");
         private static string DeletDialog_DeleteSucess = rm.GetString("DeletDialog_DeleteSucess");
-        private static string DeletDialog_DeletePrompt = rm.GetString("DeletDialog_DeletePrompt");        
+        private static string DeletDialog_DeletePrompt = rm.GetString("DeletDialog_DeletePrompt");
         private static string yes = rm.GetString("yes");
         private static string no = rm.GetString("no");
         private static string OtherDayDialog_Error2 = rm.GetString("OtherDayDialog_Error2");
 
-        
+
 
         /// <summary>
         /// The bot configuration.
@@ -82,7 +82,7 @@ namespace PlanB.Butler.Bot
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-            this.AddDialog(new NextOrder(config));
+            this.AddDialog(new NextOrder(config, telemetryClient));
 
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);
@@ -169,7 +169,7 @@ namespace PlanB.Butler.Bot
         }
 
         private async Task<DialogTurnResult> RemoveStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {                   
+        {
             try
             {
                 var order = new Order();
@@ -208,14 +208,14 @@ namespace PlanB.Butler.Bot
                 var collection = orderBlob.OrderList.FindAll(x => x.Name == order.Name);
                 obj = collection.FindLast(x => x.CompanyStatus == order.CompanyStatus);
 
-                var DeletDialog_DeletePrompt1 = string.Format(DeletDialog_DeletePrompt,obj.Meal); //Should ... be deleted?
+                var DeletDialog_DeletePrompt1 = string.Format(DeletDialog_DeletePrompt, obj.Meal); //Should ... be deleted?
 
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
 
                     {
-                        Prompt = MessageFactory.Text(DeletDialog_DeletePrompt1), 
+                        Prompt = MessageFactory.Text(DeletDialog_DeletePrompt1),
                         Choices = ChoiceFactory.ToChoices(new List<string> { yes, no }),
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);

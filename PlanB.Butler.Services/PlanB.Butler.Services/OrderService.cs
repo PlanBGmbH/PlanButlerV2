@@ -36,9 +36,9 @@ namespace PlanB.Butler.Services
         /// Gets the daily order overview.
         /// </summary>
         /// <param name="req">The req.</param>
+        /// <param name="dateVal">stringDate.</param>
         /// <param name="blob">binding to the blob.</param>
         /// <param name="log">The log.</param>
-        /// <param name="context">The context.</param>
         /// <returns>
         /// Daily Overview.
         /// </returns>
@@ -47,33 +47,20 @@ namespace PlanB.Butler.Services
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [FunctionName(nameof(GetDailyOrderOverview))]
         public static async Task<string> GetDailyOrderOverview(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "orders/{dateVal}")] HttpRequest req,
+            string dateVal,
             [Blob("orders", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlobContainer blob,
-            ILogger log,
-            ExecutionContext context)
+            ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
             Guid correlationId = Util.ReadCorrelationId(req.Headers);
             var methodName = MethodBase.GetCurrentMethod().Name;
             var trace = new Dictionary<string, string>();
             List<OrderBlob> orders = new List<OrderBlob>();
             List<IListBlobItem> cloudBlockBlobs = new List<IListBlobItem>();
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
-            var config = new ConfigurationBuilder()
-                .SetBasePath(context.FunctionAppDirectory)
-                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile("secret.settings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
-
-            List<OrderBlob> orderBlob = new List<OrderBlob>();
             try
             {
-                string stringDate = string.Empty;
                 string blobData = string.Empty;
-                Microsoft.Extensions.Primitives.StringValues date = string.Empty;
-
-                req.Headers.TryGetValue(date, out date);
 
                 BlobContinuationToken blobContinuationToken = null;
                 var options = new BlobRequestOptions();
@@ -81,7 +68,7 @@ namespace PlanB.Butler.Services
 
                 do
                 {
-                    var blobs = await blob.ListBlobsSegmentedAsync(date.ToString(), true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+                    var blobs = await blob.ListBlobsSegmentedAsync(dateVal, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
                     blobContinuationToken = blobs.ContinuationToken;
                     cloudBlockBlobs.AddRange(blobs.Results);
                 }
@@ -95,7 +82,7 @@ namespace PlanB.Butler.Services
                     orders.Add(orderItem);
                 }
 
-                trace.Add("date", stringDate);
+                trace.Add("date", dateVal);
                 trace.Add("data", blobData);
                 trace.Add("requestbody", req.Body.ToString());
             }
@@ -120,28 +107,25 @@ namespace PlanB.Butler.Services
         /// Gets the daily order overview for user.
         /// </summary>
         /// <param name="req">The req.</param>
+        /// <param name="username">username.</param>
         /// <param name="blob">blob.</param>
         /// <param name="log">The log.</param>
-        /// <param name="context">The context.</param>
         /// <returns>Daily Overview.</returns>
         [ProducesResponseType(typeof(List<OrderBlob>), StatusCodes.Status200OK)]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [FunctionName(nameof(GetDailyOrderOverviewForUser))]
         public static async Task<string> GetDailyOrderOverviewForUser(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
-        [Blob("orders/{Label}.json", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
-        ILogger log,
-        ExecutionContext context)
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "orders/{username}")] HttpRequest req,
+        string username,
+        [Blob("orders/{username}.json", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
+        ILogger log)
         {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(context.FunctionAppDirectory)
-                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile("secret.settings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
+            if (username is null)
+            {
+                throw new ArgumentNullException(nameof(username));
+            }
 
-            log.LogInformation("C# HTTP trigger function processed a request.");
             Guid correlationId = Util.ReadCorrelationId(req.Headers);
             var methodName = MethodBase.GetCurrentMethod().Name;
             var trace = new Dictionary<string, string>();
@@ -152,17 +136,12 @@ namespace PlanB.Butler.Services
             {
                 string stringDate = string.Empty;
                 string blobData = string.Empty;
-                string username = string.Empty;
                 string connectionString = string.Empty;
-
-                req.Headers.TryGetValue("user", out Microsoft.Extensions.Primitives.StringValues user);
 
                 await blob.FetchAttributesAsync();
 
-                connectionString = config["StorageSend"];
                 DateTime date = DateTime.Now;
                 stringDate = date.ToString("yyyy-MM-dd");
-                username = user.ToString();
 
                 if (blob.Metadata.Contains(new KeyValuePair<string, string>("date", stringDate)) && blob.Metadata.Contains(new KeyValuePair<string, string>("user", username)))
                 {
@@ -207,7 +186,7 @@ namespace PlanB.Butler.Services
         [FunctionName(nameof(PostDocumentOrder))]
         public static async void PostDocumentOrder(
            [ServiceBusTrigger("q.planbutlerupdateorder", Connection = "butlerSend")]Message messageHeader,
-           [Blob("orders/{Label}.json", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
+           [Blob("{Label}", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
            ILogger log,
            ExecutionContext context)
         {
@@ -236,6 +215,8 @@ namespace PlanB.Butler.Services
 
                 var stringDate = date.ToString("yyyy-MM-dd");
 
+                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+
                 blob.Metadata.Add("user", name);
                 blob.Metadata.Add("date", stringDate);
                 await blob.UploadTextAsync(payload);
@@ -251,7 +232,6 @@ namespace PlanB.Butler.Services
                 trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
                 log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
                 log.LogError(correlationId, $"'{methodName}' - rejected", trace);
-                throw;
             }
             finally
             {
@@ -302,7 +282,7 @@ namespace PlanB.Butler.Services
                 byte[] bytes = Encoding.ASCII.GetBytes(body);
                 outputMessage = new Message(bytes)
                 {
-                    Label = $"{orders.LoginName}_{stringDate}",
+                    Label = $"orders/{stringDate}_{orders.LoginName}.json",
                     CorrelationId = correlationId.ToString(),
                 };
 
