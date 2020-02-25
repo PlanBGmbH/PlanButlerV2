@@ -408,9 +408,9 @@ namespace PlanB.Butler.Bot.Dictionary {
         /// <summary>
         ///   Looks up a localized string similar to Für welchen Tag möchten Sie Essen bestellen?.
         /// </summary>
-        public static string OtherDayDialog_Time {
+        public static string OtherDayDialog_TimePrompt {
             get {
-                return ResourceManager.GetString("OtherDayDialog_Time", resourceCulture);
+                return ResourceManager.GetString("OtherDayDialog_TimePrompt", resourceCulture);
             }
         }
         

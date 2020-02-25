@@ -23,12 +23,12 @@ namespace PlanB.Butler.Bot
     {
         /// <summary>
         /// DailyCreditDialogDepts.
-        /// DailyCreditDialogOrderMe.
-        /// DailyCreditDialogOrderCostumer.
-        /// DailyCreditDialogOrderTrainee.
-        /// DailyCreditDialogSumMe.
-        /// DailyCreditDialogSumCostumer.
-        /// DailyCreditDialogSumTrainee.
+        /// DailyCreditDialogOrderMe
+        /// DailyCreditDialogOrderCostumer
+        /// DailyCreditDialogOrderTrainee
+        /// DailyCreditDialogSumMe
+        /// DailyCreditDialogSumCostumer
+        /// DailyCreditDialogSumTrainee
         /// DailyCreditDialogOrderedAt.
         /// </summary>
         
@@ -88,13 +88,13 @@ namespace PlanB.Butler.Bot
                 var orderList = await BotMethods.GetDailyUserOverview(name, this.botConfig.Value.GetDailyUserOverviewFunc);
                 OrderBlob orderBlob = new OrderBlob();
 
-                msg += $"{DailyCreditDialogDepts } {Environment.NewLine}";
+                msg += $"{DailyCreditDialogDepts} {Environment.NewLine}";
                 string message = string.Empty;
-                string orders = $"{DailyCreditDialogOrderMe } {Environment.NewLine}";
+                string orders = $"{DailyCreditDialogOrderMe} {Environment.NewLine}";
                 double sum = 0;
-                string corders = $"{DailyCreditDialogOrderCostumer }  {Environment.NewLine}";
+                string corders = $"{DailyCreditDialogOrderCostumer}  {Environment.NewLine}";
                 double csum = 0;
-                string iorders = $"{DailyCreditDialogOrderTrainee }  {Environment.NewLine}";
+                string iorders = $"{DailyCreditDialogOrderTrainee}  {Environment.NewLine}";
                 double isum = 0;
                 bool check = false;
                 bool cchecker = false;
@@ -133,21 +133,21 @@ namespace PlanB.Butler.Bot
 
                 if (check)
                 {
-                    var dailyCreditDialog_SumMe = string.Format(DailyCreditDialogSumMe, sum);
-                    orders += $"{dailyCreditDialog_SumMe} {Environment.NewLine}";
+                    var dailyCreditDialogSumMe = string.Format(DailyCreditDialogSumMe, sum);
+                    orders += $"{dailyCreditDialogSumMe} {Environment.NewLine}";
                 }
 
                 if (cchecker)
                 {
-                    var dailyCreditDialog_SumCostumer = string.Format(DailyCreditDialogSumCostumer, csum);
+                    var dailyCreditDialogSumCostumer = string.Format(DailyCreditDialogSumCostumer, csum);
                     orders += corders;
-                    corders += $"{dailyCreditDialog_SumCostumer} {Environment.NewLine}";
+                    corders += $"{dailyCreditDialogSumCostumer} {Environment.NewLine}";
                 }
 
                 if (ichecker)
                 {
-                    var dailyCreditDialog_SumTrainee = string.Format(DailyCreditDialogSumTrainee, csum);
-                    iorders += $"{dailyCreditDialog_SumTrainee} {Environment.NewLine}";
+                    var dailyCreditDialogSumTrainee = string.Format(DailyCreditDialogSumTrainee, csum);
+                    iorders += $"{dailyCreditDialogSumTrainee} {Environment.NewLine}";
                     orders += iorders;
                 }
 

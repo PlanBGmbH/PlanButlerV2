@@ -239,7 +239,7 @@
   <data name="OtherDayDialog_Thanks" xml:space="preserve">
     <value>Danke</value>
   </data>
-  <data name="OtherDayDialog_Time" xml:space="preserve">
+  <data name="OtherDayDialog_TimePrompt" xml:space="preserve">
     <value>Für welchen Tag möchten Sie Essen bestellen?</value>
   </data>
   <data name="OverviewDialog_DaysOrder" xml:space="preserve">
