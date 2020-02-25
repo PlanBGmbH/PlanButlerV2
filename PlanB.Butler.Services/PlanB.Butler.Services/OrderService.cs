@@ -116,8 +116,9 @@ namespace PlanB.Butler.Services
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [FunctionName(nameof(GetDailyOrderOverviewForUser))]
         public static async Task<string> GetDailyOrderOverviewForUser(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "orders/{username}")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "orders/{username}/{dateVal}")] HttpRequest req,
         string username,
+        string dateVal,
         [Blob("orders/{username}.json", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
         ILogger log)
         {
@@ -134,16 +135,12 @@ namespace PlanB.Butler.Services
             List<OrderBlob> orderBlob = new List<OrderBlob>();
             try
             {
-                string stringDate = string.Empty;
                 string blobData = string.Empty;
                 string connectionString = string.Empty;
 
                 await blob.FetchAttributesAsync();
 
-                DateTime date = DateTime.Now;
-                stringDate = date.ToString("yyyy-MM-dd");
-
-                if (blob.Metadata.Contains(new KeyValuePair<string, string>("date", stringDate)) && blob.Metadata.Contains(new KeyValuePair<string, string>("user", username)))
+                if (blob.Metadata.Contains(new KeyValuePair<string, string>("date", dateVal)) && blob.Metadata.Contains(new KeyValuePair<string, string>("user", username)))
                 {
                     await blob.FetchAttributesAsync();
                     var blobDownload = blob.DownloadTextAsync();
@@ -151,7 +148,7 @@ namespace PlanB.Butler.Services
                     orderBlob.Add(JsonConvert.DeserializeObject<OrderBlob>(blobData));
                 }
 
-                trace.Add("date", stringDate);
+                trace.Add("date", dateVal);
                 trace.Add("data", blobData);
                 trace.Add("requestbody", req.Body.ToString());
             }
