@@ -26,9 +26,10 @@ namespace PlanB.Butler.Bot
         /// </summary>
         private readonly IOptions<BotConfig> botConfig;
 
-        public OrderDialog(IOptions<BotConfig> config)
+        public OrderDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(OrderDialog))
         {
+            this.TelemetryClient = telemetryClient;
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
                 {
@@ -45,7 +46,7 @@ namespace PlanB.Butler.Bot
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-            this.AddDialog(new NextOrder(config));
+            this.AddDialog(new NextOrder(config, telemetryClient));
 
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);
@@ -247,9 +248,17 @@ namespace PlanB.Butler.Bot
 
                 order.Grand = grand;
                 var bufferorder = order;
-                HttpStatusCode statusOrder = BotMethods.UploadOrder(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-                HttpStatusCode statusSalary = BotMethods.UploadOrderforSalaryDeduction(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-                HttpStatusCode statusMoney = BotMethods.UploadMoney(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                string orderDocument = JsonConvert.SerializeObject(order);
+
+                var state = new Dictionary<string, string>
+                {
+                    { "orderDocument", orderDocument },
+                };
+
+                this.TelemetryClient.TrackTrace("Order", Severity.Information, state);
+                HttpStatusCode statusOrder = await BotMethods.UploadOrder(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                HttpStatusCode statusSalary = await BotMethods.UploadOrderforSalaryDeduction(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                HttpStatusCode statusMoney = await BotMethods.UploadMoney(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                 if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
                 {
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Deine bestellung wurde gespeichert."), cancellationToken);

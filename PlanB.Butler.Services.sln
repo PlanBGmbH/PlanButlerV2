@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29721.120
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanB.Butler.Services", "PlanB.Butler.Services\PlanB.Butler.Services.csproj", "{DD80AF75-8B36-4D46-A3DD-D3B5533437D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanB.Butler.Services", "PlanB.Butler.Services\PlanB.Butler.Services\PlanB.Butler.Services.csproj", "{DD80AF75-8B36-4D46-A3DD-D3B5533437D9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanB.Butler.Library", "PlanB.Butler.Library\PlanB.Butler.Library\PlanB.Butler.Library.csproj", "{A35E3D67-E934-4095-834A-7509D5A379E1}"
 EndProject

@@ -24,7 +24,7 @@ namespace PlanB.Butler.Bot
         /// </summary>
         private readonly IOptions<BotConfig> botConfig;
 
-        public ExcellDialog(IOptions<BotConfig> config)
+        public ExcellDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
               : base(nameof(ExcellDialog))
         {
             this.botConfig = config;

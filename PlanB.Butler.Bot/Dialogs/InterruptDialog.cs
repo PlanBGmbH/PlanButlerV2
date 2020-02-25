@@ -31,12 +31,12 @@ namespace PlanB.Butler.Bot
         private static Plan plan = new Plan();
         private readonly IOptions<BotConfig> botConfig;
 
-        public InterruptDialog(string v, IOptions<BotConfig> config)
+        public InterruptDialog(string v, IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(InterruptDialog))
         {
             this.botConfig = config;
-            this.AddDialog(new OverviewDialog(config));
-            this.AddDialog(new ExcellDialog(config));
+            this.AddDialog(new OverviewDialog(config, telemetryClient));
+            this.AddDialog(new ExcellDialog(config, telemetryClient));
         }
 
         protected override async Task<DialogTurnResult> OnBeginDialogAsync(DialogContext innerDc, object options, CancellationToken cancellationToken = default(CancellationToken))

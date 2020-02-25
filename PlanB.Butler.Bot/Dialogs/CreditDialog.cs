@@ -34,7 +34,7 @@ namespace PlanB.Butler.Bot
         /// </summary>
         private readonly IOptions<BotConfig> botConfig;
 
-        public CreditDialog(IOptions<BotConfig> config)
+        public CreditDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(CreditDialog))
         {
             this.botConfig = config;

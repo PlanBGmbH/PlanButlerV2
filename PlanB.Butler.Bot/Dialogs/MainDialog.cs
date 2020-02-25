@@ -16,7 +16,7 @@
     public class MainDialog : InterruptDialog
     {
         public MainDialog(IBotTelemetryClient telemetryClient, IOptions<BotConfig> config)
-            : base(nameof(MainDialog), config)
+            : base(nameof(MainDialog), config,telemetryClient)
         {
             // Set the telemetry client for this and all child dialogs.
             this.TelemetryClient = telemetryClient;
