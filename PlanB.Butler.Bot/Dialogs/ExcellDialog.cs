@@ -55,7 +55,7 @@ namespace PlanB.Butler.Bot
                                         nameof(ChoicePrompt),
                                         new PromptOptions
                                         {
-                                            Prompt = MessageFactory.Text("FürWlchen Monat willst du die Abbrechnung?"),
+                                            Prompt = MessageFactory.Text("Für Welchen Monat willst du die Abbrechnung?"),
                                             Choices = ChoiceFactory.ToChoices(months),
                                             Style = ListStyle.HeroCard,
                                         }, cancellationToken);

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Net;
 using System.Reflection;
 using System.Resources;
@@ -29,28 +28,27 @@ namespace PlanB.Butler.Bot
         static int valueDay;
         const double grand = 3.30;
         static string dayName;
+        static string[] weekDays = { "Montag", "Dienstag", "Mitwoch", "Donnerstag", "Freitag" };
+        static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
         static int indexer = 0;
         static string[] companyStatus = { "intern", "extern", "internship" };
         static string[] companyStatusD = { "Für mich", "Kunde", "Praktikant" };
         static Order obj = new Order();
-        private static int daysDivVal;
-        private static CultureInfo culture = new CultureInfo("de-DE");
-        private static DayOfWeek[] weekDays = { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday };
 
         private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
-        private static string deleteDayOrder = rm.GetString("deleteDayOrder");
-        private static string errorOtherDay2 = rm.GetString("errorOtherDay2");
-        private static string errorOtherDay = rm.GetString("errorOtherDay");
-        private static string orderWho = rm.GetString("orderWho");
-        private static string me = rm.GetString("me");
-        private static string trainee = rm.GetString("trainee");
-        private static string costumer = rm.GetString("costumer");
-        private static string delete1 = rm.GetString("delete1");
-        private static string delete2 = rm.GetString("delete2");
+        private static string DeletDialog_TimePrompt = rm.GetString("DeletDialog_TimePrompt");
+        private static string DeletDialog_WhoPrompt = rm.GetString("DeletDialog_WhoPrompt");
+        private static string NextOrderDialog_Myself = rm.GetString("NextOrderDialog_Myself");
+        private static string NextOrderDialog_Trainee = rm.GetString("NextOrderDialog_Trainee");
+        private static string NextOrderDialog_Costumer = rm.GetString("NextOrderDialog_Costumer");
+        private static string DeletDialog_NoOrder = rm.GetString("DeletDialog_NoOrder");
+        private static string DeletDialog_DeleteSucess = rm.GetString("DeletDialog_DeleteSucess");
+        private static string DeletDialog_DeletePrompt = rm.GetString("DeletDialog_DeletePrompt");        
         private static string yes = rm.GetString("yes");
         private static string no = rm.GetString("no");
-        private static string noOrderToday = rm.GetString("noOrderToday");
-        private static string deleteSuccess = rm.GetString("deleteSuccess");
+        private static string OtherDayDialog_Error2 = rm.GetString("OtherDayDialog_Error2");
+
+        
 
         /// <summary>
         /// The bot configuration.
@@ -61,7 +59,7 @@ namespace PlanB.Butler.Bot
         /// Initializes a new instance of the <see cref="DeleteOrderDialog"/> class.
         /// </summary>
         /// <param name="config">The configuration.</param>
-        public DeleteOrderDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
+        public DeleteOrderDialog(IOptions<BotConfig> config)
             : base(nameof(DeleteOrderDialog))
         {
             this.botConfig = config;
@@ -84,7 +82,7 @@ namespace PlanB.Butler.Bot
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-            this.AddDialog(new NextOrder(config, telemetryClient));
+            this.AddDialog(new NextOrder(config));
 
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);
@@ -101,20 +99,9 @@ namespace PlanB.Butler.Bot
             var reply = MessageFactory.Attachment(attachments);
 
 
-            for (int i = 0; i < weekDays.Length; i++)
-            {
-                if (weekDays[i].ToString().ToLower() == DateTime.Now.DayOfWeek.ToString().ToLower() && DateTime.Now.Hour < 12)
-                {
-                    indexer = i;
-                }
-                else if (weekDays[i].ToString().ToLower() == DateTime.Now.DayOfWeek.ToString().ToLower() && weekDays[i].ToString().ToLower() != "friday")
-                {
-                    indexer = i + 1;
-                }
-            }
             for (int i = indexer; i < weekDays.Length; i++)
             {
-                currentWeekDays.Add(culture.DateTimeFormat.GetDayName(weekDays[i]));
+                currentWeekDays.Add(weekDays[i]);
             }
 
             if (currentWeekDays != null)
@@ -123,14 +110,14 @@ namespace PlanB.Butler.Bot
                     nameof(ChoicePrompt),
                     new PromptOptions
                     {
-                        Prompt = MessageFactory.Text(deleteDayOrder),
+                        Prompt = MessageFactory.Text(DeletDialog_TimePrompt),
                         Choices = ChoiceFactory.ToChoices(currentWeekDays),
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(errorOtherDay2), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(OtherDayDialog_Error2), cancellationToken);
 
                 return await stepContext.EndDialogAsync(null, cancellationToken);
             }
@@ -140,14 +127,25 @@ namespace PlanB.Butler.Bot
         {
             stepContext.Values["mainChoise"] = ((FoundChoice)stepContext.Result).Value;
             string text = stepContext.Values["mainChoise"].ToString();
+            for (int i = 0; i < weekDays.Length; i++)
+            {
+                if (weekDays[i] == text)
+                {
+                    indexer = i;
+                }
+                else if (weekDays[i] == text && weekDaysEN[i] != "friday")
+                {
+                    indexer = i + 1;
+                }
+            }
 
             stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
             return await stepContext.PromptAsync(
                nameof(ChoicePrompt),
                new PromptOptions
                {
-                   Prompt = MessageFactory.Text(orderWho),
-                   Choices = ChoiceFactory.ToChoices(new List<string> { me, costumer, trainee }),
+                   Prompt = MessageFactory.Text(DeletDialog_WhoPrompt),
+                   Choices = ChoiceFactory.ToChoices(new List<string> { NextOrderDialog_Myself, NextOrderDialog_Costumer, NextOrderDialog_Trainee }),
                    Style = ListStyle.HeroCard,
                }, cancellationToken);
         }
@@ -164,14 +162,14 @@ namespace PlanB.Butler.Bot
                 }
             }
 
-            valueDay = plan.Planday.FindIndex(x => x.Name == weekDays[indexer].ToString().ToLower());
-            dayName = weekDays[indexer].ToString().ToLower();
+            valueDay = plan.Planday.FindIndex(x => x.Name == weekDaysEN[indexer]);
+            dayName = weekDaysEN[indexer];
             stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
             return await stepContext.NextAsync(null, cancellationToken);
         }
 
         private async Task<DialogTurnResult> RemoveStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
+        {                   
             try
             {
                 var order = new Order();
@@ -185,43 +183,46 @@ namespace PlanB.Butler.Bot
                 string currentDay = DateTime.Now.DayOfWeek.ToString().ToLower();
                 DateTime date = DateTime.Now;
                 var stringDate = string.Empty;
-                for (int i = 0; i < weekDays.Length; i++)
+                for (int i = 0; i < weekDaysList.Length; i++)
                 {
-                    if (dayName.ToString().ToLower() == culture.DateTimeFormat.GetDayName(weekDays[i]).ToString().ToLower())
+                    if (currentDay == weekDaysList[i])
                     {
-                        daysDivVal = (int)weekDays[i];
+                        indexCurentDay = i;
+                    }
+                    if (weekDaysEN[indexer] == weekDaysList[i])
+                    {
+                        indexDay = i;
                     }
                 }
-                if (daysDivVal == null)
+                if (indexDay == indexCurentDay)
                 {
-                    await stepContext.Context.SendActivityAsync(MessageFactory.Text(errorOtherDay), cancellationToken);
-                    await stepContext.EndDialogAsync(null, cancellationToken);
-                    return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
+                    stringDate = date.ToString("yyyy-MM-dd");
                 }
                 else
                 {
-                    daysDivVal = daysDivVal - indexer - 1;
-                }
-              
-                    date = DateTime.Now.AddDays(daysDivVal);
+                    indexCurentDay = indexDay - indexCurentDay;
+                    date = DateTime.Now.AddDays(indexCurentDay);
                     stringDate = date.ToString("yyyy-MM-dd");
-               
+                }
                 orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + stringDate + "_" + order.Name + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
                 var collection = orderBlob.OrderList.FindAll(x => x.Name == order.Name);
                 obj = collection.FindLast(x => x.CompanyStatus == order.CompanyStatus);
 
+                var DeletDialog_DeletePrompt1 = string.Format(DeletDialog_DeletePrompt,obj.Meal); //Should ... be deleted?
+
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
+
                     {
-                        Prompt = MessageFactory.Text($"{delete1} {obj.Meal} {delete2}"),
+                        Prompt = MessageFactory.Text(DeletDialog_DeletePrompt1), 
                         Choices = ChoiceFactory.ToChoices(new List<string> { yes, no }),
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);
             }
             catch (Exception ex)
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(noOrderToday), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(DeletDialog_NoOrder), cancellationToken);
                 await stepContext.EndDialogAsync(null, cancellationToken);
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
             }
@@ -239,15 +240,15 @@ namespace PlanB.Butler.Bot
                 DeleteOrder(order, this.botConfig.Value.ServiceBusConnectionString);
 
                 DeleteOrderforSalaryDeduction(bufferOrder, this.botConfig.Value.ServiceBusConnectionString);
-                BotMethods.DeleteMoney(bufferOrder, weekDays[indexer].ToString().ToLower(), this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                BotMethods.DeleteMoney(bufferOrder, weekDaysEN[indexer], this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
 
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(deleteSuccess), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(DeletDialog_DeleteSucess), cancellationToken);
                 await stepContext.EndDialogAsync();
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog));
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(deleteSuccess), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(DeletDialog_DeleteSucess), cancellationToken);
                 await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
             }

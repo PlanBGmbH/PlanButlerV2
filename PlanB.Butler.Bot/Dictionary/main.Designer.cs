@@ -61,272 +61,284 @@ namespace PlanB.Butler.Bot.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Wie viele Essen möchten Sie bestellen?.
+        ///   Looks up a localized string similar to Letzten Monat betrug ihre Belastung: {0} €.
         /// </summary>
-        public static string amountFood {
+        public static string CreditDialog_LastMonthDepts {
             get {
-                return ResourceManager.GetString("amountFood", resourceCulture);
+                return ResourceManager.GetString("CreditDialog_LastMonthDepts", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to und bei dem Restaraunt.
+        ///   Looks up a localized string similar to Diesen Monat beträgt ihre Belastung: {0} €.
         /// </summary>
-        public static string andAtRestauarant {
+        public static string CreditDialog_MonthDepts {
             get {
-                return ResourceManager.GetString("andAtRestauarant", resourceCulture);
+                return ResourceManager.GetString("CreditDialog_MonthDepts", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to bei.
+        ///   Looks up a localized string similar to Es liegt für diesen Monat noch keine Rechnung vor. Soll ich für letzten Monat nachschauen?.
         /// </summary>
-        public static string at {
+        public static string CreditDialog_NoBill {
             get {
-                return ResourceManager.GetString("at", resourceCulture);
+                return ResourceManager.GetString("CreditDialog_NoBill", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to berechnet.
+        ///   Looks up a localized string similar to Es liegt für den letzten Monat ebenfalls keine Rechnung vor. Leider kann ich Ihnen nicht weiterhelfen..
         /// </summary>
-        public static string calculated {
+        public static string CreditDialog_NoBillLastMonth {
             get {
-                return ResourceManager.GetString("calculated", resourceCulture);
+                return ResourceManager.GetString("CreditDialog_NoBillLastMonth", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Für welche Firma soll Essen bestellt werden? Bitte geben Sie zusätzlich den Namen des Kunden/der Kunden an..
+        ///   Looks up a localized string similar to Sie haben diesen Monat noch nichts bestellt. Soll ich für letzten Monat nachschauen..
         /// </summary>
-        public static string company {
+        public static string CreditDialog_NoOrder {
             get {
-                return ResourceManager.GetString("company", resourceCulture);
+                return ResourceManager.GetString("CreditDialog_NoOrder", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Kunde.
+        ///   Looks up a localized string similar to Heute beträgt die Belastung: {0} €.
         /// </summary>
-        public static string costumer {
+        public static string DailyCreditDialog_Depts {
             get {
-                return ResourceManager.GetString("costumer", resourceCulture);
+                return ResourceManager.GetString("DailyCreditDialog_Depts", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tagesbestellung.
+        ///   Looks up a localized string similar to Für den Kunden wurde: {0} berechnet..
         /// </summary>
-        public static string daysOrder {
+        public static string DailyCreditDialog_OrderCostumer {
             get {
-                return ResourceManager.GetString("daysOrder", resourceCulture);
+                return ResourceManager.GetString("DailyCreditDialog_OrderCostumer", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Soll .
+        ///   Looks up a localized string similar to Sie haben heute bei {0} bestellt und dies bei dem Restaurant {1}..
         /// </summary>
-        public static string delete1 {
+        public static string DailyCreditDialog_OrderedAt {
             get {
-                return ResourceManager.GetString("delete1", resourceCulture);
+                return ResourceManager.GetString("DailyCreditDialog_OrderedAt", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to gelöscht werden?.
+        ///   Looks up a localized string similar to Für Sie wurde: {0} berechnet..
         /// </summary>
-        public static string delete2 {
+        public static string DailyCreditDialog_OrderMe {
             get {
-                return ResourceManager.GetString("delete2", resourceCulture);
+                return ResourceManager.GetString("DailyCreditDialog_OrderMe", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Für welchen Tag möchten Sie ihre Bestellung löschen?.
+        ///   Looks up a localized string similar to Für den Prakikanten wurde: {0} berechnet..
         /// </summary>
-        public static string deleteDayOrder {
+        public static string DailyCreditDialog_OrderTrainee {
             get {
-                return ResourceManager.GetString("deleteDayOrder", resourceCulture);
+                return ResourceManager.GetString("DailyCreditDialog_OrderTrainee", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bestellung entfernen.
+        ///   Looks up a localized string similar to Insgesamt werden für den Kunden {0} berechnet..
         /// </summary>
-        public static string deleteOrder {
+        public static string DailyCreditDialog_SumCostumer {
             get {
-                return ResourceManager.GetString("deleteOrder", resourceCulture);
+                return ResourceManager.GetString("DailyCreditDialog_SumCostumer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insgesamt werden Ihnen {0} berechnet..
+        /// </summary>
+        public static string DailyCreditDialog_SumMe {
+            get {
+                return ResourceManager.GetString("DailyCreditDialog_SumMe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insgesamt werden für den Prakitkanten {0} berechnet..
+        /// </summary>
+        public static string DailyCreditDialog_SumTrainee {
+            get {
+                return ResourceManager.GetString("DailyCreditDialog_SumTrainee", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Soll {0} gelöscht werden?.
+        /// </summary>
+        public static string DeletDialog_DeletePrompt {
+            get {
+                return ResourceManager.GetString("DeletDialog_DeletePrompt", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Ihre Bestellung wurde entfernt..
         /// </summary>
-        public static string deleteSuccess {
+        public static string DeletDialog_DeleteSucess {
             get {
-                return ResourceManager.GetString("deleteSuccess", resourceCulture);
+                return ResourceManager.GetString("DeletDialog_DeleteSucess", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to fehler.
+        ///   Looks up a localized string similar to An diesem Tag liegt keine Bestellung vor..
         /// </summary>
-        public static string error {
+        public static string DeletDialog_NoOrder {
             get {
-                return ResourceManager.GetString("error", resourceCulture);
+                return ResourceManager.GetString("DeletDialog_NoOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Für welchen Tag möchten Sie ihre Bestellung löschen?.
+        /// </summary>
+        public static string DeletDialog_TimePrompt {
+            get {
+                return ResourceManager.GetString("DeletDialog_TimePrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Für wen möchten Sie die Bestellung löschen?.
+        /// </summary>
+        public static string DeletDialog_WhoPrompt {
+            get {
+                return ResourceManager.GetString("DeletDialog_WhoPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hallo, Ich bin dein persönlicher Essensbestell Bot. Zu den schon angezeigten befehlen kann ich noch
+        ///-Ein weiteres essen für z.B. Praktikanten oder Kunden bestellen. Daür bitte &apos;Weiteres Essen bestellen&apos; eingeben. 
+        ///-Ein essen für einen anderen Tag in dieser Woche bestellen. Dafür bitte &apos;für einen anderen Tag Essen bestellen eingeben.
+        ///-Fragen was man heute bestellt hat zur Kontrolle. Dafür bitte &apos;Was habe ich heute bestellt&apos; eingeben..
+        /// </summary>
+        public static string InterruptDialog_HelpText {
+            get {
+                return ResourceManager.GetString("InterruptDialog_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wie viele Essen möchten Sie bestellen?.
+        /// </summary>
+        public static string NextOrderDialog_AmountFoodPrompt {
+            get {
+                return ResourceManager.GetString("NextOrderDialog_AmountFoodPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Für welche Firma soll Essen bestellt werden? Bitte geben Sie zusätzlich den Namen des Kunden/der Kunden an..
+        /// </summary>
+        public static string NextOrderDialog_CompanyPrompt {
+            get {
+                return ResourceManager.GetString("NextOrderDialog_CompanyPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kunde.
+        /// </summary>
+        public static string NextOrderDialog_Costumer {
+            get {
+                return ResourceManager.GetString("NextOrderDialog_Costumer", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Da ist wohl etwas schiefgegangen. Bitte beginnen Sie nochmal von vorn ..
         /// </summary>
-        public static string error1 {
+        public static string NextOrderDialog_Error {
             get {
-                return ResourceManager.GetString("error1", resourceCulture);
+                return ResourceManager.GetString("NextOrderDialog_Error", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Bei deiner Bestellung ist etwas schiefgegangen. Bitte bestellen Sie noch einmal..
         /// </summary>
-        public static string error2 {
+        public static string NextOrderDialog_Error2 {
             get {
-                return ResourceManager.GetString("error2", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Es tut mir Leid, es muss ein Fehler unterlaufen sein. Bitte versuchen Sie es noch einmal..
-        /// </summary>
-        public static string errorOtherDay {
-            get {
-                return ResourceManager.GetString("errorOtherDay", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Tut mir Leid. Ich konnte Sie nicht verstehen. Bitte benutzen Sie Befehle, welche mir bekannt sind..
-        /// </summary>
-        public static string errorOtherDay2 {
-            get {
-                return ResourceManager.GetString("errorOtherDay2", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to €.
-        /// </summary>
-        public static string euro {
-            get {
-                return ResourceManager.GetString("euro", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to extern.
-        /// </summary>
-        public static string external {
-            get {
-                return ResourceManager.GetString("external", resourceCulture);
+                return ResourceManager.GetString("NextOrderDialog_Error2", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Welches Essen möchten Sie bestellen?.
         /// </summary>
-        public static string food {
+        public static string NextOrderDialog_FoodPrompt {
             get {
-                return ResourceManager.GetString("food", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Freitag.
-        /// </summary>
-        public static string friday {
-            get {
-                return ResourceManager.GetString("friday", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Wähle Sie eines der unten stehenden Ereignissen aus oder schreibe &quot;Hilfe&quot; um zu erfahren was ich sonst noch alles kann..
-        /// </summary>
-        public static string help {
-            get {
-                return ResourceManager.GetString("help", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to intern.
-        /// </summary>
-        public static string internally {
-            get {
-                return ResourceManager.GetString("internally", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to intership.
-        /// </summary>
-        public static string intership {
-            get {
-                return ResourceManager.GetString("intership", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Letzten Monat betrug ihre Belastung:.
-        /// </summary>
-        public static string lastMonthBurden {
-            get {
-                return ResourceManager.GetString("lastMonthBurden", resourceCulture);
+                return ResourceManager.GetString("NextOrderDialog_FoodPrompt", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Für mich.
         /// </summary>
-        public static string me {
+        public static string NextOrderDialog_Myself {
             get {
-                return ResourceManager.GetString("me", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Montag.
-        /// </summary>
-        public static string monday {
-            get {
-                return ResourceManager.GetString("monday", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Diesen Monat beträgt ihre Belastung: .
-        /// </summary>
-        public static string monthBurden {
-            get {
-                return ResourceManager.GetString("monthBurden", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Bitte geben Sie ihren Namen ein..
-        /// </summary>
-        public static string name {
-            get {
-                return ResourceManager.GetString("name", resourceCulture);
+                return ResourceManager.GetString("NextOrderDialog_Myself", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Wie ist der Namen des Praktikanten?.
         /// </summary>
-        public static string nameTrainee {
+        public static string NextOrderDialog_NameTraineePrompt {
             get {
-                return ResourceManager.GetString("nameTrainee", resourceCulture);
+                return ResourceManager.GetString("NextOrderDialog_NameTraineePrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bei welchem Restauarant möchten Sie bestellen?.
+        /// </summary>
+        public static string NextOrderDialog_RestaurantPrompt {
+            get {
+                return ResourceManager.GetString("NextOrderDialog_RestaurantPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ihre Bestellung wurde gespeichert..
+        /// </summary>
+        public static string NextOrderDialog_SaveOrder {
+            get {
+                return ResourceManager.GetString("NextOrderDialog_SaveOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Praktikant.
+        /// </summary>
+        public static string NextOrderDialog_Trainee {
+            get {
+                return ResourceManager.GetString("NextOrderDialog_Trainee", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Für wen möchten Sie bestellen?.
+        /// </summary>
+        public static string NextOrderDialog_WhoPrompt {
+            get {
+                return ResourceManager.GetString("NextOrderDialog_WhoPrompt", resourceCulture);
             }
         }
         
@@ -340,290 +352,173 @@ namespace PlanB.Butler.Bot.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Es liegt für den letzten Monat ebenfalls keine Rechnung vor. Leider kann ich Ihnen nicht weiterhelfen..
+        ///   Looks up a localized string similar to fehler.
         /// </summary>
-        public static string noBillLastMonth {
+        public static string OtherDayDialog_Error {
             get {
-                return ResourceManager.GetString("noBillLastMonth", resourceCulture);
+                return ResourceManager.GetString("OtherDayDialog_Error", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Es liegt für diesen Monat noch keine Rechnung vor. Soll ich für letzten Monat nachschauen?.
+        ///   Looks up a localized string similar to Es tut mir Leid, es muss ein Fehler unterlaufen sein. Bitte versuchen Sie es noch einmal..
         /// </summary>
-        public static string noBillMonth {
+        public static string OtherDayDialog_Error1 {
             get {
-                return ResourceManager.GetString("noBillMonth", resourceCulture);
+                return ResourceManager.GetString("OtherDayDialog_Error1", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sie haben diesen Monat noch nichts bestellt. Soll ich für letzten Monat nachschauen..
+        ///   Looks up a localized string similar to Tut mir Leid. Ich konnte Sie nicht verstehen. Bitte benutzen Sie Befehle, welche mir bekannt sind..
         /// </summary>
-        public static string noOrderMonth {
+        public static string OtherDayDialog_Error2 {
             get {
-                return ResourceManager.GetString("noOrderMonth", resourceCulture);
+                return ResourceManager.GetString("OtherDayDialog_Error2", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An diesem Tag liegt keine Bestellung vor..
+        ///   Looks up a localized string similar to Bitte geben Sie ihren Namen ein..
         /// </summary>
-        public static string noOrderToday {
+        public static string OtherDayDialog_NamePrompt {
             get {
-                return ResourceManager.GetString("noOrderToday", resourceCulture);
+                return ResourceManager.GetString("OtherDayDialog_NamePrompt", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sie möchten bei.
+        ///   Looks up a localized string similar to Essen wird bei {0} bestellt..
         /// </summary>
-        public static string order1 {
+        public static string OtherDayDialog_Order {
             get {
-                return ResourceManager.GetString("order1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to bestellen..
-        /// </summary>
-        public static string order2 {
-            get {
-                return ResourceManager.GetString("order2", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Für den Kunden wurde:.
-        /// </summary>
-        public static string orderCostumer {
-            get {
-                return ResourceManager.GetString("orderCostumer", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to bestellt.
-        /// </summary>
-        public static string ordered {
-            get {
-                return ResourceManager.GetString("ordered", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Essen bestellen.
-        /// </summary>
-        public static string orderFood {
-            get {
-                return ResourceManager.GetString("orderFood", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Für Sie wurde:.
-        /// </summary>
-        public static string orderMe {
-            get {
-                return ResourceManager.GetString("orderMe", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Für einen anderen Tag bestellen.
-        /// </summary>
-        public static string orderOtherDay {
-            get {
-                return ResourceManager.GetString("orderOtherDay", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Für den Prakikanten wurde:.
-        /// </summary>
-        public static string orderTrainee {
-            get {
-                return ResourceManager.GetString("orderTrainee", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Für welchen Tag möchten Sie Essen bestellen?.
-        /// </summary>
-        public static string orderWhen {
-            get {
-                return ResourceManager.GetString("orderWhen", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Für wen möchten Sie bestellen?.
-        /// </summary>
-        public static string orderWho {
-            get {
-                return ResourceManager.GetString("orderWho", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Bestellung entfernen.
-        /// </summary>
-        public static string remove {
-            get {
-                return ResourceManager.GetString("remove", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Bei welchem Restauarant möchten Sie bestellen?.
-        /// </summary>
-        public static string restaurant {
-            get {
-                return ResourceManager.GetString("restaurant", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Samstag.
-        /// </summary>
-        public static string saturday {
-            get {
-                return ResourceManager.GetString("saturday", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Ihre Bestellung wurde gespeichert..
-        /// </summary>
-        public static string saveOrder {
-            get {
-                return ResourceManager.GetString("saveOrder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Monatliche Belastung anzeigen.
-        /// </summary>
-        public static string showMonthBurden {
-            get {
-                return ResourceManager.GetString("showMonthBurden", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Insgesamt werden für den Kunden .
-        /// </summary>
-        public static string sumCostumer {
-            get {
-                return ResourceManager.GetString("sumCostumer", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Insgesamt werden Ihnen .
-        /// </summary>
-        public static string sumMe {
-            get {
-                return ResourceManager.GetString("sumMe", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Insgesamt werden für den Prakitkanten .
-        /// </summary>
-        public static string sumTrainee {
-            get {
-                return ResourceManager.GetString("sumTrainee", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Sonntag.
-        /// </summary>
-        public static string sunday {
-            get {
-                return ResourceManager.GetString("sunday", resourceCulture);
+                return ResourceManager.GetString("OtherDayDialog_Order", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Danke.
         /// </summary>
-        public static string thanks {
+        public static string OtherDayDialog_Thanks {
             get {
-                return ResourceManager.GetString("thanks", resourceCulture);
+                return ResourceManager.GetString("OtherDayDialog_Thanks", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Donnerstag.
+        ///   Looks up a localized string similar to Für welchen Tag möchten Sie Essen bestellen?.
         /// </summary>
-        public static string thursday {
+        public static string OtherDayDialog_Time {
             get {
-                return ResourceManager.GetString("thursday", resourceCulture);
+                return ResourceManager.GetString("OtherDayDialog_Time", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Heute beträgt die Belastung:.
+        ///   Looks up a localized string similar to Tagesbestellung.
         /// </summary>
-        public static string todayBurden {
+        public static string OverviewDialog_DaysOrder {
             get {
-                return ResourceManager.GetString("todayBurden", resourceCulture);
+                return ResourceManager.GetString("OverviewDialog_DaysOrder", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Heute wird bei dem Restaurant .
+        ///   Looks up a localized string similar to Bestellung entfernen.
         /// </summary>
-        public static string todaysRestaurant {
+        public static string OverviewDialog_DeleteOrder {
             get {
-                return ResourceManager.GetString("todaysRestaurant", resourceCulture);
+                return ResourceManager.GetString("OverviewDialog_DeleteOrder", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Es ist nach 12 Uhr. Bitte bestellen Sie für einen anderen Tag..
+        ///   Looks up a localized string similar to Wähle Sie eines der unten stehenden Ereignissen aus oder schreibe Sie &quot;Hilfe&quot; um zu erfahren was ich sonst noch alles kann..
         /// </summary>
-        public static string tooLate {
+        public static string OverviewDialog_Help {
             get {
-                return ResourceManager.GetString("tooLate", resourceCulture);
+                return ResourceManager.GetString("OverviewDialog_Help", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Praktikant.
+        ///   Looks up a localized string similar to Essen bestellen.
         /// </summary>
-        public static string trainee {
+        public static string OverviewDialog_OrderFood {
             get {
-                return ResourceManager.GetString("trainee", resourceCulture);
+                return ResourceManager.GetString("OverviewDialog_OrderFood", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Dienstag.
+        ///   Looks up a localized string similar to Für einen anderen Tag bestellen.
         /// </summary>
-        public static string tuesday {
+        public static string OverviewDialog_OtherDay {
             get {
-                return ResourceManager.GetString("tuesday", resourceCulture);
+                return ResourceManager.GetString("OverviewDialog_OtherDay", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Mittwoch.
+        ///   Looks up a localized string similar to Monatliche Belastung anzeigen.
         /// </summary>
-        public static string wednesday {
+        public static string OverviewDialog_ShowDepts {
             get {
-                return ResourceManager.GetString("wednesday", resourceCulture);
+                return ResourceManager.GetString("OverviewDialog_ShowDepts", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Was möchten Sie tun?.
         /// </summary>
-        public static string whatNow {
+        public static string OverviewDialog_WhatNow {
             get {
-                return ResourceManager.GetString("whatNow", resourceCulture);
+                return ResourceManager.GetString("OverviewDialog_WhatNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Okay, hier der Essensplan von .
+        /// </summary>
+        public static string PlanDialog_MenuCard {
+            get {
+                return ResourceManager.GetString("PlanDialog_MenuCard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Von welchem Restaurant möchten Sie die Speisekarte sehen?.
+        /// </summary>
+        public static string PlanDialog_MenuCardPrompt {
+            get {
+                return ResourceManager.GetString("PlanDialog_MenuCardPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Für {0} ist leider keine Speisekarte vorhanden..
+        /// </summary>
+        public static string PlanDialog_NoMenuCard {
+            get {
+                return ResourceManager.GetString("PlanDialog_NoMenuCard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Möchten Sie eine Speisekarte eines anderen Restaurant anschauen?.
+        /// </summary>
+        public static string PlanDialog_OtherMenuCard {
+            get {
+                return ResourceManager.GetString("PlanDialog_OtherMenuCard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Guten Tag, ich bin der PlanButler, ihr Essensorganisator. Wie kann ich ihnen helfen? Tippen Sie eine Taste um fortzufahren..
+        /// </summary>
+        public static string TeamBots_WelcomeMessage {
+            get {
+                return ResourceManager.GetString("TeamBots_WelcomeMessage", resourceCulture);
             }
         }
         
@@ -633,24 +528,6 @@ namespace PlanB.Butler.Bot.Dictionary {
         public static string yes {
             get {
                 return ResourceManager.GetString("yes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Sie haben heute .
-        /// </summary>
-        public static string youOrderedToday {
-            get {
-                return ResourceManager.GetString("youOrderedToday", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to und bei dem Restaurant..
-        /// </summary>
-        public static string youOrderedToday2 {
-            get {
-                return ResourceManager.GetString("youOrderedToday2", resourceCulture);
             }
         }
     }

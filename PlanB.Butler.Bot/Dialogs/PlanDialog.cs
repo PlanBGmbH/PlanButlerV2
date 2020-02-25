@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
+    using System.Resources;
     using System.Threading;
     using System.Threading.Tasks;
      using BotLibraryV2;
@@ -14,6 +16,14 @@
 
     public class PlanDialog : ComponentDialog
     {
+
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+        private static string PlanDialog_MenuCardPrompt = rm.GetString("PlanDialog_MenuCardPrompt");
+        private static string PlanDialog_MenuCard = rm.GetString("PlanDialog_MenuCard");
+        private static string PlanDialog_OtherMenuCard = rm.GetString("PlanDialog_OtherMenuCard");
+        private static string PlanDialog_NoMenuCard= rm.GetString("PlanDialog_NoMenuCard");
+        private static string yes = rm.GetString("yes");
+        private static string no = rm.GetString("no");
         /// <summary>
         /// The bot configuration.
         /// </summary>
@@ -46,8 +56,8 @@
         {
             return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
             {
-                Prompt = MessageFactory.Text("Von welchem Restaurant möchtest du die Speisekarte sehen?"),
-                Choices = ChoiceFactory.ToChoices(new List<string> { "Bieg", "Delphi", "Leib und Seele", "Liederhalle" ,"Feasy","La Boussola"}),
+                Prompt = MessageFactory.Text(PlanDialog_MenuCardPrompt),
+                Choices = ChoiceFactory.ToChoices(new List<string> { "Bieg", "Delphi", "Leib und Seele", "Liederhalle", "Feasy",  "La Boussola"}),
                 Style = ListStyle.HeroCard,
             }, cancellationToken);
         }
@@ -57,21 +67,23 @@
             stepContext.Values["restaurant"] = ((FoundChoice)stepContext.Result).Value;
             string restaurant = stepContext.Values["restaurant"].ToString();
 
+            var PlanDialog_NoMenuCard1 = MessageFactory.Text(string.Format(PlanDialog_NoMenuCard, restaurant));
+         
             var picture = BotMethods.GetDocument("pictures", restaurant.Replace(' ', '_') + ".txt", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
             if (!picture.Contains("BlobNotFound"))
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text("Okay, hier der Essensplan von " + restaurant), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(PlanDialog_MenuCard + restaurant), cancellationToken);
                 await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(new Attachment("image/png", picture)), cancellationToken);
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text("Für " + restaurant + " ist leider keine Speisekarte vorhanden."), cancellationToken);
+                await stepContext.Context.SendActivityAsync(PlanDialog_NoMenuCard1, cancellationToken);
             }
 
             return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
             {
-                Prompt = MessageFactory.Text("Willst du einen weitere Karte anschauen?"),
-                Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
+                Prompt = MessageFactory.Text(PlanDialog_OtherMenuCard),
+                Choices = ChoiceFactory.ToChoices(new List<string> { yes, no }),
                 Style = ListStyle.HeroCard,
             });
         }
