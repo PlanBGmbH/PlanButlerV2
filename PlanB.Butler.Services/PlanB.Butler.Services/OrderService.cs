@@ -36,7 +36,6 @@ namespace PlanB.Butler.Services
         /// Gets the daily order overview.
         /// </summary>
         /// <param name="req">The req.</param>
-        /// <param name="dateVal">stringDate.</param>
         /// <param name="blob">binding to the blob.</param>
         /// <param name="log">The log.</param>
         /// <returns>
@@ -45,8 +44,155 @@ namespace PlanB.Butler.Services
         [ProducesResponseType(typeof(List<OrderBlob>), StatusCodes.Status200OK)]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
-        [FunctionName(nameof(GetDailyOrderOverview))]
-        public static async Task<string> GetDailyOrderOverview(
+        [FunctionName(nameof(GetOrders))]
+        public static async Task<string> GetOrders(
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "orders")] HttpRequest req,
+            [Blob("orders", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlobContainer blob,
+            ILogger log)
+        {
+            Guid correlationId = Util.ReadCorrelationId(req.Headers);
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            var trace = new Dictionary<string, string>();
+            List<OrderBlob> orders = new List<OrderBlob>();
+            List<IListBlobItem> cloudBlockBlobs = new List<IListBlobItem>();
+            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            try
+            {
+                string blobData = string.Empty;
+
+                BlobContinuationToken blobContinuationToken = null;
+                var options = new BlobRequestOptions();
+                var operationContext = new OperationContext();
+
+                do
+                {
+                    var blobs = await blob.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+                    blobContinuationToken = blobs.ContinuationToken;
+                    cloudBlockBlobs.AddRange(blobs.Results);
+                }
+                while (blobContinuationToken != null);
+
+                foreach (var item in cloudBlockBlobs)
+                {
+                    CloudBlockBlob blobs = (CloudBlockBlob)item;
+                    var blobContent = blobs.DownloadTextAsync();
+                    var orderItem = JsonConvert.DeserializeObject<OrderBlob>(await blobContent);
+                    orders.Add(orderItem);
+                }
+
+                trace.Add("data", blobData);
+                trace.Add("requestbody", req.Body.ToString());
+            }
+            catch (Exception e)
+            {
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+                throw;
+            }
+            finally
+            {
+                log.LogTrace(eventId, $"'{methodName}' - finished");
+                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+            }
+
+            return JsonConvert.SerializeObject(cloudBlockBlobs);
+        }
+
+        /// <summary>
+        /// Gets the daily order overview for user.
+        /// </summary>
+        /// <param name="req">The req.</param>
+        /// <param name="username">username.</param>
+        /// <param name="dateVal">dateVal.</param>
+        /// <param name="blob">blob.</param>
+        /// <param name="log">The log.</param>
+        /// <returns>Daily Overview.</returns>
+        [ProducesResponseType(typeof(List<OrderBlob>), StatusCodes.Status200OK)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        [FunctionName(nameof(GetOrdersByUserAndDate))]
+        public static async Task<string> GetOrdersByUserAndDate(
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "orders/{username}/{dateVal}")] HttpRequest req,
+        string username,
+        string dateVal,
+        [Blob("orders", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlobContainer blob,
+        ILogger log)
+        {
+            if (username is null)
+            {
+                throw new ArgumentNullException(nameof(username));
+            }
+
+            Guid correlationId = Util.ReadCorrelationId(req.Headers);
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            var trace = new Dictionary<string, string>();
+            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            List<IListBlobItem> cloudBlockBlobs = new List<IListBlobItem>();
+            List<OrderBlob> orders = new List<OrderBlob>();
+
+            try
+            {
+                string blobData = string.Empty;
+                string connectionString = string.Empty;
+                BlobContinuationToken blobContinuationToken = null;
+                var options = new BlobRequestOptions();
+                var operationContext = new OperationContext();
+
+                do
+                {
+                    var blobs = await blob.ListBlobsSegmentedAsync(dateVal, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+                    blobContinuationToken = blobs.ContinuationToken;
+                    cloudBlockBlobs.AddRange(blobs.Results);
+                }
+                while (blobContinuationToken != null);
+
+                foreach (var item in cloudBlockBlobs)
+                {
+                    CloudBlockBlob blobs = (CloudBlockBlob)item;
+                    if (blobs.Metadata.Contains(new KeyValuePair<string, string>("user", username)))
+                    {
+                        var blobContent = blobs.DownloadTextAsync();
+                        var orderItem = JsonConvert.DeserializeObject<OrderBlob>(await blobContent);
+                        orders.Add(orderItem);
+                    }
+                }
+
+                trace.Add("date", dateVal);
+                trace.Add("data", blobData);
+                trace.Add("requestbody", req.Body.ToString());
+            }
+            catch (Exception e)
+            {
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+                throw;
+            }
+            finally
+            {
+                log.LogTrace(eventId, $"'{methodName}' - finished");
+                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+            }
+
+            return JsonConvert.SerializeObject(orders);
+        }
+
+        /// <summary>
+        /// Gets the daily order overview for user.
+        /// </summary>
+        /// <param name="req">The req.</param>
+        /// <param name="dateVal">username.</param>
+        /// <param name="blob">blob.</param>
+        /// <param name="log">The log.</param>
+        /// <returns>Daily Overview.</returns>
+        [ProducesResponseType(typeof(List<OrderBlob>), StatusCodes.Status200OK)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        [FunctionName(nameof(GetOrdersByDate))]
+        public static async Task<string> GetOrdersByDate(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "orders/{dateVal}")] HttpRequest req,
             string dateVal,
             [Blob("orders", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlobContainer blob,
@@ -114,41 +260,49 @@ namespace PlanB.Butler.Services
         [ProducesResponseType(typeof(List<OrderBlob>), StatusCodes.Status200OK)]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
-        [FunctionName(nameof(GetDailyOrderOverviewForUser))]
-        public static async Task<string> GetDailyOrderOverviewForUser(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "orders/{username}/{dateVal}")] HttpRequest req,
-        string username,
-        string dateVal,
-        [Blob("orders/{username}.json", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
-        ILogger log)
+        [FunctionName(nameof(GetOrdersByUser))]
+        public static async Task<string> GetOrdersByUser(
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "orders/{username}")] HttpRequest req,
+            string username,
+            [Blob("orders", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlobContainer blob,
+            ILogger log)
         {
-            if (username is null)
-            {
-                throw new ArgumentNullException(nameof(username));
-            }
-
             Guid correlationId = Util.ReadCorrelationId(req.Headers);
             var methodName = MethodBase.GetCurrentMethod().Name;
             var trace = new Dictionary<string, string>();
+            List<OrderBlob> orders = new List<OrderBlob>();
+            List<IListBlobItem> cloudBlockBlobs = new List<IListBlobItem>();
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
-
-            List<OrderBlob> orderBlob = new List<OrderBlob>();
             try
             {
                 string blobData = string.Empty;
-                string connectionString = string.Empty;
 
-                await blob.FetchAttributesAsync();
+                BlobContinuationToken blobContinuationToken = null;
+                var options = new BlobRequestOptions();
+                var operationContext = new OperationContext();
 
-                if (blob.Metadata.Contains(new KeyValuePair<string, string>("date", dateVal)) && blob.Metadata.Contains(new KeyValuePair<string, string>("user", username)))
+                do
                 {
-                    await blob.FetchAttributesAsync();
-                    var blobDownload = blob.DownloadTextAsync();
-                    blobData = blobDownload.Result;
-                    orderBlob.Add(JsonConvert.DeserializeObject<OrderBlob>(blobData));
+                    var blobs = await blob.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+                    blobContinuationToken = blobs.ContinuationToken;
+                    cloudBlockBlobs.AddRange(blobs.Results);
+                }
+                while (blobContinuationToken != null);
+
+                foreach (var item in cloudBlockBlobs)
+                {
+                    CloudBlockBlob blobs = (CloudBlockBlob)item;
+                    string user = string.Empty;
+                    blobs.Metadata.TryGetValue("user", out user);
+                    if (user == username)
+                    {
+                        var blobContent = blobs.DownloadTextAsync();
+                        var orderItem = JsonConvert.DeserializeObject<OrderBlob>(await blobContent);
+                        orders.Add(orderItem);
+                    }
                 }
 
-                trace.Add("date", dateVal);
+                trace.Add("date", username);
                 trace.Add("data", blobData);
                 trace.Add("requestbody", req.Body.ToString());
             }
@@ -166,7 +320,7 @@ namespace PlanB.Butler.Services
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
             }
 
-            return JsonConvert.SerializeObject(orderBlob);
+            return JsonConvert.SerializeObject(cloudBlockBlobs);
         }
 
         /// <summary>
