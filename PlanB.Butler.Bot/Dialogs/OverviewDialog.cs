@@ -32,20 +32,23 @@ namespace PlanB.Butler.Bot
         private static bool valid;
 
         private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
-        private static string help = rm.GetString("help");
-        private static string orderFood = rm.GetString("orderFood"); 
-        private static string deleteOrder = rm.GetString("deleteOrder");
-        private static string showMonthBurden = rm.GetString("showMonthBurden");
-        private static string orderOtherDay = rm.GetString("orderOtherDay");
-        private static string daysOrder = rm.GetString("daysOrder");
-        private static string ordered = rm.GetString("ordered");
-        private static string todaysRestaurant = rm.GetString("todaysRestaurant");
-        private static string andAtRestauarant = rm.GetString("andAtRestauarant");
-        private static string whatNow = rm.GetString("whatNow"); 
-        private static string errorOtherDay2 = rm.GetString("errorOtherDay2");
+        private static string OverviewDialog_Help = rm.GetString("OverviewDialog_Help");
+        private static string OverviewDialog_OrderFood = rm.GetString("OverviewDialog_OrderFood"); 
+        private static string OverviewDialog_DeleteOrder = rm.GetString("OverviewDialog_DeleteOrder");
+        private static string OverviewDialog_ShowDepts = rm.GetString("OverviewDialog_ShowDepts");
+        private static string OverviewDialog_OtherDay = rm.GetString("OverviewDialog_OtherDay");
+        private static string OverviewDialog_DaysOrder = rm.GetString("OverviewDialog_DaysOrder");
+        private static string NextOrderDialog_RestaurantPrompt = rm.GetString("NextOrderDialog_RestaurantPrompt");
+        private static string OverviewDialog_WhatNow = rm.GetString("OverviewDialog_WhatNow");
+        private static string OtherDayDialog_Order1 = rm.GetString("OtherDayDialog_Order1");
+        private static string OtherDayDialog_Order2 = rm.GetString("OtherDayDialog_Order2");
+        private static string OtherDayDialog_Error2 = rm.GetString("OtherDayDialog_Error2");
+        private static string OverviewDialog_Restaurant = rm.GetString("OverviewDialog_Restaurant"); 
+        
+        
 
         // In this Array you can Easy modify your choice List.
-        private static string[] choices = { orderFood, orderOtherDay, deleteOrder, showMonthBurden , daysOrder };
+        private static string[] choices = { OverviewDialog_OrderFood, OverviewDialog_OtherDay, OverviewDialog_DeleteOrder, OverviewDialog_ShowDepts, OverviewDialog_DaysOrder };
         private static ComponentDialog[] dialogs;
 
         /// <summary>
@@ -117,7 +120,7 @@ namespace PlanB.Butler.Bot
     /// <returns></returns>
     private async Task<DialogTurnResult> InitialStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            await stepContext.Context.SendActivityAsync(MessageFactory.Text(help), cancellationToken);
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text(OverviewDialog_Help), cancellationToken);
 
             // Cards are sent as Attachments in the Bot Framework.
             // So we need to create a list of attachments for the reply activity.
@@ -164,12 +167,12 @@ namespace PlanB.Butler.Bot
             {
                 if (temp == false)
                 {
-                    msg = $" {todaysRestaurant} {item} {ordered} ";
+                    msg = $" {OtherDayDialog_Order1} {item} {OtherDayDialog_Order2} ";
                     temp = true;
                 }
                 else
                 {
-                    msg += $"{andAtRestauarant} {item}";
+                    msg += $"{OverviewDialog_Restaurant} {item} ";
                 }
             }
             
@@ -187,7 +190,7 @@ namespace PlanB.Butler.Bot
             nameof(ChoicePrompt),
             new PromptOptions
             {
-                Prompt = MessageFactory.Text(whatNow),
+                Prompt = MessageFactory.Text(OverviewDialog_WhatNow),
                 Choices = ChoiceFactory.ToChoices(choiceList),
                 Style = ListStyle.HeroCard,
             }, cancellationToken);
@@ -218,7 +221,7 @@ namespace PlanB.Butler.Bot
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(errorOtherDay2), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(OtherDayDialog_Error2), cancellationToken);
 
                 return await stepContext.EndDialogAsync(null, cancellationToken);
             }

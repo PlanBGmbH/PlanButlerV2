@@ -64,9 +64,6 @@
   </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Update="Dictionary\main.de-IT.resx">
-        <SubType>Designer</SubType>
-      </EmbeddedResource>
       <EmbeddedResource Update="Dictionary\main.resx">
         <LastGenOutput>main.Designer.cs</LastGenOutput>
         <Generator>PublicResXFileCodeGenerator</Generator>
