@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
 using System.Net.Mime;
 using System.Reflection;
 using System.Text;
@@ -16,12 +15,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using PlanB.Butler.Services.Extensions;
 using PlanB.Butler.Services.Models;
 
@@ -39,7 +36,7 @@ namespace PlanB.Butler.Services
         /// <param name="blob">blob.</param>
         /// <param name="log">The log.</param>
         /// <returns>Daily Overview.</returns>
-        [ProducesResponseType(typeof(List<OrderBlob>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<OrdersModel>), StatusCodes.Status200OK)]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [FunctionName(nameof(GetOrder))]
@@ -111,7 +108,6 @@ namespace PlanB.Butler.Services
 
                 trace.Add("date", dateVal);
                 trace.Add("data", blobData);
-                trace.Add("requestbody", req.Body.ToString());
                 log.LogInformation(correlationId, $"'{methodName}' - success", trace);
                 actionResult = new OkObjectResult(orders);
             }
@@ -146,7 +142,7 @@ namespace PlanB.Butler.Services
         /// <param name="log">The log.</param>
         /// <param name="context">The context.</param>
         [Singleton]
-        [ProducesResponseType(typeof(List<OrderBlob>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<OrdersModel>), StatusCodes.Status200OK)]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [FunctionName(nameof(PostDocumentOrder))]
