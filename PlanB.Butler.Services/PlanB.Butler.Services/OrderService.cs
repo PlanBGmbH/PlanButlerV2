@@ -57,7 +57,7 @@ namespace PlanB.Butler.Services
             var trace = new Dictionary<string, string>();
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
             List<IListBlobItem> cloudBlockBlobs = new List<IListBlobItem>();
-            List<OrderBlob> orders = new List<OrderBlob>();
+            List<OrdersModel> orders = new List<OrdersModel>();
 
             try
             {
@@ -91,16 +91,20 @@ namespace PlanB.Butler.Services
                     if (string.IsNullOrEmpty(username))
                     {
                         var blobContent = blobitem.DownloadTextAsync();
-                        var orderItem = JsonConvert.DeserializeObject<OrderBlob>(await blobContent);
-                        orders.Add(orderItem);
+                        var orderItem = JsonConvert.DeserializeObject<OrderModel>(await blobContent);
+                        OrdersModel order = new OrdersModel();
+                        order.Orders.Add(orderItem);
+                        orders.Add(order);
                     }
                     else
                     {
                         if (blobitem.Metadata.Contains(new KeyValuePair<string, string>("user", username)))
                         {
                             var blobContent = blobitem.DownloadTextAsync();
-                            var orderItem = JsonConvert.DeserializeObject<OrderBlob>(await blobContent);
-                            orders.Add(orderItem);
+                            var orderItem = JsonConvert.DeserializeObject<OrderModel>(await blobContent);
+                            OrdersModel order = new OrdersModel();
+                            order.Orders.Add(orderItem);
+                            orders.Add(order);
                         }
                     }
                 }
