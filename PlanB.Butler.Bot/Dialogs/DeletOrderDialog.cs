@@ -37,15 +37,15 @@ namespace PlanB.Butler.Bot
 
         /// <summary>
         /// DeletDialogTimePrompt.
-        /// DeletDialogWhoPrompt.
-        /// NextOrderDialogMyself.
-        /// NextOrderDialolTrainee.
-        /// NextOrderDialogCostumer.
-        /// DeletDialogNoOrder.
-        /// DeletDialogDeleteSucess.
-        /// DeletDialogDeletePrompt.
-        /// DeletDialogYes.
-        /// DeletDialogNo.
+        /// DeletDialogWhoPrompt
+        /// NextOrderDialogMyself
+        /// NextOrderDialolTrainee
+        /// NextOrderDialogCostumer
+        /// DeletDialogNoOrder
+        /// DeletDialogDeleteSucess
+        /// DeletDialogDeletePrompt
+        /// DeletDialogYes
+        /// DeletDialogNo
         /// OtherDayDialogError2.
         /// </summary>
 
@@ -221,14 +221,14 @@ namespace PlanB.Butler.Bot
                 var collection = orderBlob.OrderList.FindAll(x => x.Name == order.Name);
                 obj = collection.FindLast(x => x.CompanyStatus == order.CompanyStatus);
 
-                var deletDialog_DeletePrompt = string.Format(DeletDialogDeletePrompt, obj.Meal); //Should ... be deleted?
+                var deletDialogDeletePrompt = string.Format(DeletDialogDeletePrompt, obj.Meal); //Should ... be deleted?
 
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
 
                     {
-                        Prompt = MessageFactory.Text(deletDialog_DeletePrompt),
+                        Prompt = MessageFactory.Text(deletDialogDeletePrompt),
                         Choices = ChoiceFactory.ToChoices(new List<string> { DeletDialogYes, DeletDialogNo}),
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);
