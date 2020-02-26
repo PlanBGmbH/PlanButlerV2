@@ -51,9 +51,8 @@ namespace PlanB.Butler.Bot
         private static readonly string OverviewDialogWhatNow = rm.GetString("OverviewDialog_WhatNow");
         private static readonly string OverviewDialogError = rm.GetString("OtherDayDialog_Error2");
         private static readonly string OtherDayDialogOrder = rm.GetString("OtherDayDialog_Order");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
-
-
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
+             
         // In this Array you can Easy modify your choice List.
         private static string[] choices = { OverviewDialogOrderFood, OverviewDDialogOtherDay, OverviewDialogDeleteOrder, OverviewDialogShowDepts, OverviewDialogDaysOrder };
         private static ComponentDialog[] dialogs;
