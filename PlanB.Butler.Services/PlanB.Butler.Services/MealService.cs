@@ -153,6 +153,7 @@ namespace PlanB.Butler.Services
 
             try
             {
+                trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
                 string startDateQuery = req.Query["startDate"];
                 string endDateQuery = req.Query["endDate"];
                 string restaurantQuery = req.Query["restaurant"];

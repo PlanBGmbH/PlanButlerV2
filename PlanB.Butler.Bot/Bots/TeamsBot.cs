@@ -7,14 +7,20 @@
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Logging;
+    using System.Resources;
+    using System.Reflection;
 
     // This bot is derived (view DialogBot<T>) from the TeamsACtivityHandler class currently included as part of this sample.
+    
 
     public class TeamsBot<T> : DialogBot<T> where T : Dialog
     {
-        private const string WelcomeMessage = "Guten Tag, ich bin der PlanButler, dein Essensorganisator. Wie kann ich dir helfen?\n" +
-            "Tippe irgendwas ein um fortzufahren.";
-
+        /// <summary>
+        /// TeamsBotsWelcomeMessage.
+        /// </summary>
+       
+        private static readonly string TeamBotsWelcomeMessage = rm.GetString("TeamBots_WelcomeMessage");
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
         public TeamsBot(ConversationState conversationState, UserState userState, T dialog, ILogger<DialogBot<T>> logger)
             : base(conversationState, userState, dialog, logger)
         {
@@ -22,7 +28,7 @@
 
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
-            await turnContext.SendActivityAsync(WelcomeMessage, cancellationToken: cancellationToken);
+            await turnContext.SendActivityAsync(TeamBotsWelcomeMessage, cancellationToken: cancellationToken);
         }
 
         protected override async Task OnSigninVerifyStateAsync(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)

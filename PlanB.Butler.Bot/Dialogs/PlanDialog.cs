@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
+    using System.Resources;
     using System.Threading;
     using System.Threading.Tasks;
      using BotLibraryV2;
@@ -14,6 +16,23 @@
 
     public class PlanDialog : ComponentDialog
     {
+        /// <summary>
+        /// PlanDialogMenuCardPrompt.
+        /// PlanDialogMenuCard
+        /// PlanDialogOtherMenuCard
+        /// PlanDialogNoMenuCard
+        /// PlanDialogYes
+        /// PlanDialogNo.
+        /// </summary>
+
+        private static readonly string PlanDialogMenuCardPrompt = rm.GetString("PlanDialog_MenuCardPrompt");
+        private static readonly string PlanDialogMenuCard = rm.GetString("PlanDialog_MenuCard");
+        private static readonly string PlanDialogOtherMenuCard = rm.GetString("PlanDialog_OtherMenuCard");
+        private static readonly string PlanDialogNoMenuCard = rm.GetString("PlanDialog_NoMenuCard");
+        private static readonly string PlanDialogYes = rm.GetString("yes");
+        private static readonly string PlanDialogNo = rm.GetString("no");
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+
         /// <summary>
         /// The bot configuration.
         /// </summary>
@@ -46,8 +65,8 @@
         {
             return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
             {
-                Prompt = MessageFactory.Text("Von welchem Restaurant möchtest du die Speisekarte sehen?"),
-                Choices = ChoiceFactory.ToChoices(new List<string> { "Bieg", "Delphi", "Leib und Seele", "Liederhalle" ,"Feasy","La Boussola"}),
+                Prompt = MessageFactory.Text(PlanDialogMenuCardPrompt),
+                Choices = ChoiceFactory.ToChoices(new List<string> { "Bieg", "Delphi", "Leib und Seele", "Liederhalle", "Feasy",  "La Boussola"}),
                 Style = ListStyle.HeroCard,
             }, cancellationToken);
         }
@@ -57,21 +76,23 @@
             stepContext.Values["restaurant"] = ((FoundChoice)stepContext.Result).Value;
             string restaurant = stepContext.Values["restaurant"].ToString();
 
+            var PlanDialog_NoMenuCard1 = MessageFactory.Text(string.Format(PlanDialogNoMenuCard, restaurant));
+         
             var picture = BotMethods.GetDocument("pictures", restaurant.Replace(' ', '_') + ".txt", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
             if (!picture.Contains("BlobNotFound"))
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text("Okay, hier der Essensplan von " + restaurant), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(PlanDialogMenuCard + restaurant), cancellationToken);
                 await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(new Attachment("image/png", picture)), cancellationToken);
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text("Für " + restaurant + " ist leider keine Speisekarte vorhanden."), cancellationToken);
+                await stepContext.Context.SendActivityAsync(PlanDialog_NoMenuCard1, cancellationToken);
             }
 
             return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
             {
-                Prompt = MessageFactory.Text("Willst du einen weitere Karte anschauen?"),
-                Choices = ChoiceFactory.ToChoices(new List<string> { "Ja", "Nein" }),
+                Prompt = MessageFactory.Text(PlanDialogOtherMenuCard),
+                Choices = ChoiceFactory.ToChoices(new List<string> { PlanDialogYes, PlanDialogNo }),
                 Style = ListStyle.HeroCard,
             });
         }

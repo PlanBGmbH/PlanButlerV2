@@ -117,11 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="hallo" xml:space="preserve">
-    <value>1234</value>
+  <data name="calculated" xml:space="preserve">
+    <value>berechnet</value>
   </data>
-  <data name="hallo1" xml:space="preserve">
-    <value>5678</value>
+  <data name="hallo" xml:space="preserve">
+    <value>hallo</value>
+  </data>
+  <data name="hallo2" xml:space="preserve">
+    <value>456</value>
+  </data>
+  <data name="hallo3" xml:space="preserve">
+    <value>789</value>
+  </data>
+  <data name="sumMe" xml:space="preserve">
+    <value>{0}Hallo{1}</value>
   </data>
   <data name="thanks" xml:space="preserve">
     <value>danke</value>

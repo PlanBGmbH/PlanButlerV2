@@ -75,11 +75,11 @@ namespace PlanB.Butler.Services.Models
         public int Quantity { get; set; }
 
         /// <summary>
-        /// Gets or sets the total.
+        /// Gets or sets the benefit.
         /// </summary>
         /// <value>
-        /// The total.
+        /// The benefit.
         /// </value>
-        public double Total { get; set; }
+        public double Benefit { get; set; }
     }
 }

@@ -19,17 +19,25 @@ namespace PlanB.Butler.Bot
 {
     public class CreditDialog : ComponentDialog
     {
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
-        private static string name = rm.GetString("name");
-        private static string monthBurden = rm.GetString("monthBurden");
-        private static string euro = rm.GetString("euro");
-        private static string noOrderMonth = rm.GetString("noOrderMonth");
-        private static string yes = rm.GetString("yes");
-        private static string no = rm.GetString("no");
-        private static string noBillMonth = rm.GetString("noBillMonth");
-        private static string noBillLastMonth = rm.GetString("noBillLastMonth");
-        private static string lastMonthBurden = rm.GetString("lastMonthBruden");
+        /// <summary>
+        /// OtherDayDialogNamePrompt.
+        /// CreditDialogNoOrder
+        /// CreditDialogNoBill
+        /// CreditDialogNoBillLastMonth
+        /// CreditDialogMonthDepts
+        /// CreditDialogYes
+        /// CreditDialogNo.
+        /// </summary>
 
+        private static readonly string OtherDayDialogNamePrompt = rm.GetString("OtherDayDialog_NamePrompt");
+        private static readonly string CreditDialogNoOrder = rm.GetString("CreditDialog_NoOrder");
+        private static readonly string CreditDialogNoBill = rm.GetString("CreditDialog_NoBill");
+        private static readonly string CreditDialogNoBillLastMonth = rm.GetString("CreditDialog_NoBillLastMonth");
+        private static readonly string CreditDialogLastMonthDepts = rm.GetString("CreditDialog_LastMonthDepts");
+        private static readonly string CreditDialogMonthDepts = rm.GetString("CreditDialog_MonthDepts");
+        private static readonly string CreditDialogYes = rm.GetString("yes");
+        private static readonly string CreditDialogNo = rm.GetString("no");
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
 
         /// <summary>
         /// The bot configuration.
@@ -66,7 +74,7 @@ namespace PlanB.Butler.Bot
             }
             else
             {
-                return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text(name) }, cancellationToken);
+                return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text(OtherDayDialogNamePrompt) }, cancellationToken);
             }
         }
 
@@ -77,14 +85,19 @@ namespace PlanB.Butler.Bot
                 stepContext.Values["name"] = (string)stepContext.Result;
             }
 
+            
+
             try
             {
                 MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(BotMethods.GetDocument("moneylog", "money_" + DateTime.Now.Month.ToString() + "_" + DateTime.Now.Year + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
 
                 var userId = money.User.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
+
+                var creditDialogMonthDepts = MessageFactory.Text(string.Format(CreditDialogMonthDepts, money.User[userId].Owe)); //monatliche Belastung 
+                
                 if (userId != -1)
                 {
-                    await stepContext.Context.SendActivityAsync(MessageFactory.Text($"{monthBurden} {money.User[userId].Owe} {euro}"), cancellationToken);
+                    await stepContext.Context.SendActivityAsync(creditDialogMonthDepts, cancellationToken);
                     await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                     return await stepContext.BeginDialogAsync(nameof(OverviewDialog));
                 }
@@ -92,8 +105,8 @@ namespace PlanB.Butler.Bot
                 {
                     return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
                     {
-                        Prompt = MessageFactory.Text(noOrderMonth),
-                        Choices = ChoiceFactory.ToChoices(new List<string> { yes, no }),
+                        Prompt = MessageFactory.Text(CreditDialogNoOrder),
+                        Choices = ChoiceFactory.ToChoices(new List<string> { CreditDialogYes, CreditDialogNo}),
                         Style = ListStyle.HeroCard,
                     });
                 }
@@ -102,8 +115,8 @@ namespace PlanB.Butler.Bot
             {
                 return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
                 {
-                    Prompt = MessageFactory.Text(noBillMonth),
-                    Choices = ChoiceFactory.ToChoices(new List<string> { yes, no }),
+                    Prompt = MessageFactory.Text(CreditDialogNoBill),
+                    Choices = ChoiceFactory.ToChoices(new List<string> { CreditDialogYes, CreditDialogNo }),
                     Style = ListStyle.HeroCard,
                 });
             }
@@ -121,18 +134,20 @@ namespace PlanB.Butler.Bot
                     MoneyLog money = JsonConvert.DeserializeObject<MoneyLog>(BotMethods.GetDocument("moneylog", "money_" + lastmonth.ToString() + "_" + DateTime.Now.Year + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
 
                     var userId = money.User.FindIndex(x => x.Name == (string)stepContext.Values["name"]);
+
+                    var CreditDialog_LastMonthDepts1 = MessageFactory.Text(string.Format(CreditDialogLastMonthDepts, money.User[userId].Owe));
                     if (userId != -1)
                     {
-                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"{lastMonthBurden} {money.User[userId].Owe} { euro}"), cancellationToken);
+                        await stepContext.Context.SendActivityAsync(CreditDialog_LastMonthDepts1, cancellationToken);
                     }
                     else
                     {
-                        await stepContext.Context.SendActivityAsync(MessageFactory.Text(noBillMonth), cancellationToken);
+                        await stepContext.Context.SendActivityAsync(MessageFactory.Text(CreditDialogNoBillLastMonth), cancellationToken);
                     }
                 }
                 catch
                 {
-                    await stepContext.Context.SendActivityAsync(MessageFactory.Text(noBillLastMonth), cancellationToken);
+                    await stepContext.Context.SendActivityAsync(MessageFactory.Text(CreditDialogNoBill), cancellationToken);
                 }
             }
 
