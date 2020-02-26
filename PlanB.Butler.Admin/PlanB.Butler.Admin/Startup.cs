@@ -1,76 +1,39 @@
-﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
 using System;
-
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.AzureAD.UI;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using PlanB.Butler.Admin.Contracts;
+using PlanB.Butler.Admin.Services;
 
 namespace PlanB.Butler.Admin
 {
-    /// <summary>
-    /// Startup.
-    /// </summary>
     public class Startup
     {
-        /// <summary>
-        /// The configuration.
-        /// </summary>
-        private readonly IConfiguration configuration;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Startup"/> class.
-        /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        /// <exception cref="ArgumentNullException">configuration.</exception>
         public Startup(IConfiguration configuration)
         {
-            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            Configuration = configuration;
         }
 
-        /// <summary>
-        /// This method gets called by the runtime. Use this method to add services to the container.
-        /// </summary>
-        /// <param name="services">The services.</param>
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<AdminConfig>(this.configuration.GetSection("myConfiguration"));
+            services.AddControllersWithViews();
+            //Set 5 min as the lifetime for the HttpMessageHandler objects in the pool used for the Catalog Typed Client
+            services.AddHttpClient<IMealService, MealService>()
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
-
-            services.AddAuthentication(AzureADDefaults.AuthenticationScheme)
-                    .AddAzureAD(options => this.configuration.Bind("AzureAd", options));
-
-            services.Configure<OpenIdConnectOptions>(AzureADDefaults.OpenIdScheme, options =>
-            {
-                options.Authority = options.Authority + "/v2.0/";         // Microsoft identity platform
-
-                options.TokenValidationParameters.ValidateIssuer = false; // accept several tenants (here simplified)
-            });
-
-            services.AddMvc(options =>
-            {
-                var policy = new AuthorizationPolicyBuilder()
-                                .RequireAuthenticatedUser()
-                                .Build();
-                options.Filters.Add(new AuthorizeFilter(policy));
-            })
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            //services.AddHttpClient<IMealService, MealService>(client =>
+            //{
+            //    client.BaseAddress = new Uri("https://planbbutlerservices.azurewebsites.net/api/");
+            //});
         }
 
         /// <summary>
@@ -78,7 +41,7 @@ namespace PlanB.Butler.Admin
         /// </summary>
         /// <param name="app">The application.</param>
         /// <param name="env">The env.</param>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -87,22 +50,21 @@ namespace PlanB.Butler.Admin
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseCookiePolicy();
 
-            app.UseAuthentication();
+            app.UseRouting();
 
-            app.UseMvc(routes =>
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }
