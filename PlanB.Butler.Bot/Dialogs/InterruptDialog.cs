@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
+using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,6 +25,14 @@ namespace PlanB.Butler.Bot
     /// <seealso cref="Microsoft.Bot.Builder.Dialogs.ComponentDialog" />
     public class InterruptDialog : ComponentDialog
     {
+        /// <summary>
+        /// InterruptDialogHelpText.
+        /// </summary>
+
+        private static readonly string InterruptDialogHelpText = rm.GetString("InterruptDialog_HelpText");
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+
+
         private static Plan plan = new Plan();
         private readonly IOptions<BotConfig> botConfig;
 
@@ -65,12 +75,8 @@ namespace PlanB.Butler.Bot
 
                 if (text == "help" || text == "hilfe")
                 {
-                    // Help message!
-                    string message = "Hallo,\nIch bin dein persönlicher Essensbestell Bot.\nZu den schon angezeigten befehlen kann ich noch\n" +
-                        " - Ein weiteres essen für z.B. Praktikanten oder Kunden bestellen. Daür bitte 'Weiteres Essen bestellen' eingeben.\n" +
-                        " - Ein essen für einen anderen Tag in dieser Woche bestellen. Dafür bitte 'für einen anderen Tag Essen bestellen eingeben.\n" +
-                        " - Fragen was man heute bestellt hat zur Kontrolle. Dafür bitte 'Was habe ich heute bestellt' eingeben.";
-                    await innerDc.Context.SendActivityAsync(MessageFactory.Text(message), cancellationToken);
+                    // Help message!                   
+                    await innerDc.Context.SendActivityAsync(MessageFactory.Text(InterruptDialogHelpText), cancellationToken);
                     await innerDc.EndDialogAsync(cancellationToken: cancellationToken);
                     return await innerDc.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                 }

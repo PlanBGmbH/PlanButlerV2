@@ -27,6 +27,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AdaptiveCards" Version="1.2.3" />
     <PackageReference Include="EPPlus" Version="4.5.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
@@ -64,9 +68,6 @@
   </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Update="Dictionary\main.de-IT.resx">
-        <SubType>Designer</SubType>
-      </EmbeddedResource>
       <EmbeddedResource Update="Dictionary\main.resx">
         <LastGenOutput>main.Designer.cs</LastGenOutput>
         <Generator>PublicResXFileCodeGenerator</Generator>
