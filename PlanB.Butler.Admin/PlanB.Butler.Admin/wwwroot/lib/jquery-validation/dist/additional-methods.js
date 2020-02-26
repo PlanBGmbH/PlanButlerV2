@@ -556,8 +556,7 @@ $.validator.addMethod( "iban", function( value, element ) {
 	// It contains:
 	// country code ISO 3166-1 - two letters,
 	// two check digits,
-	// Basic Bank 
-	Number(BBAN) - up to 30 chars
+	// Basic Bank Account Number (BBAN) - up to 30 chars
 	var minimalIBANlength = 5;
 	if ( iban.length < minimalIBANlength ) {
 		return false;

@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanB.Butler.Library.Test",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanB.Butler.Services", "PlanB.Butler.Services\PlanB.Butler.Services\PlanB.Butler.Services.csproj", "{68C9A463-999E-45B2-BAA6-8F53321367EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanB.Butler.Services.Test", "PlanB.Butler.Services\PlanB.Butler.Services.Test\PlanB.Butler.Services.Test.csproj", "{5DC67115-3051-44E2-A69F-C9694D2BDD0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanB.Butler.Services.Test", "PlanB.Butler.Services\PlanB.Butler.Services.Test\PlanB.Butler.Services.Test.csproj", "{5DC67115-3051-44E2-A69F-C9694D2BDD0D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanB.Butler.Admin", "PlanB.Butler.Admin\PlanB.Butler.Admin\PlanB.Butler.Admin.csproj", "{EDD3DF63-CF5A-4A11-BBF2-535AC035613A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{5DC67115-3051-44E2-A69F-C9694D2BDD0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5DC67115-3051-44E2-A69F-C9694D2BDD0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5DC67115-3051-44E2-A69F-C9694D2BDD0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDD3DF63-CF5A-4A11-BBF2-535AC035613A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDD3DF63-CF5A-4A11-BBF2-535AC035613A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDD3DF63-CF5A-4A11-BBF2-535AC035613A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDD3DF63-CF5A-4A11-BBF2-535AC035613A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
