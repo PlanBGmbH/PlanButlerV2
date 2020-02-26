@@ -5,6 +5,7 @@
     <UserSecretsId>82b45153-dea6-42fe-94f4-c897cc45ea91</UserSecretsId>
     <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
     <Company>PlanB. GmbH</Company>
+    <ApplicationInsightsResourceId>/subscriptions/0b2d10f3-ce35-4020-a415-33e1455eed50/resourcegroups/PlanButlerV2/providers/microsoft.insights/components/planbutlerbotservicev2</ApplicationInsightsResourceId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -41,6 +42,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
   </ItemGroup>
 
 
