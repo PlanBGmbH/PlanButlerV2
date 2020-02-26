@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -6,10 +9,13 @@ using System.Threading.Tasks;
 
 namespace PlanB.Butler.Admin.Models
 {
+    /// <summary>
+    /// RestaurantViewModel.
+    /// </summary>
     public class RestaurantViewModel
     {
         /// <summary>
-        /// Gets the identifier.
+        /// Gets or sets the identifier.
         /// </summary>
         /// <value>
         /// The identifier.
@@ -76,6 +82,5 @@ namespace PlanB.Butler.Admin.Models
         /// The email adress.
         /// </value>
         public string EmailAdress { get; set; }
-
     }
 }
