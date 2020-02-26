@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -67,5 +70,4 @@ namespace PlanB.Butler.Admin.Models
         /// </value>
         public string Restaurant { get; set; }
     }
-
 }

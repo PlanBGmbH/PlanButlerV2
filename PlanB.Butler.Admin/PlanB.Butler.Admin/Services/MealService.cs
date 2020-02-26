@@ -27,7 +27,7 @@ namespace PlanB.Butler.Admin.Services
         private readonly HttpClient httpClient;
 
         /// <summary>
-        /// The configuration
+        /// The configuration.
         /// </summary>
         private readonly IConfiguration config;
 
