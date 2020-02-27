@@ -4,6 +4,8 @@
 using System;
 using System.Globalization;
 
+using Newtonsoft.Json;
+
 namespace PlanB.Butler.Services.Models
 {
     /// <summary>
@@ -17,6 +19,7 @@ namespace PlanB.Butler.Services.Models
         /// <value>
         /// The identifier.
         /// </value>
+        [JsonProperty("id")]
         public string Id
         {
             get
@@ -33,6 +36,7 @@ namespace PlanB.Butler.Services.Models
         /// <value>
         /// The correlation identifier.
         /// </value>
+        [JsonProperty("correlationId")]
         public Guid? CorrelationId { get; set; }
 
         /// <summary>
@@ -41,6 +45,7 @@ namespace PlanB.Butler.Services.Models
         /// <value>
         /// The date.
         /// </value>
+        [JsonProperty("date")]
         public DateTime Date { get; set; }
 
         /// <summary>
@@ -49,6 +54,7 @@ namespace PlanB.Butler.Services.Models
         /// <value>
         /// The price.
         /// </value>
+        [JsonProperty("price")]
         public double Price { get; set; }
 
         /// <summary>
@@ -57,6 +63,7 @@ namespace PlanB.Butler.Services.Models
         /// <value>
         /// The name.
         /// </value>
+        [JsonProperty("name")]
         public string Name { get; set; }
 
         /// <summary>
@@ -65,6 +72,7 @@ namespace PlanB.Butler.Services.Models
         /// <value>
         /// The restaurant.
         /// </value>
+        [JsonProperty("restaurant")]
         public string Restaurant { get; set; }
     }
 }
