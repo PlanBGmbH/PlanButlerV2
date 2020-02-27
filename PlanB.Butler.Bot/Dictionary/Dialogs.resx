@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CreditDialog_LastMonthDepts" xml:space="preserve">
-    <value>Letzten Monat betrug ihre Belastung: {0} €</value>
-  </data>
   <data name="CreditDialog_MonthDepts" xml:space="preserve">
     <value>Diesen Monat beträgt ihre Belastung: {0} €</value>
   </data>
@@ -172,10 +169,7 @@
     <value>Für wen möchten Sie die Bestellung löschen?</value>
   </data>
   <data name="InterruptDialog_HelpText" xml:space="preserve">
-    <value>Hallo, Ich bin dein persönlicher Essensbestell Bot. Zu den schon angezeigten Befehlen kann ich noch
--Ein weiteres essen für z.B. Praktikanten oder Kunden bestellen. Daür bitte 'Weiteres Essen bestellen' eingeben. 
--Ein Essen für einen anderen Tag in dieser Woche bestellen. Dafür bitte 'für einen anderen Tag Essen bestellen eingeben.
--Zur Kontrolle kann man mich fragen was man heute bestellt hat. Dafür bitte 'Was habe ich heute bestellt' eingeben.</value>
+    <value>Hallo, Ich bin dein persönlicher Essensbestell Bot. Zu den schon angezeigten Befehlen kann ich noch</value>
   </data>
   <data name="NextOrderDialog_AmountFoodPrompt" xml:space="preserve">
     <value>Wie viele Essen möchten Sie bestellen?</value>
@@ -269,6 +263,15 @@
   </data>
   <data name="PlanDialog_OtherMenuCard" xml:space="preserve">
     <value>Möchten Sie die Speisekarte eines anderen Restaurant anschauen?</value>
+  </data>
+  <data name="String" xml:space="preserve">
+    <value>-Ein weiteres essen für z.B. Praktikanten oder Kunden bestellen. Daür bitte 'Weiteres Essen bestellen' eingeben.</value>
+  </data>
+  <data name="String1" xml:space="preserve">
+    <value>-Ein Essen für einen anderen Tag in dieser Woche bestellen. Dafür bitte 'für einen anderen Tag Essen bestellen eingeben.</value>
+  </data>
+  <data name="String2" xml:space="preserve">
+    <value>-Zur Kontrolle kann man mich fragen was man heute bestellt hat. Dafür bitte 'Was habe ich heute bestellt' eingeben.</value>
   </data>
   <data name="TeamBots_WelcomeMessage" xml:space="preserve">
     <value>Guten Tag, ich bin der PlanButler, ihr Essensorganisator. Wie kann ich ihnen helfen? Tippen Sie eine Taste um fortzufahren.</value>

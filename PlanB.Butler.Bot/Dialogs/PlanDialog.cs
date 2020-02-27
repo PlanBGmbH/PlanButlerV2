@@ -26,15 +26,14 @@
         /// PlanDialogNo.
         /// </summary>
 
-        private static readonly string PlanDialogMenuCardPrompt = rm.GetString("PlanDialog_MenuCardPrompt");
-        private static readonly string PlanDialogMenuCard = rm.GetString("PlanDialog_MenuCard");
-        private static readonly string PlanDialogOtherMenuCard = rm.GetString("PlanDialog_OtherMenuCard");
-        private static readonly string PlanDialogNoMenuCard = rm.GetString("PlanDialog_NoMenuCard");
-        private static readonly string PlanDialogYes = rm.GetString("yes");
-        private static readonly string PlanDialogNo = rm.GetString("no");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
-        
-        private readonly IStringLocalizer<PlanDialog> _localizer;       
+        private static string planDialogMenuCardPrompt = string.Empty;
+        private static string planDialogMenuCard = string.Empty;
+        private static string planDialogOtherMenuCard = string.Empty;
+        private static string planDialogNoMenuCard = string.Empty;
+        private static string planDialogYes = string.Empty;
+        private static string planDialogNo = string.Empty;
+
+        private readonly IStringLocalizer<PlanDialog> _localizer;
         /// <summary>
         /// The bot configuration.
         /// </summary>
@@ -43,6 +42,13 @@
         public PlanDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(PlanDialog))
         {
+            ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs", Assembly.GetExecutingAssembly());
+            planDialogMenuCardPrompt = rm.GetString("PlanDialog_MenuCardPrompt");
+            planDialogMenuCard = rm.GetString("PlanDialog_MenuCard");
+            planDialogOtherMenuCard = rm.GetString("PlanDialog_OtherMenuCard");
+            planDialogNoMenuCard = rm.GetString("PlanDialog_NoMenuCard");
+            planDialogYes = rm.GetString("yes");
+            planDialogNo = rm.GetString("no");
 
             this.botConfig = config;
 
@@ -68,8 +74,8 @@
         {
             return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
             {
-                Prompt = MessageFactory.Text(PlanDialogMenuCardPrompt),
-                Choices = ChoiceFactory.ToChoices(new List<string> { "Bieg", "Delphi", "Leib und Seele", "Liederhalle", "Feasy",  "La Boussola"}),
+                Prompt = MessageFactory.Text(planDialogMenuCardPrompt),
+                Choices = ChoiceFactory.ToChoices(new List<string> { "Bieg", "Delphi", "Leib und Seele", "Liederhalle", "Feasy", "La Boussola" }),
                 Style = ListStyle.HeroCard,
             }, cancellationToken);
         }
@@ -79,24 +85,25 @@
             stepContext.Values["restaurant"] = ((FoundChoice)stepContext.Result).Value;
             string restaurant = stepContext.Values["restaurant"].ToString();
 
-            var planDialogNoMenuCard = MessageFactory.Text(string.Format(PlanDialogNoMenuCard, restaurant));
-         
+            var planDialogNoMenuCard1 = MessageFactory.Text(string.Format(planDialogNoMenuCard, restaurant));
+            var planDialogMenuCard1 = MessageFactory.Text(string.Format(planDialogMenuCard, restaurant));
+
             var picture = BotMethods.GetDocument("pictures", restaurant.Replace(' ', '_') + ".txt", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
             if (!picture.Contains("BlobNotFound"))
             {
-                var planDialogMenuCard = MessageFactory.Text(string.Format(PlanDialogMenuCard, restaurant));
-                await stepContext.Context.SendActivityAsync(planDialogMenuCard, cancellationToken);
+                
+                await stepContext.Context.SendActivityAsync(planDialogMenuCard1, cancellationToken);
                 await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(new Attachment("image/png", picture)), cancellationToken);
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(planDialogNoMenuCard, cancellationToken);
+                await stepContext.Context.SendActivityAsync(planDialogNoMenuCard1, cancellationToken);
             }
 
             return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions
             {
-                Prompt = MessageFactory.Text(PlanDialogOtherMenuCard),
-                Choices = ChoiceFactory.ToChoices(new List<string> { PlanDialogYes, PlanDialogNo }),
+                Prompt = MessageFactory.Text(planDialogOtherMenuCard),
+                Choices = ChoiceFactory.ToChoices(new List<string> { planDialogYes, planDialogNo }),
                 Style = ListStyle.HeroCard,
             });
         }
@@ -107,7 +114,7 @@
             if (stepContext.Values["Choise"].ToString().ToLower() == "ja")
             {
                 await stepContext.EndDialogAsync();
-                return await stepContext.BeginDialogAsync(nameof(PlanDialog),null,cancellationToken);
+                return await stepContext.BeginDialogAsync(nameof(PlanDialog), null, cancellationToken);
             }
             else
             {

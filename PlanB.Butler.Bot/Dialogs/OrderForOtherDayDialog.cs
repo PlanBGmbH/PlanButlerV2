@@ -29,7 +29,7 @@ namespace PlanB.Butler.Bot
         private static Plan plan = new Plan();
         private static int valueDay;
         private const double grand = 3.30;
-        private static string dayName;       
+        private static string dayName;
         private static List<string> meal1List = new List<string>();
         private static List<string> meal1ListwithMoney = new List<string>();
         private static List<string> meal2List = new List<string>();
@@ -53,17 +53,16 @@ namespace PlanB.Butler.Bot
         /// NextOrderDialogSaveOrder.
         /// </summary>
 
-        private static readonly string OtherDayDialogTimePrompt = rm.GetString("OtherDayDialog_TimePrompt");
-        private static readonly string OtherDayDialogError = rm.GetString("OtherDayDialog_Error");
-        private static readonly string OtherDayDialogError1 = rm.GetString("OtherDayDialog_Error1");
-        private static readonly string OtherDayDialogError2 = rm.GetString("OtherDayDialog_Error2");
-        private static readonly string OtherDayDialogNamePrompt = rm.GetString("OtherDayDialog_NamePrompt");
-        private static readonly string OtherDayDialogThanks = rm.GetString("OtherDayDialog_Thanks");
-        private static readonly string NextOrderDialogRestaurantPrompt = rm.GetString("NextOrderDialog_RestaurantPrompt");
-        private static readonly string NextOrderDialogFoodPrompt = rm.GetString("NextOrderDialog_FoodPrompt");
-        private static readonly string OtherDayDialogOrder = rm.GetString("OtherDayDialog_Order");
-        private static readonly string NextOrderDialogSaveOrder = rm.GetString("NextOrderDialog_SaveOrder");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
+        private static string otherDayDialogTimePrompt = string.Empty;
+        private static string otherDayDialogError = string.Empty;
+        private static string otherDayDialogError1 = string.Empty;
+        private static string otherDayDialogError2 = string.Empty;
+        private static string otherDayDialogNamePrompt = string.Empty;
+        private static string otherDayDialogThanks = string.Empty;
+        private static string nextOrderDialogRestaurantPrompt = string.Empty;
+        private static string nextOrderDialogFoodPrompt = string.Empty;
+        private static string otherDayDialogOrder = string.Empty;
+        private static string nextOrderDialogSaveOrder = string.Empty;
 
         private IBotTelemetryClient telemetryClient;
         /// <summary>
@@ -74,6 +73,18 @@ namespace PlanB.Butler.Bot
         public OrderForOtherDayDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(OrderForOtherDayDialog))
         {
+            ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs", Assembly.GetExecutingAssembly());
+            otherDayDialogTimePrompt = rm.GetString("OtherDayDialog_TimePrompt");
+            otherDayDialogError = rm.GetString("OtherDayDialog_Error");
+            otherDayDialogError1 = rm.GetString("OtherDayDialog_Error1");
+            otherDayDialogError2 = rm.GetString("OtherDayDialog_Error2");
+            otherDayDialogNamePrompt = rm.GetString("OtherDayDialog_NamePrompt");
+            otherDayDialogThanks = rm.GetString("OtherDayDialog_Thanks");
+            nextOrderDialogRestaurantPrompt = rm.GetString("NextOrderDialog_RestaurantPrompt");
+            nextOrderDialogFoodPrompt = rm.GetString("NextOrderDialog_FoodPrompt");
+            otherDayDialogOrder = rm.GetString("OtherDayDialog_Order");
+            nextOrderDialogSaveOrder = rm.GetString("NextOrderDialog_SaveOrder");
+
             this.telemetryClient = telemetryClient;
             this.botConfig = config;
 
@@ -133,14 +144,14 @@ namespace PlanB.Butler.Bot
                     nameof(ChoicePrompt),
                     new PromptOptions
                     {
-                        Prompt = MessageFactory.Text(OtherDayDialogTimePrompt),
+                        Prompt = MessageFactory.Text(otherDayDialogTimePrompt),
                         Choices = ChoiceFactory.ToChoices(currentWeekDays),
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(OtherDayDialogError), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(otherDayDialogError), cancellationToken);
 
                 return await stepContext.EndDialogAsync(null, cancellationToken);
             }
@@ -160,7 +171,7 @@ namespace PlanB.Butler.Bot
             }
             if (daysDivVal == null)
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(OtherDayDialogError1), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(otherDayDialogError1), cancellationToken);
                 await stepContext.EndDialogAsync(null, cancellationToken);
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
             }
@@ -182,12 +193,12 @@ namespace PlanB.Butler.Bot
                 }
                 else
                 {
-                    return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text(OtherDayDialogNamePrompt) }, cancellationToken);
+                    return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = MessageFactory.Text(otherDayDialogNamePrompt) }, cancellationToken);
                 }
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(OtherDayDialogError2), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(otherDayDialogError2), cancellationToken);
 
                 return await stepContext.EndDialogAsync(null, cancellationToken);
             }
@@ -200,13 +211,13 @@ namespace PlanB.Butler.Bot
                 stepContext.Values["name"] = (string)stepContext.Result;
             }
 
-            await stepContext.Context.SendActivityAsync(MessageFactory.Text($" {OtherDayDialogThanks} {stepContext.Values["name"]}"), cancellationToken);
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text($" {otherDayDialogThanks} {stepContext.Values["name"]}"), cancellationToken);
 
             return await stepContext.PromptAsync(
                 nameof(ChoicePrompt),
                 new PromptOptions
                 {
-                    Prompt = MessageFactory.Text(NextOrderDialogRestaurantPrompt),
+                    Prompt = MessageFactory.Text(nextOrderDialogRestaurantPrompt),
                     Choices = GetChoice("restaurant", plan),
                     Style = ListStyle.HeroCard,
                 }, cancellationToken);
@@ -216,9 +227,9 @@ namespace PlanB.Butler.Bot
         {
             stepContext.Values["restaurant"] = ((FoundChoice)stepContext.Result).Value;
 
-            var otherDayDialogOrder = MessageFactory.Text(string.Format(OtherDayDialogOrder, stepContext.Values["restaurant"]));
+            var otherDayDialogOrder1 = MessageFactory.Text(string.Format(otherDayDialogOrder, stepContext.Values["restaurant"]));
 
-            await stepContext.Context.SendActivityAsync(otherDayDialogOrder, cancellationToken);
+            await stepContext.Context.SendActivityAsync(otherDayDialogOrder1, cancellationToken);
 
             if (stepContext.Values["restaurant"].ToString().ToLower() == plan.Planday[indexer].Restaurant1.ToLower())
             {
@@ -227,7 +238,7 @@ namespace PlanB.Butler.Bot
                     nameof(ChoicePrompt),
                     new PromptOptions
                     {
-                        Prompt = MessageFactory.Text(NextOrderDialogFoodPrompt),
+                        Prompt = MessageFactory.Text(nextOrderDialogFoodPrompt),
                         Choices = GetChoice("food1", plan),
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);
@@ -239,14 +250,14 @@ namespace PlanB.Butler.Bot
                     nameof(ChoicePrompt),
                     new PromptOptions
                     {
-                        Prompt = MessageFactory.Text(NextOrderDialogFoodPrompt),
+                        Prompt = MessageFactory.Text(nextOrderDialogFoodPrompt),
                         Choices = GetChoice("food2", plan),
                         Style = ListStyle.HeroCard,
                     }, cancellationToken);
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(OtherDayDialogError1), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(otherDayDialogError1), cancellationToken);
                 await stepContext.EndDialogAsync();
                 return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
             }
@@ -293,7 +304,7 @@ namespace PlanB.Butler.Bot
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(OtherDayDialogError1), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(otherDayDialogError1), cancellationToken);
                 return await stepContext.EndDialogAsync();
             }
             return await stepContext.NextAsync(null, cancellationToken);
@@ -344,11 +355,11 @@ namespace PlanB.Butler.Bot
             HttpStatusCode statusMoney = await BotMethods.UploadMoney(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
             if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(NextOrderDialogSaveOrder), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(nextOrderDialogSaveOrder), cancellationToken);
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(OtherDayDialogError2), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(otherDayDialogError2), cancellationToken);
                 BotMethods.DeleteOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                 BotMethods.DeleteMoney(bufferorder, weekDays[valueDay].ToString().ToLower(), this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                 BotMethods.DeleteOrder(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
