@@ -63,7 +63,7 @@ namespace PlanB.Butler.Admin.Models
         /// <value>
         /// The phone number.
         /// </value>
-        [JsonProperty("phonenumber")]
+        [JsonProperty("phoneNumber")]
         public string PhoneNumber { get; set; }
 
         /// <summary>
@@ -81,16 +81,16 @@ namespace PlanB.Butler.Admin.Models
         /// <value>
         /// The postal code.
         /// </value>
-        [JsonProperty("postalcode")]
+        [JsonProperty("postalCode")]
         public string PostalCode { get; set; }
 
         /// <summary>
-        /// Gets or sets the email adress.
+        /// Gets or sets the email address.
         /// </summary>
         /// <value>
         /// The email adress.
         /// </value>
-        [JsonProperty("emailadress")]
-        public string EmailAdress { get; set; }
+        [JsonProperty("emailAddress")]
+        public string EmailAddress { get; set; }
     }
 }
