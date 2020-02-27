@@ -19,10 +19,10 @@ namespace PlanB.Butler.Admin.Models
         public string RequestId { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether [show request identifier].
+        /// Gets a value indicating whether to show request identifier.
         /// </summary>
         /// <value>
-        ///   <c>true</c> if [show request identifier]; otherwise, <c>false</c>.
+        ///   <c>true</c> if to show request identifier; otherwise, <c>false</c>.
         /// </value>
         public bool ShowRequestId => !string.IsNullOrEmpty(this.RequestId);
     }

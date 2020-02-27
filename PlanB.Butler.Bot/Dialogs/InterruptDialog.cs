@@ -30,7 +30,7 @@ namespace PlanB.Butler.Bot
         /// </summary>
 
         private static readonly string InterruptDialogHelpText = rm.GetString("InterruptDialog_HelpText");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
 
 
         private static Plan plan = new Plan();

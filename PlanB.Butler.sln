@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanB.Butler.Library.Test",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanB.Butler.Services", "PlanB.Butler.Services\PlanB.Butler.Services\PlanB.Butler.Services.csproj", "{68C9A463-999E-45B2-BAA6-8F53321367EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanB.Butler.Services.Test", "PlanB.Butler.Services\PlanB.Butler.Services.Test\PlanB.Butler.Services.Test.csproj", "{5DC67115-3051-44E2-A69F-C9694D2BDD0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlanB.Butler.Services.Test", "PlanB.Butler.Services\PlanB.Butler.Services.Test\PlanB.Butler.Services.Test.csproj", "{5DC67115-3051-44E2-A69F-C9694D2BDD0D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

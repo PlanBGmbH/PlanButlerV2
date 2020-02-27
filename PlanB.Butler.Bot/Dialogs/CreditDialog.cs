@@ -37,7 +37,7 @@ namespace PlanB.Butler.Bot
         private static readonly string CreditDialogMonthDepts = rm.GetString("CreditDialog_MonthDepts");
         private static readonly string CreditDialogYes = rm.GetString("yes");
         private static readonly string CreditDialogNo = rm.GetString("no");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
 
         /// <summary>
         /// The bot configuration.

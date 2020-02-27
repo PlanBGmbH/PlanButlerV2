@@ -40,7 +40,7 @@ namespace PlanB.Butler.Bot
         private static readonly string DailyCreditDialogSumCostumer = rm.GetString("DailyCreditDialog_SumCostumer");
         private static readonly string DailyCreditDialogSumTrainee = rm.GetString("DailyCreditDialog_SumTrainne");
         private static readonly string DailyCreditDialogOrderedAt = rm.GetString("DailyCreditDialog_OrderedAt");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
 
         /// <summary>
         /// The bot configuration.

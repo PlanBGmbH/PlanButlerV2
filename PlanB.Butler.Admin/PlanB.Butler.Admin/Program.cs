@@ -1,8 +1,8 @@
-﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Copyright (c) PlanB. GmbH. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace PlanB.Butler.Admin
 {
@@ -17,16 +17,19 @@ namespace PlanB.Butler.Admin
         /// <param name="args">The arguments.</param>
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Run();
         }
 
         /// <summary>
-        /// Creates the web host builder.
+        /// Creates the host builder.
         /// </summary>
         /// <param name="args">The arguments.</param>
-        /// <returns>IWebHostBuilder.</returns>
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+        /// <returns>IHostBuilder.</returns>
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }

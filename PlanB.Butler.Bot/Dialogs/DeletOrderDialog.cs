@@ -60,7 +60,7 @@ namespace PlanB.Butler.Bot
         private static readonly string DeletDialogYes = rm.GetString("yes");
         private static readonly string DeletDialogNo = rm.GetString("no");
         private static readonly string OtherDayDialogError2 = rm.GetString("OtherDayDialog_Error2");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
 
 
         /// <summary>
