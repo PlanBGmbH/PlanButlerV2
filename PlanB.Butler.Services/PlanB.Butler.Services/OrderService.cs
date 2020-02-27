@@ -54,7 +54,7 @@ namespace PlanB.Butler.Services
             var trace = new Dictionary<string, string>();
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
             List<IListBlobItem> cloudBlockBlobs = new List<IListBlobItem>();
-            List<OrdersModel> orders = new List<OrdersModel>();
+            List<OrdersModel> orderBlob = new List<OrdersModel>();
 
             try
             {
@@ -74,7 +74,7 @@ namespace PlanB.Butler.Services
                     else
                     {
                         // TODO: Remove the prefix orders_.
-                        blobs = await blob.ListBlobsSegmentedAsync("orders_" + dateVal, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+                        blobs = await blob.ListBlobsSegmentedAsync(dateVal, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
                     }
 
                     blobContinuationToken = blobs.ContinuationToken;
@@ -88,20 +88,26 @@ namespace PlanB.Butler.Services
                     if (string.IsNullOrEmpty(username))
                     {
                         var blobContent = blobitem.DownloadTextAsync();
-                        var orderItem = JsonConvert.DeserializeObject<OrderModel>(await blobContent);
-                        OrdersModel order = new OrdersModel();
-                        order.Orders.Add(orderItem);
-                        orders.Add(order);
+                        var orderItem = JsonConvert.DeserializeObject<OrdersModel>(await blobContent);
+                        OrdersModel tmp = new OrdersModel
+                        {
+                            Orders = new List<OrderModel>(),
+                        };
+                        tmp = orderItem;
+                        orderBlob.Add(tmp);
                     }
                     else
                     {
                         if (blobitem.Metadata.Contains(new KeyValuePair<string, string>("user", username)))
                         {
                             var blobContent = blobitem.DownloadTextAsync();
-                            var orderItem = JsonConvert.DeserializeObject<OrderModel>(await blobContent);
-                            OrdersModel order = new OrdersModel();
-                            order.Orders.Add(orderItem);
-                            orders.Add(order);
+                            var orderItem = JsonConvert.DeserializeObject<OrdersModel>(await blobContent);
+                            OrdersModel tmp = new OrdersModel
+                            {
+                                Orders = new List<OrderModel>(),
+                            };
+                            tmp = orderItem;
+                            orderBlob.Add(tmp);
                         }
                     }
                 }
@@ -109,7 +115,7 @@ namespace PlanB.Butler.Services
                 trace.Add("date", dateVal);
                 trace.Add("data", blobData);
                 log.LogInformation(correlationId, $"'{methodName}' - success", trace);
-                actionResult = new OkObjectResult(orders);
+                actionResult = new OkObjectResult(orderBlob);
             }
             catch (Exception e)
             {
@@ -148,7 +154,7 @@ namespace PlanB.Butler.Services
         [FunctionName(nameof(PostDocumentOrder))]
         public static async void PostDocumentOrder(
            [ServiceBusTrigger("q.planbutlerupdateorder", Connection = "butlerSend")]Message messageHeader,
-           [Blob("{Label}", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
+           [Blob("orders/{Label}", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
            ILogger log,
            ExecutionContext context)
         {
@@ -157,18 +163,21 @@ namespace PlanB.Butler.Services
                 throw new ArgumentNullException(nameof(context));
             }
 
-            Guid correlationId = new Guid($"orderqueue {messageHeader.Label}");
+            Guid correlationId = new Guid(messageHeader.CorrelationId);
             var methodName = MethodBase.GetCurrentMethod().Name;
             var trace = new Dictionary<string, string>();
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
             try
             {
                 string payload = Encoding.Default.GetString(messageHeader.Body);
-                OrderBlob orderBlob = JsonConvert.DeserializeObject<OrderBlob>(payload);
-                orderBlob.OrderList = new List<Order>();
+                OrdersModel orderBlob = new OrdersModel
+                {
+                    Orders = new List<OrderModel>(),
+                };
+                orderBlob = JsonConvert.DeserializeObject<OrdersModel>(payload);
                 string name = string.Empty;
                 DateTime date = DateTime.Now;
-                foreach (var item in orderBlob.OrderList)
+                foreach (var item in orderBlob.Orders)
                 {
                     name = item.Name;
                     date = item.Date;
@@ -244,13 +253,13 @@ namespace PlanB.Butler.Services
                 byte[] bytes = Encoding.ASCII.GetBytes(body);
                 outputMessage = new Message(bytes)
                 {
-                    Label = $"orders/{stringDate}_{orders.LoginName}.json",
+                    Label = $"{stringDate}_{orders.LoginName}.json",
                     CorrelationId = correlationId.ToString(),
                 };
 
                 trace.Add("loginname", orders.LoginName);
                 trace.Add("label", outputMessage.Label);
-                actionResult = new AcceptedResult();
+                actionResult = new OkObjectResult(outputMessage);
                 log.LogInformation(correlationId, $"'{methodName}' - success", trace);
             }
             catch (Exception e)
