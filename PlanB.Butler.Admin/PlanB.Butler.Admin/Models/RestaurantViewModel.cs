@@ -88,7 +88,7 @@ namespace PlanB.Butler.Admin.Models
         /// Gets or sets the email address.
         /// </summary>
         /// <value>
-        /// The email adress.
+        /// The email address.
         /// </value>
         [JsonProperty("emailAddress")]
         public string EmailAddress { get; set; }
