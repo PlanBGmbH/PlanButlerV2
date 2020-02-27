@@ -7,6 +7,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json;
+
 namespace PlanB.Butler.Admin.Models
 {
     /// <summary>
@@ -21,6 +23,7 @@ namespace PlanB.Butler.Admin.Models
         /// The identifier.
         /// </value>
         [Key]
+        [JsonProperty("id")]
         public string Id
         {
             get;
@@ -33,6 +36,7 @@ namespace PlanB.Butler.Admin.Models
         /// <value>
         /// The URL.
         /// </value>
+        [JsonProperty("url")]
         public Uri Url { get; set; }
 
         /// <summary>
@@ -41,6 +45,7 @@ namespace PlanB.Butler.Admin.Models
         /// <value>
         /// The name.
         /// </value>
+        [JsonProperty("name")]
         public string Name { get; set; }
 
         /// <summary>
@@ -49,6 +54,7 @@ namespace PlanB.Butler.Admin.Models
         /// <value>
         /// The street.
         /// </value>
+        [JsonProperty("street")]
         public string Street { get; set; }
 
         /// <summary>
@@ -57,6 +63,7 @@ namespace PlanB.Butler.Admin.Models
         /// <value>
         /// The phone number.
         /// </value>
+        [JsonProperty("phonenumber")]
         public string PhoneNumber { get; set; }
 
         /// <summary>
@@ -65,6 +72,7 @@ namespace PlanB.Butler.Admin.Models
         /// <value>
         /// The city.
         /// </value>
+        [JsonProperty("city")]
         public string City { get; set; }
 
         /// <summary>
@@ -73,6 +81,7 @@ namespace PlanB.Butler.Admin.Models
         /// <value>
         /// The postal code.
         /// </value>
+        [JsonProperty("postalcode")]
         public string PostalCode { get; set; }
 
         /// <summary>
@@ -81,6 +90,7 @@ namespace PlanB.Butler.Admin.Models
         /// <value>
         /// The email adress.
         /// </value>
+        [JsonProperty("emailadress")]
         public string EmailAdress { get; set; }
     }
 }
