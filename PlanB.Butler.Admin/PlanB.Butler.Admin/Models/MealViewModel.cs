@@ -1,8 +1,13 @@
-﻿using System;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+
+using Newtonsoft.Json;
 
 namespace PlanB.Butler.Admin.Models
 {
@@ -18,6 +23,7 @@ namespace PlanB.Butler.Admin.Models
         /// The identifier.
         /// </value>
         [Key]
+        [JsonProperty("id")]
         public string Id
         {
             get;
@@ -30,6 +36,7 @@ namespace PlanB.Butler.Admin.Models
         /// <value>
         /// The correlation identifier.
         /// </value>
+        [JsonProperty("correlationid")]
         public Guid? CorrelationId { get; set; }
 
         /// <summary>
@@ -40,6 +47,7 @@ namespace PlanB.Butler.Admin.Models
         /// </value>
         [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy}")]
         [DataType(DataType.Date)]
+        [JsonProperty("date")]
         public DateTime Date { get; set; }
 
         /// <summary>
@@ -49,6 +57,7 @@ namespace PlanB.Butler.Admin.Models
         /// The price.
         /// </value>
         [DisplayFormat(DataFormatString = "{0:c}")]
+        [JsonProperty("price")]
         public double Price { get; set; }
 
         /// <summary>
@@ -57,6 +66,7 @@ namespace PlanB.Butler.Admin.Models
         /// <value>
         /// The name.
         /// </value>
+        [JsonProperty("name")]
         public string Name { get; set; }
 
         /// <summary>
@@ -65,7 +75,7 @@ namespace PlanB.Butler.Admin.Models
         /// <value>
         /// The restaurant.
         /// </value>
+        [JsonProperty("restaurant")]
         public string Restaurant { get; set; }
     }
-
 }
