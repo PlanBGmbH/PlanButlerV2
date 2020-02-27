@@ -63,7 +63,7 @@ namespace PlanB.Butler.Bot
         private static readonly string NextOrderDialogFoodPrompt = rm.GetString("NextOrderDialog_FoodPrompt");
         private static readonly string OtherDayDialogOrder = rm.GetString("OtherDayDialog_Order");
         private static readonly string NextOrderDialogSaveOrder = rm.GetString("NextOrderDialog_SaveOrder");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
 
         private IBotTelemetryClient telemetryClient;
         /// <summary>

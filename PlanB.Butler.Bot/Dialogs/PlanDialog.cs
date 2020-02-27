@@ -6,11 +6,12 @@
     using System.Resources;
     using System.Threading;
     using System.Threading.Tasks;
-     using BotLibraryV2;
+    using BotLibraryV2;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Builder.Dialogs.Choices;
     using Microsoft.Bot.Schema;
+    using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
 
@@ -31,8 +32,9 @@
         private static readonly string PlanDialogNoMenuCard = rm.GetString("PlanDialog_NoMenuCard");
         private static readonly string PlanDialogYes = rm.GetString("yes");
         private static readonly string PlanDialogNo = rm.GetString("no");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
-
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
+        
+        private readonly IStringLocalizer<PlanDialog> _localizer;       
         /// <summary>
         /// The bot configuration.
         /// </summary>
@@ -41,6 +43,7 @@
         public PlanDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(PlanDialog))
         {
+
             this.botConfig = config;
 
             // This array defines how the Waterfall will execute.
@@ -76,17 +79,18 @@
             stepContext.Values["restaurant"] = ((FoundChoice)stepContext.Result).Value;
             string restaurant = stepContext.Values["restaurant"].ToString();
 
-            var PlanDialog_NoMenuCard1 = MessageFactory.Text(string.Format(PlanDialogNoMenuCard, restaurant));
+            var planDialogNoMenuCard = MessageFactory.Text(string.Format(PlanDialogNoMenuCard, restaurant));
          
             var picture = BotMethods.GetDocument("pictures", restaurant.Replace(' ', '_') + ".txt", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
             if (!picture.Contains("BlobNotFound"))
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(PlanDialogMenuCard + restaurant), cancellationToken);
+                var planDialogMenuCard = MessageFactory.Text(string.Format(PlanDialogMenuCard, restaurant));
+                await stepContext.Context.SendActivityAsync(planDialogMenuCard, cancellationToken);
                 await stepContext.Context.SendActivityAsync(MessageFactory.Attachment(new Attachment("image/png", picture)), cancellationToken);
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(PlanDialog_NoMenuCard1, cancellationToken);
+                await stepContext.Context.SendActivityAsync(planDialogNoMenuCard, cancellationToken);
             }
 
             return await stepContext.PromptAsync(nameof(ChoicePrompt), new PromptOptions

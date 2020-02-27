@@ -10,7 +10,6 @@ using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 using BotLibraryV2;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
@@ -75,7 +74,7 @@ namespace PlanB.Butler.Bot
         private static readonly string NextOrderDialogSaveOrder = rm.GetString("NextOrderDialog_SaveOrder");
         private static readonly string OtherDayDialogOrder = rm.GetString("OtherDayDialog_Order");
 
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
         
         /// <summary>
         /// The bot configuration.
@@ -104,8 +103,6 @@ namespace PlanB.Butler.Bot
                     indexer = i + 1;
                 }
             }
-
-
 
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
