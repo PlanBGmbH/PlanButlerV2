@@ -58,6 +58,7 @@ namespace PlanB.Butler.Admin.Controllers
             if (this.ModelState.IsValid)
             {
                 var result = await this.mealService.CreateMeal(meal);
+                return this.RedirectToAction("Index");
             }
 
             return this.View(meal);

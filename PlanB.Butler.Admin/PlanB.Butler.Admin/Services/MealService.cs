@@ -52,6 +52,7 @@ namespace PlanB.Butler.Admin.Services
         public async Task<bool> CreateMeal(MealViewModel meal)
         {
             Guid correlationId = Guid.NewGuid();
+            meal.CorrelationId = correlationId;
             var json = JsonConvert.SerializeObject(meal);
             StringContent content = Util.CreateStringContent(json, correlationId, null);
             var uri = this.config["MealsUri"];
@@ -63,7 +64,9 @@ namespace PlanB.Butler.Admin.Services
             httpRequestMessage.Headers.Clear();
             Util.AddDefaultEsbHeaders(httpRequestMessage, correlationId, this.config["FunctionsKey"]);
             var result = await this.httpClient.SendAsync(httpRequestMessage);
-            return true;
+            result.EnsureSuccessStatusCode();
+            var success = result.IsSuccessStatusCode;
+            return success;
         }
 
         /// <summary>
