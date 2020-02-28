@@ -29,8 +29,7 @@ namespace PlanB.Butler.Bot
         /// InterruptDialogHelpText.
         /// </summary>
 
-        private static readonly string InterruptDialogHelpText = rm.GetString("InterruptDialog_HelpText");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.main", Assembly.GetExecutingAssembly());
+        private static string interruptDialogHelpText = string.Empty;
 
 
         private static Plan plan = new Plan();
@@ -39,6 +38,9 @@ namespace PlanB.Butler.Bot
         public InterruptDialog(string v, IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(InterruptDialog))
         {
+            ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs", Assembly.GetExecutingAssembly());
+            interruptDialogHelpText = rm.GetString("InterruptDialog_HelpText");
+
             this.botConfig = config;
             this.AddDialog(new OverviewDialog(config, telemetryClient));
             this.AddDialog(new ExcellDialog(config, telemetryClient));
@@ -76,7 +78,7 @@ namespace PlanB.Butler.Bot
                 if (text == "help" || text == "hilfe")
                 {
                     // Help message!                   
-                    await innerDc.Context.SendActivityAsync(MessageFactory.Text(InterruptDialogHelpText), cancellationToken);
+                    await innerDc.Context.SendActivityAsync(MessageFactory.Text(interruptDialogHelpText), cancellationToken);
                     await innerDc.EndDialogAsync(cancellationToken: cancellationToken);
                     return await innerDc.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
                 }
@@ -167,7 +169,7 @@ namespace PlanB.Butler.Bot
                 else if (text.Contains("excel"))
                 {
                     await innerDc.Context.SendActivityAsync(MessageFactory.Text($"Einen Moment ich suche schnell alles zusammen!"), cancellationToken);
-                   
+
                     await innerDc.EndDialogAsync(cancellationToken: cancellationToken);
                     return await innerDc.BeginDialogAsync(nameof(ExcellDialog), null, cancellationToken);
 

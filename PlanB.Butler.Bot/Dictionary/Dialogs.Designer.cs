@@ -22,14 +22,14 @@ namespace PlanB.Butler.Bot.Dictionary {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class main {
+    public class Dialogs {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal main() {
+        internal Dialogs() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace PlanB.Butler.Bot.Dictionary {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PlanB.Butler.Bot.Dictionary.main", typeof(main).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs", typeof(Dialogs).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,15 +57,6 @@ namespace PlanB.Butler.Bot.Dictionary {
             }
             set {
                 resourceCulture = value;
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Letzten Monat betrug ihre Belastung: {0} €.
-        /// </summary>
-        public static string CreditDialog_LastMonthDepts {
-            get {
-                return ResourceManager.GetString("CreditDialog_LastMonthDepts", resourceCulture);
             }
         }
         
@@ -124,7 +115,7 @@ namespace PlanB.Butler.Bot.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sie haben heute bei {0} bestellt und dies bei dem Restaurant {1}..
+        ///   Looks up a localized string similar to Sie haben heute {0} bestellt und dies bei dem Restaurant {1}..
         /// </summary>
         public static string DailyCreditDialog_OrderedAt {
             get {
@@ -223,10 +214,7 @@ namespace PlanB.Butler.Bot.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hallo, Ich bin dein persönlicher Essensbestell Bot. Zu den schon angezeigten befehlen kann ich noch
-        ///-Ein weiteres essen für z.B. Praktikanten oder Kunden bestellen. Daür bitte &apos;Weiteres Essen bestellen&apos; eingeben. 
-        ///-Ein essen für einen anderen Tag in dieser Woche bestellen. Dafür bitte &apos;für einen anderen Tag Essen bestellen eingeben.
-        ///-Fragen was man heute bestellt hat zur Kontrolle. Dafür bitte &apos;Was habe ich heute bestellt&apos; eingeben..
+        ///   Looks up a localized string similar to Hallo, Ich bin dein persönlicher Essensbestell Bot. Zu den schon angezeigten Befehlen kann ich noch.
         /// </summary>
         public static string InterruptDialog_HelpText {
             get {
@@ -298,7 +286,7 @@ namespace PlanB.Butler.Bot.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Wie ist der Namen des Praktikanten?.
+        ///   Looks up a localized string similar to Wie ist der Namen des Praktikanten/ der Praktikatin?.
         /// </summary>
         public static string NextOrderDialog_NameTraineePrompt {
             get {
@@ -361,7 +349,7 @@ namespace PlanB.Butler.Bot.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Es tut mir Leid, es muss ein Fehler unterlaufen sein. Bitte versuchen Sie es noch einmal..
+        ///   Looks up a localized string similar to Es tut mir Leid. Es ist ein Fehler unterlaufen. Bitt versuchen sie es erneut..
         /// </summary>
         public static string OtherDayDialog_Error1 {
             get {
@@ -478,7 +466,7 @@ namespace PlanB.Butler.Bot.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Okay, hier der Essensplan von .
+        ///   Looks up a localized string similar to Okay, hier ist der Essensplan von {0}.
         /// </summary>
         public static string PlanDialog_MenuCard {
             get {
@@ -505,11 +493,38 @@ namespace PlanB.Butler.Bot.Dictionary {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Möchten Sie eine Speisekarte eines anderen Restaurant anschauen?.
+        ///   Looks up a localized string similar to Möchten Sie die Speisekarte eines anderen Restaurant anschauen?.
         /// </summary>
         public static string PlanDialog_OtherMenuCard {
             get {
                 return ResourceManager.GetString("PlanDialog_OtherMenuCard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -Ein weiteres essen für z.B. Praktikanten oder Kunden bestellen. Daür bitte &apos;Weiteres Essen bestellen&apos; eingeben..
+        /// </summary>
+        public static string String {
+            get {
+                return ResourceManager.GetString("String", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -Ein Essen für einen anderen Tag in dieser Woche bestellen. Dafür bitte &apos;für einen anderen Tag Essen bestellen eingeben..
+        /// </summary>
+        public static string String1 {
+            get {
+                return ResourceManager.GetString("String1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -Zur Kontrolle kann man mich fragen was man heute bestellt hat. Dafür bitte &apos;Was habe ich heute bestellt&apos; eingeben..
+        /// </summary>
+        public static string String2 {
+            get {
+                return ResourceManager.GetString("String2", resourceCulture);
             }
         }
         
