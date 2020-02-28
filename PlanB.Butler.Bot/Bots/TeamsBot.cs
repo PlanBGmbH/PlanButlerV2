@@ -11,24 +11,27 @@
     using System.Reflection;
 
     // This bot is derived (view DialogBot<T>) from the TeamsACtivityHandler class currently included as part of this sample.
-    
+
 
     public class TeamsBot<T> : DialogBot<T> where T : Dialog
     {
         /// <summary>
         /// TeamsBotsWelcomeMessage.
         /// </summary>
-       
-        private static readonly string TeamBotsWelcomeMessage = rm.GetString("TeamBots_WelcomeMessage");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
+
+        private static string teamBotsWelcomeMessage = string.Empty;
+     
         public TeamsBot(ConversationState conversationState, UserState userState, T dialog, ILogger<DialogBot<T>> logger)
             : base(conversationState, userState, dialog, logger)
         {
+            ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs", Assembly.GetExecutingAssembly());
+            teamBotsWelcomeMessage = rm.GetString("TeamBots_WelcomeMessage");
         }
 
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
-            await turnContext.SendActivityAsync(TeamBotsWelcomeMessage, cancellationToken: cancellationToken);
+
+            await turnContext.SendActivityAsync(teamBotsWelcomeMessage, cancellationToken: cancellationToken);
         }
 
         protected override async Task OnSigninVerifyStateAsync(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)

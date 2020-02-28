@@ -31,16 +31,15 @@ namespace PlanB.Butler.Bot
         /// DailyCreditDialogSumTrainee
         /// DailyCreditDialogOrderedAt.
         /// </summary>
-        
-        private static readonly string DailyCreditDialogDepts = rm.GetString("DailyCreditDialog_Depts");
-        private static readonly string DailyCreditDialogOrderMe = rm.GetString("DailyCreditDialog_OrderMe");
-        private static readonly string DailyCreditDialogOrderCostumer = rm.GetString("DailyCreditDialog_OrderCostumer");
-        private static readonly string DailyCreditDialogOrderTrainee = rm.GetString("DailyCreditDialog_OrderTrainee");
-        private static readonly string DailyCreditDialogSumMe = rm.GetString("DailyCreditDialog_SumMe");
-        private static readonly string DailyCreditDialogSumCostumer = rm.GetString("DailyCreditDialog_SumCostumer");
-        private static readonly string DailyCreditDialogSumTrainee = rm.GetString("DailyCreditDialog_SumTrainne");
-        private static readonly string DailyCreditDialogOrderedAt = rm.GetString("DailyCreditDialog_OrderedAt");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
+
+        private static string dailyCreditDialogDepts = string.Empty;
+        private static string dailyCreditDialogOrderMe = string.Empty;
+        private static string dailyCreditDialogOrderCostumer = string.Empty;
+        private static string dailyCreditDialogOrderTrainee = string.Empty;
+        private static string dailyCreditDialogSumMe = string.Empty;
+        private static string dailyCreditDialogSumCostumer = string.Empty;
+        private static string dailyCreditDialogSumTrainee = string.Empty;
+        private static string dailyCreditDialogOrderedAt = string.Empty;
 
         /// <summary>
         /// The bot configuration.
@@ -50,6 +49,17 @@ namespace PlanB.Butler.Bot
         public DailyCreditDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(DailyCreditDialog))
         {
+            ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs", Assembly.GetExecutingAssembly());
+
+            dailyCreditDialogDepts = rm.GetString("DailyCreditDialog_Depts");
+            dailyCreditDialogOrderMe = rm.GetString("DailyCreditDialog_OrderMe");
+            dailyCreditDialogOrderCostumer = rm.GetString("DailyCreditDialog_OrderCostumer");
+            dailyCreditDialogOrderTrainee = rm.GetString("DailyCreditDialog_OrderTrainee");
+            dailyCreditDialogSumMe = rm.GetString("DailyCreditDialog_SumMe");
+            dailyCreditDialogSumCostumer = rm.GetString("DailyCreditDialog_SumCostumer");
+            dailyCreditDialogSumTrainee = rm.GetString("DailyCreditDialog_SumTrainne");
+            dailyCreditDialogOrderedAt = rm.GetString("DailyCreditDialog_OrderedAt");
+
             this.botConfig = config;
 
             // This array defines how the Waterfall will execute.
@@ -88,13 +98,13 @@ namespace PlanB.Butler.Bot
                 var orderList = await BotMethods.GetDailyUserOverview(name, this.botConfig.Value.GetDailyUserOverviewFunc);
                 OrderBlob orderBlob = new OrderBlob();
 
-                msg += $"{DailyCreditDialogDepts} {Environment.NewLine}";
+                msg += $"{dailyCreditDialogDepts} {Environment.NewLine}";
                 string message = string.Empty;
-                string orders = $"{DailyCreditDialogOrderMe} {Environment.NewLine}";
+                string orders = $"{dailyCreditDialogOrderMe} {Environment.NewLine}";
                 double sum = 0;
-                string corders = $"{DailyCreditDialogOrderCostumer}  {Environment.NewLine}";
+                string corders = $"{dailyCreditDialogOrderCostumer}  {Environment.NewLine}";
                 double csum = 0;
-                string iorders = $"{DailyCreditDialogOrderTrainee}  {Environment.NewLine}";
+                string iorders = $"{dailyCreditDialogOrderTrainee}  {Environment.NewLine}";
                 double isum = 0;
                 bool check = false;
                 bool cchecker = false;
@@ -118,11 +128,11 @@ namespace PlanB.Butler.Bot
                         }
                         else
                         {
-                            var dailyCreditDialogOrderedAt = string.Format(DailyCreditDialogOrderedAt, items.Meal, items.Restaurant);
+                            var dailyCreditDialogOrderedAt1 = string.Format(dailyCreditDialogOrderedAt, items.Meal, items.Restaurant);
 
                             if (check = false)
                             {
-                                message = dailyCreditDialogOrderedAt;
+                                message = dailyCreditDialogOrderedAt1;
                             }
                             orders += $"{items.Name} \t/ {items.Restaurant} \t/ {items.Meal} \t/ {items.Price}€  {Environment.NewLine}";
                             sum += Convert.ToDouble(items.Price);
@@ -133,21 +143,21 @@ namespace PlanB.Butler.Bot
 
                 if (check)
                 {
-                    var dailyCreditDialogSumMe = string.Format(DailyCreditDialogSumMe, sum);
-                    orders += $"{dailyCreditDialogSumMe} {Environment.NewLine}";
+                    var dailyCreditDialogSumMe1 = string.Format(dailyCreditDialogSumMe, sum);
+                    orders += $"{dailyCreditDialogSumMe1} {Environment.NewLine}";
                 }
 
                 if (cchecker)
                 {
-                    var dailyCreditDialogSumCostumer = string.Format(DailyCreditDialogSumCostumer, csum);
+                    var dailyCreditDialogSumCostumer1 = string.Format(dailyCreditDialogSumCostumer, csum);
                     orders += corders;
-                    corders += $"{dailyCreditDialogSumCostumer} {Environment.NewLine}";
+                    corders += $"{dailyCreditDialogSumCostumer1} {Environment.NewLine}";
                 }
 
                 if (ichecker)
                 {
-                    var dailyCreditDialogSumTrainee = string.Format(DailyCreditDialogSumTrainee, csum);
-                    iorders += $"{dailyCreditDialogSumTrainee} {Environment.NewLine}";
+                    var dailyCreditDialogSumTrainee1 = string.Format(dailyCreditDialogSumTrainee, csum);
+                    iorders += $"{dailyCreditDialogSumTrainee1} {Environment.NewLine}";
                     orders += iorders;
                 }
 

@@ -100,28 +100,28 @@ namespace PlanB.Butler.Bot
                 return new TelemetryLoggerMiddleware(telemetryClient, logPersonalInformation: true);
             });
 
-            //Globalization and Localization
-            services.AddLocalization(opts => opts.ResourcesPath = "Dictionary");
+            ////Globalization and Localization
+            //services.AddLocalization(opts => opts.ResourcesPath = "Dictionary");
 
-            services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
-                .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
-                .AddDataAnnotationsLocalization();
+            //services.AddMvc()
+            //    .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+            //    .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+            //    .AddDataAnnotationsLocalization();
 
-            services.Configure<RequestLocalizationOptions>(opts =>
-            {
-                var supportedCultures = new List<CultureInfo>
-                {
-                    new CultureInfo("en-US"),
-                    new CultureInfo("fr"),
-                    new CultureInfo("ja"),
-                };
-                opts.DefaultRequestCulture = new RequestCulture("de");
-                opts.SupportedCultures = supportedCultures;
-                opts.SupportedUICultures = supportedCultures;
-                opts.RequestCultureProviders.Insert(0, new RouteDataRequestCultureProvider());
+            //services.Configure<RequestLocalizationOptions>(opts =>
+            //{
+            //    var supportedCultures = new List<CultureInfo>
+            //    {
+            //        new CultureInfo("en-US"),
+            //        new CultureInfo("fr"),
+            //        new CultureInfo("ja"),
+            //    };
+            //    opts.DefaultRequestCulture = new RequestCulture("de");
+            //    opts.SupportedCultures = supportedCultures;
+            //    opts.SupportedUICultures = supportedCultures;
+            //    opts.RequestCultureProviders.Insert(0, new RouteDataRequestCultureProvider());
 
-            });
+            //});
         }
 
         /// <summary>

@@ -31,6 +31,7 @@ namespace PlanB.Butler.Bot
         private static int indexer = 0;
         private static bool valid;
 
+        private static ComponentDialog[] dialogs;
         /// <summary>
         /// OverviewDialogHelp.
         /// OverviewDialogOrderFood
@@ -42,21 +43,19 @@ namespace PlanB.Butler.Bot
         /// OverviewDialogError.
         /// </summary>
 
-        private static readonly string OverviewDialogHelp = rm.GetString("OverviewDialog_Help");
-        private static readonly string OverviewDialogOrderFood = rm.GetString("OverviewDialog_OrderFood");
-        private static readonly string OverviewDialogDeleteOrder = rm.GetString("OverviewDialog_DeleteOrder");
-        private static readonly string OverviewDialogShowDepts = rm.GetString("OverviewDialog_ShowDepts");
-        private static readonly string OverviewDDialogOtherDay = rm.GetString("OtherDayDialog_OrderDay");
-        private static readonly string OverviewDialogDaysOrder = rm.GetString("OverviewDialog_DaysOrder");
-        private static readonly string OverviewDialogWhatNow = rm.GetString("OverviewDialog_WhatNow");
-        private static readonly string OverviewDialogError = rm.GetString("OtherDayDialog_Error2");
-        private static readonly string OtherDayDialogOrder = rm.GetString("OtherDayDialog_Order");
-        private static ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs.de", Assembly.GetExecutingAssembly());
-             
-        // In this Array you can Easy modify your choice List.
-        private static string[] choices = { OverviewDialogOrderFood, OverviewDDialogOtherDay, OverviewDialogDeleteOrder, OverviewDialogShowDepts, OverviewDialogDaysOrder };
-        private static ComponentDialog[] dialogs;
+        private static string overviewDialogHelp = string.Empty;
+        private static string overviewDialogOrderFood = string.Empty;
+        private static string overviewDialogDeleteOrder = string.Empty;
+        private static string overviewDialogShowDepts = string.Empty;
+        private static string overviewDialogOtherDay = string.Empty;
+        private static string overviewDialogDaysOrder = string.Empty;
+        private static string overviewDialogWhatNow = string.Empty;
+        private static string overviewDialogError = string.Empty;
+        private static string otherDayDialogOrder = string.Empty;
 
+        // In this Array you can Easy modify your choice List.
+        private static string[] choices;
+        
         /// <summary>
         /// The bot configuration.
         /// </summary>
@@ -69,9 +68,22 @@ namespace PlanB.Butler.Bot
         public OverviewDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
             : base(nameof(OverviewDialog))
         {
+            ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs", Assembly.GetExecutingAssembly());
+
+            overviewDialogHelp = rm.GetString("OverviewDialog_Help");
+            overviewDialogOrderFood = rm.GetString("OverviewDialog_OrderFood");
+            overviewDialogDeleteOrder = rm.GetString("OverviewDialog_DeleteOrder");
+            overviewDialogShowDepts = rm.GetString("OverviewDialog_ShowDepts");
+            overviewDialogOtherDay = rm.GetString("OverviewDialog_OtherDay");
+            overviewDialogDaysOrder = rm.GetString("OverviewDialog_DaysOrder");
+            overviewDialogWhatNow = rm.GetString("OverviewDialog_WhatNow");
+            overviewDialogError = rm.GetString("OtherDayDialog_Error2");
+            otherDayDialogOrder = rm.GetString("OtherDayDialog_Order");
+
             this.botConfig = config;
 
-            OrderDialog orderDialog = new OrderDialog(config, telemetryClient );
+            choices = new string[]{ overviewDialogOrderFood, overviewDialogOtherDay, overviewDialogDeleteOrder, overviewDialogShowDepts, overviewDialogDaysOrder };
+            OrderDialog orderDialog = new OrderDialog(config, telemetryClient);
             NextOrder nextorderDialog = new NextOrder(config, telemetryClient);
             PlanDialog planDialog = new PlanDialog(config, telemetryClient);
             CreditDialog creditDialog = new CreditDialog(config, telemetryClient);
@@ -101,7 +113,7 @@ namespace PlanB.Butler.Bot
 
             // Add named dialogs to the DialogSet. These names are saved in the dialog state.
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
-            this.AddDialog(new OrderDialog(config,telemetryClient));
+            this.AddDialog(new OrderDialog(config, telemetryClient));
             this.AddDialog(new CreditDialog(config, telemetryClient));
             this.AddDialog(new PlanDialog(config, telemetryClient));
             this.AddDialog(new OrderForOtherDayDialog(config, telemetryClient));
@@ -116,17 +128,17 @@ namespace PlanB.Butler.Bot
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);
 
-    }
+        }
 
-    /// <summary>
-    /// Initials the step asynchronous.
-    /// </summary>
-    /// <param name="stepContext">The step context.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns></returns>
-    private async Task<DialogTurnResult> InitialStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        /// <summary>
+        /// Initials the step asynchronous.
+        /// </summary>
+        /// <param name="stepContext">The step context.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        private async Task<DialogTurnResult> InitialStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            await stepContext.Context.SendActivityAsync(MessageFactory.Text(OverviewDialogHelp), cancellationToken);
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text(overviewDialogHelp), cancellationToken);
             // Cards are sent as Attachments in the Bot Framework.
             // So we need to create a list of attachments for the reply activity.
             var attachments = new List<Attachment>();
@@ -167,24 +179,24 @@ namespace PlanB.Butler.Bot
             }
 
             string msg = string.Empty;
-            bool temp = false;
+            bool temp = false;;
             foreach (var item in choise)
             {
                 if (temp == false)
                 {
-                    var otherDayDialog_Order = MessageFactory.Text(string.Format(OtherDayDialogOrder, item));
-                    msg = $" {otherDayDialog_Order}";
+                    var otherDayDialog_Order1 = MessageFactory.Text(string.Format(otherDayDialogOrder, item));
+                    msg = $" {otherDayDialog_Order1}";
                     temp = true;
                 }
                 else
                 {
                     
-                   // msg += $"{} {item}";
+                    
                 }
             }
-            
-            await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg));
-            
+
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text(""));
+
             // Reply to the activity we received with an activity.
             var reply = MessageFactory.Attachment(attachments);
             List<string> choiceList = new List<string>();
@@ -197,7 +209,7 @@ namespace PlanB.Butler.Bot
             nameof(ChoicePrompt),
             new PromptOptions
             {
-                Prompt = MessageFactory.Text(OverviewDialogWhatNow),
+                Prompt = MessageFactory.Text(overviewDialogWhatNow),
                 Choices = ChoiceFactory.ToChoices(choiceList),
                 Style = ListStyle.HeroCard,
             }, cancellationToken);
@@ -228,7 +240,7 @@ namespace PlanB.Butler.Bot
             }
             else
             {
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(OverviewDialogError), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(overviewDialogError), cancellationToken);
 
                 return await stepContext.EndDialogAsync(null, cancellationToken);
             }
