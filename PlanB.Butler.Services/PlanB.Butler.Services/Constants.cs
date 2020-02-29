@@ -15,11 +15,11 @@ namespace PlanB.Butler.Services
         /// <summary>
         /// The butler correlation trace name.
         /// </summary>
-        internal const string ButlerCorrelationTraceName = "Butler-Correlation-Id";
+        internal const string ButlerCorrelationTraceName = "ButlerCorrelationId";
 
         /// <summary>
         /// The butler correlation trace header.
         /// </summary>
-        internal const string ButlerCorrelationTraceHeader = "ButlerCorrelationId";
+        internal const string ButlerCorrelationTraceHeader = "Butler-Correlation-Id";
     }
 }

@@ -90,8 +90,7 @@ namespace PlanB.Butler.Services
                     var metaDate = mealModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
                     blob.Metadata.Add(MetaDate, metaDate);
                     blob.Metadata.Add(MetaRestaurant, mealModel.Restaurant);
-
-                    //  blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
+                    blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
                     var meal = JsonConvert.SerializeObject(mealModel);
                     trace.Add("meal", meal);
 
@@ -116,7 +115,6 @@ namespace PlanB.Butler.Services
                 };
 
                 actionResult = new BadRequestObjectResult(errorModel);
-                throw;
             }
             finally
             {

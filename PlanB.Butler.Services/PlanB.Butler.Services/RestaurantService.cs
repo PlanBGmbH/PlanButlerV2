@@ -28,6 +28,9 @@ namespace PlanB.Butler.Services
     /// </summary>
     public static class RestaurantService
     {
+        private const string MetaRestaurant = "restaurant";
+        private const string MetaCity = "city";
+
         /// <summary>
         /// Gets the restaurants.
         /// </summary>
@@ -126,7 +129,7 @@ namespace PlanB.Butler.Services
 
                 RestaurantModel restaurantModel = JsonConvert.DeserializeObject<RestaurantModel>(requestBody);
 
-                var filename = $"{restaurantModel.Name}.json";
+                var filename = $"{restaurantModel.Name}-{restaurantModel.City}.json";
                 trace.Add($"filename", filename);
 
                 req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
@@ -136,10 +139,13 @@ namespace PlanB.Butler.Services
                 {
                     blob.Properties.ContentType = "application/json";
                     blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
+                    blob.Metadata.Add(MetaRestaurant, System.Web.HttpUtility.HtmlEncode(restaurantModel.Name));
+                    blob.Metadata.Add(MetaCity, System.Web.HttpUtility.HtmlEncode(restaurantModel.City));
                     var restaurant = JsonConvert.SerializeObject(restaurantModel);
                     trace.Add("restaurant", restaurant);
 
                     Task task = blob.UploadTextAsync(requestBody);
+                    task.Wait();
                 }
 
                 log.LogInformation(correlationId, $"'{methodName}' - success", trace);
@@ -159,7 +165,6 @@ namespace PlanB.Butler.Services
                 };
 
                 actionResult = new BadRequestObjectResult(errorModel);
-                throw;
             }
             finally
             {
