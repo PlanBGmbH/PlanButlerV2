@@ -2,18 +2,24 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
-
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Localization.Routing;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.ApplicationInsights;
 using Microsoft.Bot.Builder.Integration.ApplicationInsights.Core;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace PlanB.Butler.Bot
 {
@@ -26,6 +32,8 @@ namespace PlanB.Butler.Bot
         /// The configuration.
         /// </summary>
         private readonly IConfiguration configuration;
+
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Startup"/> class.
@@ -91,6 +99,29 @@ namespace PlanB.Butler.Bot
                 var telemetryClient = sp.GetService<IBotTelemetryClient>();
                 return new TelemetryLoggerMiddleware(telemetryClient, logPersonalInformation: true);
             });
+
+            ////Globalization and Localization
+            //services.AddLocalization(opts => opts.ResourcesPath = "Dictionary");
+
+            //services.AddMvc()
+            //    .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+            //    .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+            //    .AddDataAnnotationsLocalization();
+
+            //services.Configure<RequestLocalizationOptions>(opts =>
+            //{
+            //    var supportedCultures = new List<CultureInfo>
+            //    {
+            //        new CultureInfo("en-US"),
+            //        new CultureInfo("fr"),
+            //        new CultureInfo("ja"),
+            //    };
+            //    opts.DefaultRequestCulture = new RequestCulture("de");
+            //    opts.SupportedCultures = supportedCultures;
+            //    opts.SupportedUICultures = supportedCultures;
+            //    opts.RequestCultureProviders.Insert(0, new RouteDataRequestCultureProvider());
+
+            //});
         }
 
         /// <summary>
@@ -108,6 +139,9 @@ namespace PlanB.Butler.Bot
             {
                 app.UseHsts();
             }
+
+            var localizationOptions = app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>().Value;
+            app.UseRequestLocalization(localizationOptions);
 
             app.UseDefaultFiles();
             app.UseStaticFiles();

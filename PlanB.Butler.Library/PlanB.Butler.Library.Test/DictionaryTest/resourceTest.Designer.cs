@@ -61,47 +61,11 @@ namespace PlanB.Butler.Library.Test.DictionaryTest {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to berechnet.
-        /// </summary>
-        public static string calculated {
-            get {
-                return ResourceManager.GetString("calculated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to hallo.
         /// </summary>
-        public static string hallo {
+        public static string hello {
             get {
-                return ResourceManager.GetString("hallo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 456.
-        /// </summary>
-        public static string hallo2 {
-            get {
-                return ResourceManager.GetString("hallo2", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 789.
-        /// </summary>
-        public static string hallo3 {
-            get {
-                return ResourceManager.GetString("hallo3", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0}Hallo{1}.
-        /// </summary>
-        public static string sumMe {
-            get {
-                return ResourceManager.GetString("sumMe", resourceCulture);
+                return ResourceManager.GetString("hello", resourceCulture);
             }
         }
         

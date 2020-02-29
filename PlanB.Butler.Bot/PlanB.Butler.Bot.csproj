@@ -14,6 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="AdaptiveCard.json" />
     <Content Remove="stylecop.json" />
   </ItemGroup>
 
@@ -28,10 +29,11 @@
 
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
+    <None Include="AdaptiveCard.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AdaptiveCards" Version="1.2.3" />
+    <PackageReference Include="AdaptiveCards" Version="1.2.4" />
     <PackageReference Include="EPPlus" Version="4.5.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.14" />
@@ -54,10 +56,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Dictionary\main.Designer.cs">
-      <DependentUpon>main.resx</DependentUpon>
+    <Compile Update="Dictionary\Dialogs.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
+      <DependentUpon>Dialogs.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -68,9 +70,9 @@
   </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Update="Dictionary\main.resx">
-        <LastGenOutput>main.Designer.cs</LastGenOutput>
+      <EmbeddedResource Update="Dictionary\Dialogs.resx">
         <Generator>PublicResXFileCodeGenerator</Generator>
+        <LastGenOutput>Dialogs.Designer.cs</LastGenOutput>
       </EmbeddedResource>
     </ItemGroup>
 
