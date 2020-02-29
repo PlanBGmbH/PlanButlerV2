@@ -126,7 +126,7 @@ namespace PlanB.Butler.Services
 
                 RestaurantModel restaurantModel = JsonConvert.DeserializeObject<RestaurantModel>(requestBody);
 
-                var filename = $"{restaurantModel.Name}.json";
+                var filename = $"{restaurantModel.Name}-{restaurantModel.City}.json";
                 trace.Add($"filename", filename);
 
                 req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
@@ -140,6 +140,7 @@ namespace PlanB.Butler.Services
                     trace.Add("restaurant", restaurant);
 
                     Task task = blob.UploadTextAsync(requestBody);
+                    task.Wait();
                 }
 
                 log.LogInformation(correlationId, $"'{methodName}' - success", trace);
@@ -159,7 +160,6 @@ namespace PlanB.Butler.Services
                 };
 
                 actionResult = new BadRequestObjectResult(errorModel);
-                throw;
             }
             finally
             {
