@@ -181,6 +181,7 @@ namespace PlanB.Butler.Services
 
                 blob.Metadata.Add("user", name);
                 blob.Metadata.Add("date", stringDate);
+                blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
                 await blob.UploadTextAsync(payload);
                 await blob.SetMetadataAsync();
                 trace.Add("data", payload);

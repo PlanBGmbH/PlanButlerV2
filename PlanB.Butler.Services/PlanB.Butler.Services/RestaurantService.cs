@@ -28,6 +28,9 @@ namespace PlanB.Butler.Services
     /// </summary>
     public static class RestaurantService
     {
+        private const string MetaRestaurant = "restaurant";
+        private const string MetaCity = "city";
+
         /// <summary>
         /// Gets the restaurants.
         /// </summary>
@@ -136,6 +139,8 @@ namespace PlanB.Butler.Services
                 {
                     blob.Properties.ContentType = "application/json";
                     blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
+                    blob.Metadata.Add(MetaRestaurant, System.Web.HttpUtility.HtmlEncode(restaurantModel.Name));
+                    blob.Metadata.Add(MetaCity, System.Web.HttpUtility.HtmlEncode(restaurantModel.City));
                     var restaurant = JsonConvert.SerializeObject(restaurantModel);
                     trace.Add("restaurant", restaurant);
 
