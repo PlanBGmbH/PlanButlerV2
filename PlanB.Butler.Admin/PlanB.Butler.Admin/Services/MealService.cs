@@ -69,6 +69,23 @@ namespace PlanB.Butler.Admin.Services
             return success;
         }
 
+        public async Task<MealViewModel> GetMeal(string id)
+        {
+            Guid correlationId = Guid.NewGuid();
+            var uri = this.config["MealsUri"].TrimEnd('/') + "/" + id;
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+            httpRequestMessage.Headers.Clear();
+            Util.AddDefaultEsbHeaders(httpRequestMessage, correlationId, this.config["FunctionsKey"]);
+            var result = await this.httpClient.SendAsync(httpRequestMessage);
+            result.EnsureSuccessStatusCode();
+
+            var body = result.Content.ReadAsStringAsync().Result;
+
+            var meal = JsonConvert.DeserializeObject<MealViewModel>(body);
+
+            return meal;
+        }
+
         /// <summary>
         /// Gets the meals.
         /// </summary>
