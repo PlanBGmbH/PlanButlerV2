@@ -76,30 +76,58 @@ namespace PlanB.Butler.Services
                     mealModel.CorrelationId = correlationId;
                 }
 
-                var date = mealModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-                var filename = $"{date}-{mealModel.Restaurant}.json";
-                trace.Add($"filename", filename);
-
-                req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
-
-                CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
-                if (blob != null)
+                bool isValid = true;
+                if (string.IsNullOrEmpty(mealModel.Name))
                 {
-                    blob.Properties.ContentType = "application/json";
-                    var metaDate = mealModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
-                    blob.Metadata.Add(MetaDate, metaDate);
-                    blob.Metadata.Add(MetaRestaurant, mealModel.Restaurant);
-                    blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
-                    var meal = JsonConvert.SerializeObject(mealModel);
-                    trace.Add("meal", meal);
-
-                    Task task = blob.UploadTextAsync(requestBody);
-                    task.Wait();
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Message = "No meal name!",
+                    };
+                    isValid = false;
+                    actionResult = new BadRequestObjectResult(errorModel);
                 }
 
-                actionResult = new OkResult();
-                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                if (string.IsNullOrEmpty(mealModel.Restaurant))
+                {
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Message = "No meal restaurant!",
+                    };
+                    isValid = false;
+                    actionResult = new BadRequestObjectResult(errorModel);
+                }
+
+                if (isValid)
+                {
+                    var date = mealModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                    var filename = $"{date}-{mealModel.Restaurant}.json";
+                    trace.Add($"filename", filename);
+
+                    req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
+
+                    CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
+                    if (blob != null)
+                    {
+                        blob.Properties.ContentType = "application/json";
+                        var metaDate = mealModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+                        blob.Metadata.Add(MetaDate, metaDate);
+                        blob.Metadata.Add(MetaRestaurant, mealModel.Restaurant);
+                        blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
+                        var meal = JsonConvert.SerializeObject(mealModel);
+                        trace.Add("meal", meal);
+
+                        Task task = blob.UploadTextAsync(requestBody);
+                        task.Wait();
+                    }
+
+                    actionResult = new OkResult();
+                    log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                }
+
+                log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
             }
             catch (Exception e)
             {
