@@ -3,14 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using PlanB.Butler.Admin.Contracts;
-using PlanB.Butler.Admin.Controllers;
 using PlanB.Butler.Admin.Models;
 
 namespace PlanB.Butler.Admin.Services
@@ -69,6 +67,13 @@ namespace PlanB.Butler.Admin.Services
             return success;
         }
 
+        /// <summary>
+        /// Gets the meal.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>
+        /// Meal by Id.
+        /// </returns>
         public async Task<MealViewModel> GetMeal(string id)
         {
             Guid correlationId = Guid.NewGuid();
