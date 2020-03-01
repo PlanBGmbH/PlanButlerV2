@@ -63,5 +63,66 @@ namespace PlanB.Butler.Admin.Controllers
 
             return this.View(meal);
         }
+
+        /// <summary>
+        /// Edits the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="meal">The meal.</param>
+        /// <returns>IActionResult.</returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(string id, [Bind("Id,CorrelationId,Date,Price,Name,Restaurant")] MealViewModel meal)
+        {
+            if (id != meal.Id)
+            {
+                return this.NotFound();
+            }
+
+            if (this.ModelState.IsValid)
+            {
+                //try
+                //{
+                //    _context.Update(movie);
+                //    await _context.SaveChangesAsync();
+                //}
+                //catch (DbUpdateConcurrencyException)
+                //{
+                //    if (!MovieExists(movie.Id))
+                //    {
+                //        return NotFound();
+                //    }
+                //    else
+                //    {
+                //        throw;
+                //    }
+                //}
+                return this.RedirectToAction(nameof(this.Index));
+            }
+
+            return this.View(meal);
+        }
+
+        /// <summary>
+        /// Edits the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>Meal.</returns>
+        public async Task<IActionResult> Edit(string? id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return this.NotFound();
+            }
+
+            var meal = await this.mealService.GetMeal(id);
+
+            if (meal == null)
+            {
+                return this.NotFound();
+            }
+
+            return this.View(meal);
+        }
     }
 }

@@ -25,5 +25,13 @@ namespace PlanB.Butler.Admin.Contracts
         /// <param name="meal">The meal.</param>
         /// <returns>True or false.</returns>
         Task<bool> CreateMeal(MealViewModel meal);
+
+        /// <summary>
+        /// Gets the meal.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>Meal by Id.</returns>
+        Task<MealViewModel> GetMeal(string id);
+
     }
 }

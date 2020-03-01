@@ -25,7 +25,7 @@ namespace PlanB.Butler.Services.Models
             get
             {
                 var date = this.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-                var id = $"{date}-{this.Restaurant}.json";
+                var id = $"{date}-{this.Restaurant}";
                 return id;
             }
         }
