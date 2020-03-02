@@ -81,22 +81,8 @@ namespace PlanB.Butler.Admin.Controllers
 
             if (this.ModelState.IsValid)
             {
-                //try
-                //{
-                //    _context.Update(movie);
-                //    await _context.SaveChangesAsync();
-                //}
-                //catch (DbUpdateConcurrencyException)
-                //{
-                //    if (!MovieExists(movie.Id))
-                //    {
-                //        return NotFound();
-                //    }
-                //    else
-                //    {
-                //        throw;
-                //    }
-                //}
+
+                var result = await this.mealService.UpdateMeal(meal);
                 return this.RedirectToAction(nameof(this.Index));
             }
 
