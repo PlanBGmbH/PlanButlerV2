@@ -154,6 +154,91 @@ namespace PlanB.Butler.Services
         }
 
         /// <summary>
+        /// Updates the meal by identifier.
+        /// </summary>
+        /// <param name="req">The req.</param>
+        /// <param name="id">The identifier.</param>
+        /// <param name="existingContent">The BLOB.</param>
+        /// <param name="cloudBlobContainer">The cloud BLOB container.</param>
+        /// <param name="log">The log.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>IActionResult.</returns>
+        [FunctionName("UpdateMealById")]
+        public static async Task<IActionResult> UpdateMealById(
+            [HttpTrigger(AuthorizationLevel.Function, "put", Route = "meals/{id}")] HttpRequest req,
+            string id,
+            [Blob("meals/{id}.json", FileAccess.ReadWrite, Connection = "StorageSend")] string existingContent,
+            [Blob("meals", FileAccess.ReadWrite, Connection = "StorageSend")] CloudBlobContainer cloudBlobContainer,
+            ILogger log,
+            ExecutionContext context)
+        {
+            Guid correlationId = Util.ReadCorrelationId(req.Headers);
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            var trace = new Dictionary<string, string>();
+            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            IActionResult actionResult = null;
+
+            MealModel mealModel = null;
+
+            try
+            {
+                trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                trace.Add("id", id);
+                mealModel = JsonConvert.DeserializeObject<MealModel>(existingContent);
+
+                var date = mealModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                var filename = $"{date}-{mealModel.Restaurant}.json";
+                trace.Add($"filename", filename);
+                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                trace.Add("requestBody", requestBody);
+                mealModel = JsonConvert.DeserializeObject<MealModel>(requestBody);
+
+                req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
+
+                CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
+                if (blob != null)
+                {
+                    blob.Properties.ContentType = "application/json";
+                    var metaDate = mealModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+                    blob.Metadata.Add(MetaDate, metaDate);
+                    blob.Metadata.Add(MetaRestaurant, mealModel.Restaurant);
+                    blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
+                    var meal = JsonConvert.SerializeObject(mealModel);
+                    trace.Add("meal", meal);
+
+                    Task task = blob.UploadTextAsync(meal);
+                    task.Wait();
+                }
+
+                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                actionResult = new OkObjectResult(mealModel);
+            }
+            catch (Exception e)
+            {
+                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+
+                ErrorModel errorModel = new ErrorModel()
+                {
+                    CorrelationId = correlationId,
+                    Details = e.StackTrace,
+                    Message = e.Message,
+                };
+                actionResult = new BadRequestObjectResult(mealModel);
+            }
+            finally
+            {
+                log.LogTrace(eventId, $"'{methodName}' - finished");
+                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+            }
+
+            return actionResult;
+        }
+
+        /// <summary>
         /// Reads the meals.
         /// </summary>
         /// <param name="req">The req.</param>
