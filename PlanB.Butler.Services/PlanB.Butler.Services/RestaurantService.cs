@@ -204,7 +204,7 @@ namespace PlanB.Butler.Services
 
                 if (isValid)
                 {
-                    var filename = $"{restaurantModel.Name}-{restaurantModel.City}.json";
+                    var filename = $"{restaurantModel.Id}.json";
                     trace.Add($"filename", filename);
 
                     req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());

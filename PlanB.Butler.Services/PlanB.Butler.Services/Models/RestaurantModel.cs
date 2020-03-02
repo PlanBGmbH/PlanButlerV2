@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 using Newtonsoft.Json;
@@ -15,7 +16,7 @@ namespace PlanB.Butler.Services.Models
     public class RestaurantModel
     {
         /// <summary>
-        /// Gets or sets the identifier.
+        /// Gets the identifier.
         /// </summary>
         /// <value>
         /// The identifier.
@@ -23,8 +24,11 @@ namespace PlanB.Butler.Services.Models
         [JsonProperty("id")]
         public string Id
         {
-            get;
-            set;
+            get
+            {
+                var id = $"{this.Name}-{this.City}";
+                return id;
+            }
         }
 
         /// <summary>
