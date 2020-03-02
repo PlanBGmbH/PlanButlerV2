@@ -106,5 +106,34 @@ namespace PlanB.Butler.Admin.Services
             var meals = JsonConvert.DeserializeObject<List<MealViewModel>>(responseString);
             return meals;
         }
+
+        /// <summary>
+        /// Updates the meal.
+        /// </summary>
+        /// <param name="meal">The meal.</param>
+        /// <returns>
+        /// Meal.
+        /// </returns>
+        public async Task<MealViewModel> UpdateMeal(MealViewModel meal)
+        {
+            Guid correlationId = Guid.NewGuid();
+            meal.CorrelationId = correlationId;
+            var json = JsonConvert.SerializeObject(meal);
+            StringContent content = Util.CreateStringContent(json, correlationId, null);
+            var uri = this.config["MealsUri"].TrimEnd('/') + "/" + meal.Id;
+
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
+            {
+                Content = content,
+            };
+            httpRequestMessage.Headers.Clear();
+            Util.AddDefaultEsbHeaders(httpRequestMessage, correlationId, this.config["FunctionsKey"]);
+            var result = await this.httpClient.SendAsync(httpRequestMessage);
+            result.EnsureSuccessStatusCode();
+            var responseString = await result.Content.ReadAsStringAsync();
+
+            var updatedMeal = JsonConvert.DeserializeObject<MealViewModel>(responseString);
+            return updatedMeal;
+        }
     }
 }
