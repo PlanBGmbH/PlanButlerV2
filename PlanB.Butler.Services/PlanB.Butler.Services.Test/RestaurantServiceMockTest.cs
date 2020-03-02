@@ -19,10 +19,10 @@ using PlanB.Butler.Services.Models;
 namespace PlanB.Butler.Services.Test
 {
     /// <summary>
-    /// MealServiceTest.
+    /// RestaurantServiceMockTest.
     /// </summary>
     [TestClass]
-    public class MealServiceMockTest
+    public class RestaurantServiceMockTest
     {
         /// <summary>
         /// The context.
@@ -76,43 +76,20 @@ namespace PlanB.Butler.Services.Test
         /// Creates the meal test.
         /// </summary>
         [TestMethod]
-        public void CreateMealTest()
+        public void CreateRestaurantOkTest()
         {
-            MealModel mealModel = new MealModel()
+            RestaurantModel restaurantModel = new RestaurantModel()
             {
-                CorrelationId = Guid.NewGuid(),
-                Date = DateTime.Now,
-                Name = "Kässpätzle",
-                Price = 2.3,
-                Restaurant = "Gasthof Adler " + DateTime.Now.Ticks,
+                City = "Main City",
+                EmailAddress = "restaurant@domain.com",
+                Name = "The Restaurant",
             };
 
             // Setup Mock
-            var httpRequest = CreateMockRequest(mealModel);
-            var result = MealService.CreateMeal(httpRequest.Object, this.mockBlobContainer.Object, this.log, this.context).Result;
+            var httpRequest = CreateMockRequest(restaurantModel);
+            var result = RestaurantService.CreateRestaurant(httpRequest.Object, this.mockBlobContainer.Object, this.log, this.context).Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(typeof(OkObjectResult), result.GetType());
-        }
-
-        /// <summary>
-        /// Creates the meal test.
-        /// </summary>
-        [TestMethod]
-        public void CreateMealNoNameTest()
-        {
-            MealModel mealModel = new MealModel()
-            {
-                CorrelationId = Guid.NewGuid(),
-                Date = DateTime.Now,
-                Price = 2.3,
-                Restaurant = "Gasthof Adler",
-            };
-
-            // Setup Mock
-            var httpRequest = CreateMockRequest(mealModel);
-            var result = MealService.CreateMeal(httpRequest.Object, this.mockBlobContainer.Object, this.log, this.context).Result;
-            Assert.IsNotNull(result);
-            Assert.AreEqual(typeof(BadRequestObjectResult), result.GetType());
         }
 
         /// <summary>
