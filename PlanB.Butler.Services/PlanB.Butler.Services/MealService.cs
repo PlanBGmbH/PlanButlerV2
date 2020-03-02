@@ -76,28 +76,7 @@ namespace PlanB.Butler.Services
                     mealModel.CorrelationId = correlationId;
                 }
 
-                bool isValid = true;
-                if (string.IsNullOrEmpty(mealModel.Name))
-                {
-                    ErrorModel errorModel = new ErrorModel()
-                    {
-                        CorrelationId = correlationId,
-                        Message = "No meal name!",
-                    };
-                    isValid = false;
-                    actionResult = new BadRequestObjectResult(errorModel);
-                }
-
-                if (string.IsNullOrEmpty(mealModel.Restaurant))
-                {
-                    ErrorModel errorModel = new ErrorModel()
-                    {
-                        CorrelationId = correlationId,
-                        Message = "No meal restaurant!",
-                    };
-                    isValid = false;
-                    actionResult = new BadRequestObjectResult(errorModel);
-                }
+                bool isValid = ValidateMeal(mealModel, correlationId, out ErrorModel errorModel);
 
                 if (isValid)
                 {
@@ -126,8 +105,11 @@ namespace PlanB.Butler.Services
                     actionResult = new OkResult();
                     log.LogInformation(correlationId, $"'{methodName}' - success", trace);
                 }
-
-                log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
+                else
+                {
+                    actionResult = new BadRequestObjectResult(errorModel);
+                    log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
+                }
             }
             catch (Exception e)
             {
@@ -498,6 +480,50 @@ namespace PlanB.Butler.Services
             }
 
             return prefix;
+        }
+
+        /// <summary>
+        /// Validates the meal.
+        /// </summary>
+        /// <param name="mealModel">The meal model.</param>
+        /// <param name="correlationId">The correlation identifier.</param>
+        /// <param name="errorModel">The error model.</param>
+        /// <returns><c>True</c> if data is valid; otherwise <c>False</c>.</returns>
+        internal static bool ValidateMeal(MealModel mealModel, Guid correlationId, out ErrorModel errorModel)
+        {
+            bool isValid = true;
+            errorModel = null;
+            if (string.IsNullOrEmpty(mealModel.Name))
+            {
+                errorModel = new ErrorModel()
+                {
+                    CorrelationId = correlationId,
+                    Message = "No meal name!",
+                };
+                isValid = false;
+            }
+
+            if (string.IsNullOrEmpty(mealModel.Restaurant))
+            {
+                errorModel = new ErrorModel()
+                {
+                    CorrelationId = correlationId,
+                    Message = "No meal restaurant!",
+                };
+                isValid = false;
+            }
+
+            if (mealModel.Date == null || mealModel.Date == DateTime.MinValue)
+            {
+                errorModel = new ErrorModel()
+                {
+                    CorrelationId = correlationId,
+                    Message = "No meal date!",
+                };
+                isValid = false;
+            }
+
+            return isValid;
         }
     }
 }
