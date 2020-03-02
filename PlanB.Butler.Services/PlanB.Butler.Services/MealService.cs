@@ -158,7 +158,7 @@ namespace PlanB.Butler.Services
         /// </summary>
         /// <param name="req">The req.</param>
         /// <param name="id">The identifier.</param>
-        /// <param name="blob">The BLOB.</param>
+        /// <param name="existingContent">The BLOB.</param>
         /// <param name="cloudBlobContainer">The cloud BLOB container.</param>
         /// <param name="log">The log.</param>
         /// <param name="context">The context.</param>
