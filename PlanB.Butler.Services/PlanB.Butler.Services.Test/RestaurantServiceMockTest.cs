@@ -94,6 +94,26 @@ namespace PlanB.Butler.Services.Test
         }
 
         /// <summary>
+        /// Creates the restaurant fail name test.
+        /// </summary>
+        [TestMethod]
+        public void CreateRestaurantFailNameTest()
+        {
+            RestaurantModel restaurantModel = new RestaurantModel()
+            {
+                City = "Main City",
+                EmailAddress = "restaurant@domain.com",
+                PhoneNumber = "32168",
+            };
+
+            // Setup Mock
+            var httpRequest = CreateMockRequest(restaurantModel);
+            var result = RestaurantService.CreateRestaurant(httpRequest.Object, this.mockBlobContainer.Object, this.log, this.context).Result;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(typeof(BadRequestObjectResult), result.GetType());
+        }
+
+        /// <summary>
         /// Creates the mock request.
         /// </summary>
         /// <param name="body">The body.</param>
