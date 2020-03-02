@@ -50,7 +50,7 @@ namespace PlanB.Butler.Services
         /// </returns>
         [FunctionName("CreateMeal")]
         [Consumes(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(MealModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         public static async Task<IActionResult> CreateMeal(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "meals")]
@@ -102,7 +102,7 @@ namespace PlanB.Butler.Services
                         task.Wait();
                     }
 
-                    actionResult = new OkResult();
+                    actionResult = new OkObjectResult(mealModel);
                     log.LogInformation(correlationId, $"'{methodName}' - success", trace);
                 }
                 else
@@ -146,6 +146,9 @@ namespace PlanB.Butler.Services
         /// <param name="context">The context.</param>
         /// <returns>IActionResult.</returns>
         [FunctionName("UpdateMealById")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(MealModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         public static async Task<IActionResult> UpdateMealById(
             [HttpTrigger(AuthorizationLevel.Function, "put", Route = "meals/{id}")] HttpRequest req,
             string id,
