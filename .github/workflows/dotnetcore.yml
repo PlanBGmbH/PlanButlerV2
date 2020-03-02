@@ -34,4 +34,4 @@ jobs:
       with:
         dotnet-version: 3.1.101
     - name: Test with dotnet
-      run: dotnet test PlanB.Butler.Services.Test/PlanB.Butler.Services.Test/PlanB.Butler.Services.Test.csproj --configuration Release --collect:"Code Coverage"
+      run: dotnet test PlanB.Butler.Services/PlanB.Butler.Services.Test/PlanB.Butler.Services.Test.csproj --configuration Release --collect:"Code Coverage"
