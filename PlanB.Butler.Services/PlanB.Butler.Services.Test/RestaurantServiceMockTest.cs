@@ -73,7 +73,7 @@ namespace PlanB.Butler.Services.Test
         }
 
         /// <summary>
-        /// Creates the meal test.
+        /// Creates the restaurant test.
         /// </summary>
         [TestMethod]
         public void CreateRestaurantOkTest()
@@ -83,6 +83,7 @@ namespace PlanB.Butler.Services.Test
                 City = "Main City",
                 EmailAddress = "restaurant@domain.com",
                 Name = "The Restaurant",
+                PhoneNumber = "32168",
             };
 
             // Setup Mock

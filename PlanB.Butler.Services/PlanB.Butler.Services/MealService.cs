@@ -78,7 +78,7 @@ namespace PlanB.Butler.Services
                         mealModel.CorrelationId = correlationId;
                     }
 
-                    bool isValid = ValidateMeal(mealModel, correlationId, out ErrorModel errorModel);
+                    bool isValid = Validate(mealModel, correlationId, out ErrorModel errorModel);
 
                     if (isValid)
                     {
@@ -184,7 +184,7 @@ namespace PlanB.Butler.Services
 
                     req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
 
-                    bool isValid = ValidateMeal(mealModel, correlationId, out ErrorModel errorModel);
+                    bool isValid = Validate(mealModel, correlationId, out ErrorModel errorModel);
                     if (isValid)
                     {
                         CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
@@ -504,7 +504,7 @@ namespace PlanB.Butler.Services
         /// <param name="correlationId">The correlation identifier.</param>
         /// <param name="errorModel">The error model.</param>
         /// <returns><c>True</c> if data is valid; otherwise <c>False</c>.</returns>
-        internal static bool ValidateMeal(MealModel mealModel, Guid correlationId, out ErrorModel errorModel)
+        internal static bool Validate(MealModel mealModel, Guid correlationId, out ErrorModel errorModel)
         {
             bool isValid = true;
             errorModel = null;
