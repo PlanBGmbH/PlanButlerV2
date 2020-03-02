@@ -100,10 +100,9 @@ namespace PlanB.Butler.Services
 
                         Task task = blob.UploadTextAsync(requestBody);
                         task.Wait();
+                        actionResult = new OkObjectResult(mealModel);
+                        log.LogInformation(correlationId, $"'{methodName}' - success", trace);
                     }
-
-                    actionResult = new OkObjectResult(mealModel);
-                    log.LogInformation(correlationId, $"'{methodName}' - success", trace);
                 }
                 else
                 {
@@ -197,10 +196,9 @@ namespace PlanB.Butler.Services
 
                         Task task = blob.UploadTextAsync(meal);
                         task.Wait();
+                        actionResult = new OkObjectResult(mealModel);
+                        log.LogInformation(correlationId, $"'{methodName}' - success", trace);
                     }
-
-                    log.LogInformation(correlationId, $"'{methodName}' - success", trace);
-                    actionResult = new OkObjectResult(mealModel);
                 }
                 else
                 {

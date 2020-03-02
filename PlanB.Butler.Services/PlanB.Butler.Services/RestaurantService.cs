@@ -107,7 +107,7 @@ namespace PlanB.Butler.Services
         /// <param name="context">The context.</param>
         /// <returns>IActionResult.</returns>
         [FunctionName("CreateRestaurant")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(RestaurantModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         public static async Task<IActionResult> CreateRestaurant(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "restaurants")]
@@ -146,10 +146,10 @@ namespace PlanB.Butler.Services
 
                     Task task = blob.UploadTextAsync(requestBody);
                     task.Wait();
-                }
 
-                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
-                actionResult = new OkResult();
+                    actionResult = new OkObjectResult(restaurantModel);
+                    log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                }
             }
             catch (Exception e)
             {
