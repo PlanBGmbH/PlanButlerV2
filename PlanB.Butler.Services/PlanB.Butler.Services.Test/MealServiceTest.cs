@@ -208,7 +208,7 @@ namespace PlanB.Butler.Services.Test
                 Date = DateTime.Now,
             };
 
-            var result = MealService.ValidateMeal(mealModel, correlationId, out errorModel);
+            var result = MealService.Validate(mealModel, correlationId, out errorModel);
             Assert.AreEqual(true, result);
             Assert.IsNull(errorModel);
         }
@@ -228,7 +228,7 @@ namespace PlanB.Butler.Services.Test
                 Date = DateTime.Now,
             };
 
-            var result = MealService.ValidateMeal(mealModel, correlationId, out errorModel);
+            var result = MealService.Validate(mealModel, correlationId, out errorModel);
             Assert.AreEqual(false, result);
             Assert.IsNotNull(errorModel);
         }
@@ -247,7 +247,7 @@ namespace PlanB.Butler.Services.Test
                 Date = DateTime.Now,
             };
 
-            var result = MealService.ValidateMeal(mealModel, correlationId, out ErrorModel errorModel);
+            var result = MealService.Validate(mealModel, correlationId, out ErrorModel errorModel);
             Assert.AreEqual(false, result);
             Assert.IsNotNull(errorModel);
         }
@@ -266,7 +266,7 @@ namespace PlanB.Butler.Services.Test
                 Restaurant = "TestRestaurant",
             };
 
-            var result = MealService.ValidateMeal(mealModel, correlationId, out ErrorModel errorModel);
+            var result = MealService.Validate(mealModel, correlationId, out ErrorModel errorModel);
             Assert.AreEqual(false, result);
             Assert.IsNotNull(errorModel);
         }

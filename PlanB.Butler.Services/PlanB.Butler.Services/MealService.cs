@@ -65,70 +65,73 @@ namespace PlanB.Butler.Services
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
 
             IActionResult actionResult = null;
-            try
+            using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
             {
-                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                trace.Add("requestBody", requestBody);
-
-                MealModel mealModel = JsonConvert.DeserializeObject<MealModel>(requestBody);
-                if (mealModel.CorrelationId == null || mealModel.CorrelationId.Equals(Guid.Empty))
+                try
                 {
-                    mealModel.CorrelationId = correlationId;
-                }
+                    string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                    trace.Add("requestBody", requestBody);
 
-                bool isValid = ValidateMeal(mealModel, correlationId, out ErrorModel errorModel);
-
-                if (isValid)
-                {
-                    var date = mealModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-                    var filename = $"{date}-{mealModel.Restaurant}.json";
-                    trace.Add($"filename", filename);
-
-                    req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
-
-                    CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
-                    if (blob != null)
+                    MealModel mealModel = JsonConvert.DeserializeObject<MealModel>(requestBody);
+                    if (mealModel.CorrelationId == null || mealModel.CorrelationId.Equals(Guid.Empty))
                     {
-                        blob.Properties.ContentType = "application/json";
-                        var metaDate = mealModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
-                        blob.Metadata.Add(MetaDate, metaDate);
-                        blob.Metadata.Add(MetaRestaurant, mealModel.Restaurant);
-                        blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
-                        var meal = JsonConvert.SerializeObject(mealModel);
-                        trace.Add("meal", meal);
+                        mealModel.CorrelationId = correlationId;
+                    }
 
-                        Task task = blob.UploadTextAsync(requestBody);
-                        task.Wait();
-                        actionResult = new OkObjectResult(mealModel);
-                        log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                    bool isValid = Validate(mealModel, correlationId, out ErrorModel errorModel);
+
+                    if (isValid)
+                    {
+                        var date = mealModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                        var filename = $"{date}-{mealModel.Restaurant}.json";
+                        trace.Add($"filename", filename);
+
+                        req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
+
+                        CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
+                        if (blob != null)
+                        {
+                            blob.Properties.ContentType = "application/json";
+                            var metaDate = mealModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+                            blob.Metadata.Add(MetaDate, metaDate);
+                            blob.Metadata.Add(MetaRestaurant, mealModel.Restaurant);
+                            blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
+                            var meal = JsonConvert.SerializeObject(mealModel);
+                            trace.Add("meal", meal);
+
+                            Task task = blob.UploadTextAsync(requestBody);
+                            task.Wait();
+                            actionResult = new OkObjectResult(mealModel);
+                            log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                        }
+                    }
+                    else
+                    {
+                        actionResult = new BadRequestObjectResult(errorModel);
+                        log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    actionResult = new BadRequestObjectResult(errorModel);
-                    log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
-                }
-            }
-            catch (Exception e)
-            {
-                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
-                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
-                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
-                ErrorModel errorModel = new ErrorModel()
-                {
-                    CorrelationId = correlationId,
-                    Details = e.StackTrace,
-                    Message = e.Message,
-                };
+                    trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                    trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                    log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                    log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Details = e.StackTrace,
+                        Message = e.Message,
+                    };
 
-                actionResult = new BadRequestObjectResult(errorModel);
-            }
-            finally
-            {
-                log.LogTrace(eventId, $"'{methodName}' - finished");
-                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                    actionResult = new BadRequestObjectResult(errorModel);
+                }
+                finally
+                {
+                    log.LogTrace(eventId, $"'{methodName}' - finished");
+                    log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                }
             }
 
             return actionResult;
@@ -163,68 +166,70 @@ namespace PlanB.Butler.Services
             IActionResult actionResult = null;
 
             MealModel mealModel = null;
-
-            try
+            using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
             {
-                trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
-                trace.Add("id", id);
-                mealModel = JsonConvert.DeserializeObject<MealModel>(existingContent);
-
-                var date = mealModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-                var filename = $"{date}-{mealModel.Restaurant}.json";
-                trace.Add($"filename", filename);
-                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                trace.Add("requestBody", requestBody);
-                mealModel = JsonConvert.DeserializeObject<MealModel>(requestBody);
-
-                req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
-
-                bool isValid = ValidateMeal(mealModel, correlationId, out ErrorModel errorModel);
-                if (isValid)
+                try
                 {
-                    CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
-                    if (blob != null)
-                    {
-                        blob.Properties.ContentType = "application/json";
-                        var metaDate = mealModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
-                        blob.Metadata.Add(MetaDate, metaDate);
-                        blob.Metadata.Add(MetaRestaurant, mealModel.Restaurant);
-                        blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
-                        var meal = JsonConvert.SerializeObject(mealModel);
-                        trace.Add("meal", meal);
+                    trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                    trace.Add("id", id);
+                    mealModel = JsonConvert.DeserializeObject<MealModel>(existingContent);
 
-                        Task task = blob.UploadTextAsync(meal);
-                        task.Wait();
-                        actionResult = new OkObjectResult(mealModel);
-                        log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                    var date = mealModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                    var filename = $"{date}-{mealModel.Restaurant}.json";
+                    trace.Add($"filename", filename);
+                    string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                    trace.Add("requestBody", requestBody);
+                    mealModel = JsonConvert.DeserializeObject<MealModel>(requestBody);
+
+                    req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
+
+                    bool isValid = Validate(mealModel, correlationId, out ErrorModel errorModel);
+                    if (isValid)
+                    {
+                        CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
+                        if (blob != null)
+                        {
+                            blob.Properties.ContentType = "application/json";
+                            var metaDate = mealModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+                            blob.Metadata.Add(MetaDate, metaDate);
+                            blob.Metadata.Add(MetaRestaurant, mealModel.Restaurant);
+                            blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
+                            var meal = JsonConvert.SerializeObject(mealModel);
+                            trace.Add("meal", meal);
+
+                            Task task = blob.UploadTextAsync(meal);
+                            task.Wait();
+                            actionResult = new OkObjectResult(mealModel);
+                            log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                        }
+                    }
+                    else
+                    {
+                        actionResult = new BadRequestObjectResult(errorModel);
+                        log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    actionResult = new BadRequestObjectResult(errorModel);
-                    log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
-                }
-            }
-            catch (Exception e)
-            {
-                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
-                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
-                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+                    trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                    trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                    log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                    log.LogError(correlationId, $"'{methodName}' - rejected", trace);
 
-                ErrorModel errorModel = new ErrorModel()
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Details = e.StackTrace,
+                        Message = e.Message,
+                    };
+                    actionResult = new BadRequestObjectResult(mealModel);
+                }
+                finally
                 {
-                    CorrelationId = correlationId,
-                    Details = e.StackTrace,
-                    Message = e.Message,
-                };
-                actionResult = new BadRequestObjectResult(mealModel);
-            }
-            finally
-            {
-                log.LogTrace(eventId, $"'{methodName}' - finished");
-                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                    log.LogTrace(eventId, $"'{methodName}' - finished");
+                    log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                }
             }
 
             return actionResult;
@@ -499,7 +504,7 @@ namespace PlanB.Butler.Services
         /// <param name="correlationId">The correlation identifier.</param>
         /// <param name="errorModel">The error model.</param>
         /// <returns><c>True</c> if data is valid; otherwise <c>False</c>.</returns>
-        internal static bool ValidateMeal(MealModel mealModel, Guid correlationId, out ErrorModel errorModel)
+        internal static bool Validate(MealModel mealModel, Guid correlationId, out ErrorModel errorModel)
         {
             bool isValid = true;
             errorModel = null;

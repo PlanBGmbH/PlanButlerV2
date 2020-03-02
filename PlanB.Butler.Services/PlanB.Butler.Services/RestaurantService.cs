@@ -124,31 +124,42 @@ namespace PlanB.Butler.Services
             IActionResult actionResult = null;
             try
             {
+                trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
                 string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
                 trace.Add("requestBody", requestBody);
 
                 RestaurantModel restaurantModel = JsonConvert.DeserializeObject<RestaurantModel>(requestBody);
 
-                var filename = $"{restaurantModel.Name}-{restaurantModel.City}.json";
-                trace.Add($"filename", filename);
+                bool isValid = Validate(restaurantModel, correlationId, log, out ErrorModel errorModel);
 
-                req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
-
-                CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
-                if (blob != null)
+                if (isValid)
                 {
-                    blob.Properties.ContentType = "application/json";
-                    blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
-                    blob.Metadata.Add(MetaRestaurant, System.Web.HttpUtility.HtmlEncode(restaurantModel.Name));
-                    blob.Metadata.Add(MetaCity, System.Web.HttpUtility.HtmlEncode(restaurantModel.City));
-                    var restaurant = JsonConvert.SerializeObject(restaurantModel);
-                    trace.Add("restaurant", restaurant);
+                    var filename = $"{restaurantModel.Name}-{restaurantModel.City}.json";
+                    trace.Add($"filename", filename);
 
-                    Task task = blob.UploadTextAsync(requestBody);
-                    task.Wait();
+                    req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
 
-                    actionResult = new OkObjectResult(restaurantModel);
-                    log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                    CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
+                    if (blob != null)
+                    {
+                        blob.Properties.ContentType = "application/json";
+                        blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
+                        blob.Metadata.Add(MetaRestaurant, System.Web.HttpUtility.HtmlEncode(restaurantModel.Name));
+                        blob.Metadata.Add(MetaCity, System.Web.HttpUtility.HtmlEncode(restaurantModel.City));
+                        var restaurant = JsonConvert.SerializeObject(restaurantModel);
+                        trace.Add("restaurant", restaurant);
+
+                        Task task = blob.UploadTextAsync(requestBody);
+                        task.Wait();
+
+                        actionResult = new OkObjectResult(restaurantModel);
+                        log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                    }
+                }
+                else
+                {
+                    actionResult = new BadRequestObjectResult(errorModel);
+                    log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
                 }
             }
             catch (Exception e)
@@ -173,6 +184,61 @@ namespace PlanB.Butler.Services
             }
 
             return actionResult;
+        }
+
+        /// <summary>
+        /// Validates the specified model.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <param name="correlationId">The correlation identifier.</param>
+        /// <param name="log">The log.</param>
+        /// <param name="errorModel">The error model.</param>
+        /// <returns><c>True</c> if data is valid; otherwise <c>False</c>.</returns>
+        internal static bool Validate(RestaurantModel model, Guid correlationId, ILogger log, out ErrorModel errorModel)
+        {
+            bool isValid = true;
+            errorModel = null;
+            var trace = new Dictionary<string, string>();
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+
+            StringBuilder message = new StringBuilder();
+            if (string.IsNullOrEmpty(model.Name))
+            {
+                message.Append("No restaurant name!");
+                isValid = false;
+            }
+
+            if (string.IsNullOrEmpty(model.City))
+            {
+                message.Append("No restaurant city!");
+                isValid = false;
+            }
+
+            if (string.IsNullOrEmpty(model.PhoneNumber))
+            {
+                message.Append("No restaurant phone!");
+                isValid = false;
+            }
+
+            if (!isValid)
+            {
+                errorModel = new ErrorModel()
+                {
+                    CorrelationId = correlationId,
+                    Message = message.ToString(),
+                };
+                trace.Add("Message", errorModel.Message);
+                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+            }
+            else
+            {
+                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+            }
+
+            log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+
+            return isValid;
         }
     }
 }
