@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -59,8 +60,11 @@ namespace PlanB.Butler.Services.Test
             this.context = new Microsoft.Azure.WebJobs.ExecutionContext() { FunctionName = nameof(MealService) };
             this.log = new FunctionTestLogger();
 
-            var mockBlobUri = new Uri("http://bogus/myaccount/blob");
+            var mockBlobUri = new Uri("http://localhost/container");
             this.mockBlobContainer = new Mock<CloudBlobContainer>(MockBehavior.Loose, mockBlobUri);
+            Mock<CloudBlockBlob> blobMock = new Mock<CloudBlockBlob>(new Uri("http://localhost/blob"));
+            blobMock.Setup(n => n.UploadTextAsync(It.IsAny<string>())).Returns(Task.FromResult(true));
+            this.mockBlobContainer.Setup(n => n.GetBlockBlobReference(It.IsAny<string>())).Returns(blobMock.Object);
         }
 
         /// <summary>
@@ -75,14 +79,14 @@ namespace PlanB.Butler.Services.Test
                 Date = DateTime.Now,
                 Name = "Kässpätzle",
                 Price = 2.3,
-                Restaurant = "Gasthof Adler",
+                Restaurant = "Gasthof Adler " + DateTime.Now.Ticks,
             };
 
             // Setup Mock
             var httpRequest = CreateMockRequest(mealModel);
             var result = MealService.CreateMeal(httpRequest.Object, this.mockBlobContainer.Object, this.log, this.context).Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual(typeof(OkResult), result.GetType());
+            Assert.AreEqual(typeof(OkObjectResult), result.GetType());
         }
 
         /// <summary>
