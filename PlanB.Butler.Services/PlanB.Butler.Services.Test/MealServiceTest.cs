@@ -198,7 +198,6 @@ namespace PlanB.Butler.Services.Test
         [TestMethod]
         public void ValidateMealTestOk()
         {
-            ErrorModel errorModel = null;
             Guid correlationId = Guid.NewGuid();
 
             MealModel mealModel = new MealModel()
@@ -208,7 +207,7 @@ namespace PlanB.Butler.Services.Test
                 Date = DateTime.Now,
             };
 
-            var result = MealService.Validate(mealModel, correlationId, out errorModel);
+            var result = MealService.Validate(mealModel, correlationId, out ErrorModel errorModel);
             Assert.AreEqual(true, result);
             Assert.IsNull(errorModel);
         }
@@ -219,7 +218,6 @@ namespace PlanB.Butler.Services.Test
         [TestMethod]
         public void ValidateMealTestMissingMeal()
         {
-            ErrorModel errorModel = null;
             Guid correlationId = Guid.NewGuid();
 
             MealModel mealModel = new MealModel()
@@ -228,7 +226,7 @@ namespace PlanB.Butler.Services.Test
                 Date = DateTime.Now,
             };
 
-            var result = MealService.Validate(mealModel, correlationId, out errorModel);
+            var result = MealService.Validate(mealModel, correlationId, out ErrorModel errorModel);
             Assert.AreEqual(false, result);
             Assert.IsNotNull(errorModel);
         }

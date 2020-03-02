@@ -27,6 +27,7 @@ namespace BotLibraryV2
         /// <param name="storageAccountUrl">The storage account URL.</param>
         /// <param name="storageAccountKey">The storage account key.</param>
         /// <returns></returns>
+        [Obsolete("Call function instead")]
         public string GetDocument(string container, string resourceName, string storageAccountUrl, string storageAccountKey)
         {
             using (HttpClient httpClient = new HttpClient())
@@ -92,6 +93,7 @@ namespace BotLibraryV2
             return sasToken;
         }
 
+        [Obsolete("Call function instead")]
         public HttpStatusCode PutDocument(string container, string resourceName, string body, string queueName, string serviceBusConnectionString)
         {
             string label = $"{container}/{resourceName}";
@@ -121,6 +123,7 @@ namespace BotLibraryV2
         /// <param name="queueName">Name of the queue.</param>
         /// <param name="serviceBusConnectionString">The service bus connection string.</param>
         /// <returns></returns>
+        [Obsolete("Call function instead")]
         public HttpStatusCode PutDocumentByteArray(string container, string resourceName, byte[] body, string queueName, string serviceBusConnectionString)
         {
             string label = $"{container}/{resourceName}";
@@ -139,6 +142,7 @@ namespace BotLibraryV2
             }
         }
 
+        [Obsolete("Call function instead")]
         public string GenerateServiceBusSasToken(string serviceBusConnectionString, string que)
         {
             var connectionString = serviceBusConnectionString;
