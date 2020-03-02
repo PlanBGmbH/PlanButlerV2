@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PlanB.Butler.Services.Models;
 
 namespace PlanB.Butler.Services.Test
 {
@@ -188,6 +190,85 @@ namespace PlanB.Butler.Services.Test
 
             var result = MealService.IsDateInRange(startDate, endDate, toCheckDate);
             Assert.AreEqual(true, result);
+        }
+
+        /// <summary>
+        /// Validates the meal test ok.
+        /// </summary>
+        [TestMethod]
+        public void ValidateMealTestOk()
+        {
+            ErrorModel errorModel = null;
+            Guid correlationId = Guid.NewGuid();
+
+            MealModel mealModel = new MealModel()
+            {
+                Name = "Test",
+                Restaurant = "TestRestaurant",
+                Date = DateTime.Now,
+            };
+
+            var result = MealService.ValidateMeal(mealModel, correlationId, out errorModel);
+            Assert.AreEqual(true, result);
+            Assert.IsNull(errorModel);
+        }
+
+        /// <summary>
+        /// Validates the meal test missing meal.
+        /// </summary>
+        [TestMethod]
+        public void ValidateMealTestMissingMeal()
+        {
+            ErrorModel errorModel = null;
+            Guid correlationId = Guid.NewGuid();
+
+            MealModel mealModel = new MealModel()
+            {
+                Restaurant = "TestRestaurant",
+                Date = DateTime.Now,
+            };
+
+            var result = MealService.ValidateMeal(mealModel, correlationId, out errorModel);
+            Assert.AreEqual(false, result);
+            Assert.IsNotNull(errorModel);
+        }
+
+        /// <summary>
+        /// Validates the meal test missing restaurant.
+        /// </summary>
+        [TestMethod]
+        public void ValidateMealTestMissingRestaurant()
+        {
+            Guid correlationId = Guid.NewGuid();
+
+            MealModel mealModel = new MealModel()
+            {
+                Name = "Test",
+                Date = DateTime.Now,
+            };
+
+            var result = MealService.ValidateMeal(mealModel, correlationId, out ErrorModel errorModel);
+            Assert.AreEqual(false, result);
+            Assert.IsNotNull(errorModel);
+        }
+
+        /// <summary>
+        /// Validates the meal test missing date.
+        /// </summary>
+        [TestMethod]
+        public void ValidateMealTestMissingDate()
+        {
+            Guid correlationId = Guid.NewGuid();
+
+            MealModel mealModel = new MealModel()
+            {
+                Name = "Test",
+                Restaurant = "TestRestaurant",
+            };
+
+            var result = MealService.ValidateMeal(mealModel, correlationId, out ErrorModel errorModel);
+            Assert.AreEqual(false, result);
+            Assert.IsNotNull(errorModel);
         }
     }
 }
