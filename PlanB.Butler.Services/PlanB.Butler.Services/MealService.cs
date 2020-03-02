@@ -178,23 +178,32 @@ namespace PlanB.Butler.Services
 
                 req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
 
-                CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
-                if (blob != null)
+                bool isValid = ValidateMeal(mealModel, correlationId, out ErrorModel errorModel);
+                if (isValid)
                 {
-                    blob.Properties.ContentType = "application/json";
-                    var metaDate = mealModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
-                    blob.Metadata.Add(MetaDate, metaDate);
-                    blob.Metadata.Add(MetaRestaurant, mealModel.Restaurant);
-                    blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
-                    var meal = JsonConvert.SerializeObject(mealModel);
-                    trace.Add("meal", meal);
+                    CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
+                    if (blob != null)
+                    {
+                        blob.Properties.ContentType = "application/json";
+                        var metaDate = mealModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+                        blob.Metadata.Add(MetaDate, metaDate);
+                        blob.Metadata.Add(MetaRestaurant, mealModel.Restaurant);
+                        blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
+                        var meal = JsonConvert.SerializeObject(mealModel);
+                        trace.Add("meal", meal);
 
-                    Task task = blob.UploadTextAsync(meal);
-                    task.Wait();
+                        Task task = blob.UploadTextAsync(meal);
+                        task.Wait();
+                    }
+
+                    log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                    actionResult = new OkObjectResult(mealModel);
                 }
-
-                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
-                actionResult = new OkObjectResult(mealModel);
+                else
+                {
+                    actionResult = new BadRequestObjectResult(errorModel);
+                    log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
+                }
             }
             catch (Exception e)
             {
