@@ -3,14 +3,21 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <Company>PlanB. GmbH</Company>
+    <Product>PlanB Butler Bot</Product>
+    <Authors>PlanB. GmbH</Authors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <CodeAnalysisRuleSet />
+    <OutputPath>bin\Release\netcoreapp2.2\</OutputPath>
+    <DocumentationFile>bin\Release\netcoreapp2.2\PlanB.Butler.Bot.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <CodeAnalysisRuleSet />
+    <OutputPath>bin\Debug\netcoreapp2.2\</OutputPath>
+    <DocumentationFile>bin\Debug\netcoreapp2.2\PlanB.Butler.Bot.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

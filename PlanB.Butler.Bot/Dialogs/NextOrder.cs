@@ -121,14 +121,14 @@ namespace PlanB.Butler.Bot
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
             {
-                CompanyStepAsync,
+                this.CompanyStepAsync,
                 NameStepAsync,
                 RestaurantStepAsync,
-                QuantatyStepAsync,
+                QuantityStepAsync,
                 FoodStepAsync,
-                MealQuantatyStepAsync,
+                MealQuantityStepAsync,
                 PriceStepAsync,
-                SummaryStepAsync,
+                this.SummaryStepAsync,
             };
 
             // Add named dialogs to the DialogSet. These names are saved in the dialog state.
@@ -280,7 +280,13 @@ namespace PlanB.Butler.Bot
             }
         }
 
-        private static async Task<DialogTurnResult> QuantatyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        /// <summary>
+        /// Quantities the step asynchronous.
+        /// </summary>
+        /// <param name="stepContext">The step context.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>DialogTurnResult.</returns>
+        private static async Task<DialogTurnResult> QuantityStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             try
             {
@@ -364,8 +370,13 @@ namespace PlanB.Butler.Bot
             }
         }
 
-
-        private static async Task<DialogTurnResult> MealQuantatyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        /// <summary>
+        /// Meals the quantity step asynchronous.
+        /// </summary>
+        /// <param name="stepContext">The step context.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>DialogTurnResult.</returns>
+        private static async Task<DialogTurnResult> MealQuantityStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var obj = ((FoundChoice)stepContext.Result).Value;
             if (stepContext.Values["rest1"].ToString() == "yes")
