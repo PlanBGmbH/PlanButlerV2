@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+
 using AzureFunctions.Extensions.Swashbuckle.Attribute;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,7 @@ using Newtonsoft.Json;
 using PlanB.Butler.Services.Extensions;
 using PlanB.Butler.Services.Models;
 
-namespace PlanB.Butler.Services
+namespace PlanB.Butler.Services.Controllers
 {
     /// <summary>
     /// RestaurantService.
@@ -62,44 +63,46 @@ namespace PlanB.Butler.Services
             IActionResult actionResult = null;
 
             List<RestaurantModel> restaurant = new List<RestaurantModel>();
-
-            try
+            using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
             {
-                BlobContinuationToken blobContinuationToken = null;
-                var options = new BlobRequestOptions();
-                var operationContext = new OperationContext();
-
-                List<IListBlobItem> cloudBlockBlobs = new List<IListBlobItem>();
-                do
+                try
                 {
-                    var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
-                    blobContinuationToken = blobs.ContinuationToken;
-                    cloudBlockBlobs.AddRange(blobs.Results);
+                    BlobContinuationToken blobContinuationToken = null;
+                    var options = new BlobRequestOptions();
+                    var operationContext = new OperationContext();
+
+                    List<IListBlobItem> cloudBlockBlobs = new List<IListBlobItem>();
+                    do
+                    {
+                        var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(null, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+                        blobContinuationToken = blobs.ContinuationToken;
+                        cloudBlockBlobs.AddRange(blobs.Results);
+                    }
+                    while (blobContinuationToken != null);
+
+                    log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                    actionResult = new OkObjectResult(restaurant);
                 }
-                while (blobContinuationToken != null);
-
-                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
-                actionResult = new OkObjectResult(restaurant);
-            }
-            catch (Exception e)
-            {
-                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
-                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
-                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
-
-                ErrorModel errorModel = new ErrorModel()
+                catch (Exception e)
                 {
-                    CorrelationId = correlationId,
-                    Details = e.StackTrace,
-                    Message = e.Message,
-                };
-                actionResult = new BadRequestObjectResult(errorModel);
-            }
-            finally
-            {
-                log.LogTrace(eventId, $"'{methodName}' - finished");
-                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                    trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                    trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                    log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                    log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Details = e.StackTrace,
+                        Message = e.Message,
+                    };
+                    actionResult = new BadRequestObjectResult(errorModel);
+                }
+                finally
+                {
+                    log.LogTrace(eventId, $"'{methodName}' - finished");
+                    log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                }
             }
 
             return actionResult;
@@ -131,14 +134,13 @@ namespace PlanB.Butler.Services
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
             IActionResult actionResult = null;
 
-            RestaurantModel model = null;
             using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
             {
                 try
                 {
                     trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
                     trace.Add("id", id);
-                    model = JsonConvert.DeserializeObject<RestaurantModel>(blob);
+                    RestaurantModel model = JsonConvert.DeserializeObject<RestaurantModel>(blob);
 
                     log.LogInformation(correlationId, $"'{methodName}' - success", trace);
                     actionResult = new OkObjectResult(model);
@@ -259,69 +261,72 @@ namespace PlanB.Butler.Services
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
 
             IActionResult actionResult = null;
-            try
+            using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
             {
-                trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
-                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                trace.Add("requestBody", requestBody);
-
-                RestaurantModel restaurantModel = JsonConvert.DeserializeObject<RestaurantModel>(requestBody);
-
-                bool isValid = Validate(restaurantModel, correlationId, log, out ErrorModel errorModel);
-
-                if (isValid)
+                try
                 {
-                    var fileName = CreateFileName(restaurantModel);
-                    trace.Add($"fileName", fileName);
-                    restaurantModel.Id = fileName;
+                    trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                    string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                    trace.Add("requestBody", requestBody);
 
-                    var fullFileName = $"{fileName}.json";
-                    trace.Add($"fullFileName", fullFileName);
+                    RestaurantModel restaurantModel = JsonConvert.DeserializeObject<RestaurantModel>(requestBody);
 
-                    req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
+                    bool isValid = Validate(restaurantModel, correlationId, log, out ErrorModel errorModel);
 
-                    CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{fullFileName}");
-                    if (blob != null)
+                    if (isValid)
                     {
-                        blob.Properties.ContentType = "application/json";
-                        blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
-                        blob.Metadata.Add(MetaRestaurant, System.Web.HttpUtility.HtmlEncode(restaurantModel.Name));
-                        blob.Metadata.Add(MetaCity, System.Web.HttpUtility.HtmlEncode(restaurantModel.City));
-                        var restaurant = JsonConvert.SerializeObject(restaurantModel);
-                        trace.Add("restaurant", restaurant);
+                        var fileName = CreateFileName(restaurantModel);
+                        trace.Add($"fileName", fileName);
+                        restaurantModel.Id = fileName;
 
-                        Task task = blob.UploadTextAsync(requestBody);
-                        task.Wait();
+                        var fullFileName = $"{fileName}.json";
+                        trace.Add($"fullFileName", fullFileName);
 
-                        actionResult = new OkObjectResult(restaurantModel);
-                        log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                        req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
+
+                        CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{fullFileName}");
+                        if (blob != null)
+                        {
+                            blob.Properties.ContentType = "application/json";
+                            blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
+                            blob.Metadata.Add(MetaRestaurant, System.Web.HttpUtility.HtmlEncode(restaurantModel.Name));
+                            blob.Metadata.Add(MetaCity, System.Web.HttpUtility.HtmlEncode(restaurantModel.City));
+                            var restaurant = JsonConvert.SerializeObject(restaurantModel);
+                            trace.Add("restaurant", restaurant);
+
+                            Task task = blob.UploadTextAsync(requestBody);
+                            task.Wait();
+
+                            actionResult = new OkObjectResult(restaurantModel);
+                            log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                        }
+                    }
+                    else
+                    {
+                        actionResult = new BadRequestObjectResult(errorModel);
+                        log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    actionResult = new BadRequestObjectResult(errorModel);
-                    log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
-                }
-            }
-            catch (Exception e)
-            {
-                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
-                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
-                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
-                ErrorModel errorModel = new ErrorModel()
-                {
-                    CorrelationId = correlationId,
-                    Details = e.StackTrace,
-                    Message = e.Message,
-                };
+                    trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                    trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                    log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                    log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Details = e.StackTrace,
+                        Message = e.Message,
+                    };
 
-                actionResult = new BadRequestObjectResult(errorModel);
-            }
-            finally
-            {
-                log.LogTrace(eventId, $"'{methodName}' - finished");
-                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                    actionResult = new BadRequestObjectResult(errorModel);
+                }
+                finally
+                {
+                    log.LogTrace(eventId, $"'{methodName}' - finished");
+                    log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                }
             }
 
             return actionResult;
@@ -386,7 +391,7 @@ namespace PlanB.Butler.Services
         /// Creates the name of the file.
         /// </summary>
         /// <param name="model">The model.</param>
-        /// <returns></returns>
+        /// <returns>FileName without extension.</returns>
         internal static string CreateFileName(RestaurantModel model)
         {
             string fileName = $"{model.Name}-{model.City}";

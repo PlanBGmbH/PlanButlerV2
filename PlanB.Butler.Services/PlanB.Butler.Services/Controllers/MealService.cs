@@ -21,7 +21,7 @@ using Newtonsoft.Json;
 using PlanB.Butler.Services.Extensions;
 using PlanB.Butler.Services.Models;
 
-namespace PlanB.Butler.Services
+namespace PlanB.Butler.Services.Controllers
 {
     /// <summary>
     /// MealService.
@@ -261,96 +261,98 @@ namespace PlanB.Butler.Services
             IActionResult actionResult = null;
 
             List<MealModel> meals = new List<MealModel>();
-
-            try
+            using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
             {
-                trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
-                string startDateQuery = req.Query["startDate"];
-                string endDateQuery = req.Query["endDate"];
-                string restaurantQuery = req.Query["restaurant"];
-                string prefix = string.Empty;
-
-                bool checkForDate = false;
-                DateTime start = DateTime.MinValue;
-                DateTime end = DateTime.MinValue;
-
-                if (!(string.IsNullOrEmpty(startDateQuery) && string.IsNullOrEmpty(endDateQuery)))
+                try
                 {
-                    checkForDate = true;
-                    DateTime.TryParse(startDateQuery, out start);
-                    DateTime.TryParse(endDateQuery, out end);
-                }
+                    trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                    string startDateQuery = req.Query["startDate"];
+                    string endDateQuery = req.Query["endDate"];
+                    string restaurantQuery = req.Query["restaurant"];
+                    string prefix = string.Empty;
 
-                if (checkForDate)
-                {
-                    prefix = CreateBlobPrefix(startDateQuery, endDateQuery);
-                }
+                    bool checkForDate = false;
+                    DateTime start = DateTime.MinValue;
+                    DateTime end = DateTime.MinValue;
 
-                BlobContinuationToken blobContinuationToken = null;
-                var options = new BlobRequestOptions();
-                var operationContext = new OperationContext();
+                    if (!(string.IsNullOrEmpty(startDateQuery) && string.IsNullOrEmpty(endDateQuery)))
+                    {
+                        checkForDate = true;
+                        DateTime.TryParse(startDateQuery, out start);
+                        DateTime.TryParse(endDateQuery, out end);
+                    }
 
-                List<IListBlobItem> cloudBlockBlobs = new List<IListBlobItem>();
-                do
-                {
-                    var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(prefix, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
-                    blobContinuationToken = blobs.ContinuationToken;
-                    cloudBlockBlobs.AddRange(blobs.Results);
-                }
-                while (blobContinuationToken != null);
-
-                foreach (var item in cloudBlockBlobs)
-                {
-                    CloudBlockBlob blob = (CloudBlockBlob)item;
                     if (checkForDate)
                     {
-                        await blob.FetchAttributesAsync();
-                        if (blob.Metadata.ContainsKey(MetaDate))
+                        prefix = CreateBlobPrefix(startDateQuery, endDateQuery);
+                    }
+
+                    BlobContinuationToken blobContinuationToken = null;
+                    var options = new BlobRequestOptions();
+                    var operationContext = new OperationContext();
+
+                    List<IListBlobItem> cloudBlockBlobs = new List<IListBlobItem>();
+                    do
+                    {
+                        var blobs = await cloudBlobContainer.ListBlobsSegmentedAsync(prefix, true, BlobListingDetails.All, null, blobContinuationToken, options, operationContext).ConfigureAwait(false);
+                        blobContinuationToken = blobs.ContinuationToken;
+                        cloudBlockBlobs.AddRange(blobs.Results);
+                    }
+                    while (blobContinuationToken != null);
+
+                    foreach (var item in cloudBlockBlobs)
+                    {
+                        CloudBlockBlob blob = (CloudBlockBlob)item;
+                        if (checkForDate)
                         {
-                            var mealMetaDate = blob.Metadata[MetaDate];
-                            DateTime mealDate = DateTime.MinValue;
-                            if (DateTime.TryParse(mealMetaDate, out mealDate))
+                            await blob.FetchAttributesAsync();
+                            if (blob.Metadata.ContainsKey(MetaDate))
                             {
-                                var isDateInRange = IsDateInRange(start, end, mealDate);
-                                if (isDateInRange)
+                                var mealMetaDate = blob.Metadata[MetaDate];
+                                DateTime mealDate = DateTime.MinValue;
+                                if (DateTime.TryParse(mealMetaDate, out mealDate))
                                 {
-                                    var blobContent = blob.DownloadTextAsync();
-                                    var blobMeal = JsonConvert.DeserializeObject<MealModel>(await blobContent);
-                                    meals.Add(blobMeal);
+                                    var isDateInRange = IsDateInRange(start, end, mealDate);
+                                    if (isDateInRange)
+                                    {
+                                        var blobContent = blob.DownloadTextAsync();
+                                        var blobMeal = JsonConvert.DeserializeObject<MealModel>(await blobContent);
+                                        meals.Add(blobMeal);
+                                    }
                                 }
                             }
                         }
+                        else
+                        {
+                            var content = blob.DownloadTextAsync();
+                            var meal = JsonConvert.DeserializeObject<MealModel>(await content);
+                            meals.Add(meal);
+                        }
                     }
-                    else
-                    {
-                        var content = blob.DownloadTextAsync();
-                        var meal = JsonConvert.DeserializeObject<MealModel>(await content);
-                        meals.Add(meal);
-                    }
+
+                    log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                    actionResult = new OkObjectResult(meals);
                 }
-
-                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
-                actionResult = new OkObjectResult(meals);
-            }
-            catch (Exception e)
-            {
-                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
-                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
-                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
-
-                ErrorModel errorModel = new ErrorModel()
+                catch (Exception e)
                 {
-                    CorrelationId = correlationId,
-                    Details = e.StackTrace,
-                    Message = e.Message,
-                };
-                actionResult = new BadRequestObjectResult(errorModel);
-            }
-            finally
-            {
-                log.LogTrace(eventId, $"'{methodName}' - finished");
-                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                    trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                    trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                    log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                    log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Details = e.StackTrace,
+                        Message = e.Message,
+                    };
+                    actionResult = new BadRequestObjectResult(errorModel);
+                }
+                finally
+                {
+                    log.LogTrace(eventId, $"'{methodName}' - finished");
+                    log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                }
             }
 
             return actionResult;
@@ -384,35 +386,37 @@ namespace PlanB.Butler.Services
             IActionResult actionResult = null;
 
             MealModel mealModel = null;
-
-            try
+            using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
             {
-                trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
-                trace.Add("id", id);
-                mealModel = JsonConvert.DeserializeObject<MealModel>(blob);
-
-                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
-                actionResult = new OkObjectResult(mealModel);
-            }
-            catch (Exception e)
-            {
-                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
-                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
-                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
-
-                ErrorModel errorModel = new ErrorModel()
+                try
                 {
-                    CorrelationId = correlationId,
-                    Details = e.StackTrace,
-                    Message = e.Message,
-                };
-                actionResult = new BadRequestObjectResult(mealModel);
-            }
-            finally
-            {
-                log.LogTrace(eventId, $"'{methodName}' - finished");
-                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                    trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                    trace.Add("id", id);
+                    mealModel = JsonConvert.DeserializeObject<MealModel>(blob);
+
+                    log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                    actionResult = new OkObjectResult(mealModel);
+                }
+                catch (Exception e)
+                {
+                    trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                    trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                    log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                    log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Details = e.StackTrace,
+                        Message = e.Message,
+                    };
+                    actionResult = new BadRequestObjectResult(mealModel);
+                }
+                finally
+                {
+                    log.LogTrace(eventId, $"'{methodName}' - finished");
+                    log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                }
             }
 
             return actionResult;
