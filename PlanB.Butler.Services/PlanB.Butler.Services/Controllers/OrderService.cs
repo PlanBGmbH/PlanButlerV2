@@ -22,7 +22,7 @@ using Newtonsoft.Json;
 using PlanB.Butler.Services.Extensions;
 using PlanB.Butler.Services.Models;
 
-namespace PlanB.Butler.Services
+namespace PlanB.Butler.Services.Controllers
 {
     /// <summary>
     /// OrderService.

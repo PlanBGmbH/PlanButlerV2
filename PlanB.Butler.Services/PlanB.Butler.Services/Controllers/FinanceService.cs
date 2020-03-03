@@ -19,7 +19,7 @@ using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using PlanB.Butler.Services.Extensions;
 
-namespace PlanB.Butler.Services
+namespace PlanB.Butler.Services.Controllers
 {
     /// <summary>
     /// Finance.

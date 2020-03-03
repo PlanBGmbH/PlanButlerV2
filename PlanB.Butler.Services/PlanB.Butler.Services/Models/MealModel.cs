@@ -14,21 +14,13 @@ namespace PlanB.Butler.Services.Models
     public class MealModel
     {
         /// <summary>
-        /// Gets the identifier.
+        /// Gets or sets the identifier.
         /// </summary>
         /// <value>
         /// The identifier.
         /// </value>
         [JsonProperty("id")]
-        public string Id
-        {
-            get
-            {
-                var date = this.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-                var id = $"{date}-{this.Restaurant}";
-                return id;
-            }
-        }
+        public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets the correlation identifier.

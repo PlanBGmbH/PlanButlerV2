@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Moq;
 using Newtonsoft.Json;
+using PlanB.Butler.Services.Controllers;
 using PlanB.Butler.Services.Models;
 
 namespace PlanB.Butler.Services.Test

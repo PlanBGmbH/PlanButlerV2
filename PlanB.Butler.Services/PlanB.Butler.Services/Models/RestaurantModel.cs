@@ -16,7 +16,7 @@ namespace PlanB.Butler.Services.Models
     public class RestaurantModel
     {
         /// <summary>
-        /// Gets the identifier.
+        /// Gets or sets the identifier.
         /// </summary>
         /// <value>
         /// The identifier.
@@ -24,11 +24,7 @@ namespace PlanB.Butler.Services.Models
         [JsonProperty("id")]
         public string Id
         {
-            get
-            {
-                var id = $"{this.Name}-{this.City}";
-                return id;
-            }
+            get; set;
         }
 
         /// <summary>
