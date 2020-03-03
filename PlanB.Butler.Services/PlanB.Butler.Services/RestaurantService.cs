@@ -8,7 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Web;
 using AzureFunctions.Extensions.Swashbuckle.Attribute;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -271,12 +271,16 @@ namespace PlanB.Butler.Services
 
                 if (isValid)
                 {
-                    var filename = $"{restaurantModel.Id}.json";
-                    trace.Add($"filename", filename);
+                    var fileName = CreateFileName(restaurantModel);
+                    trace.Add($"fileName", fileName);
+                    restaurantModel.Id = fileName;
+
+                    var fullFileName = $"{fileName}.json";
+                    trace.Add($"fullFileName", fullFileName);
 
                     req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
 
-                    CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
+                    CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{fullFileName}");
                     if (blob != null)
                     {
                         blob.Properties.ContentType = "application/json";
@@ -376,6 +380,18 @@ namespace PlanB.Butler.Services
             log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
 
             return isValid;
+        }
+
+        /// <summary>
+        /// Creates the name of the file.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <returns></returns>
+        internal static string CreateFileName(RestaurantModel model)
+        {
+            string fileName = $"{model.Name}-{model.City}";
+            fileName = HttpUtility.UrlEncode(fileName);
+            return fileName;
         }
     }
 }
