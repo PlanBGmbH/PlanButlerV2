@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net.Mime;
 using System.Reflection;
@@ -141,78 +142,6 @@ namespace PlanB.Butler.Services.Controllers
         }
 
         /// <summary>
-        /// Posts the document order.
-        /// </summary>
-        /// <param name="messageHeader">The message header.</param>
-        /// <param name="blob">The BLOB.</param>
-        /// <param name="log">The log.</param>
-        /// <param name="context">The context.</param>
-        [Singleton]
-        [ProducesResponseType(typeof(List<OrdersModel>), StatusCodes.Status200OK)]
-        [Consumes(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
-        [FunctionName(nameof(PostDocumentOrder))]
-        public static async void PostDocumentOrder(
-           [ServiceBusTrigger("q.planbutlerupdateorder", Connection = "butlerSend")]Message messageHeader,
-           [Blob("orders/{Label}", FileAccess.ReadWrite, Connection = "StorageSend")]CloudBlockBlob blob,
-           ILogger log,
-           ExecutionContext context)
-        {
-            if (context is null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            Guid correlationId = new Guid(messageHeader.CorrelationId);
-            var methodName = MethodBase.GetCurrentMethod().Name;
-            var trace = new Dictionary<string, string>();
-            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
-            try
-            {
-                string payload = Encoding.Default.GetString(messageHeader.Body);
-                OrdersModel orderBlob = new OrdersModel
-                {
-                    Orders = new List<OrderModel>(),
-                };
-                orderBlob = JsonConvert.DeserializeObject<OrdersModel>(payload);
-                string name = string.Empty;
-                DateTime date = DateTime.Now;
-                foreach (var item in orderBlob.Orders)
-                {
-                    name = item.Name;
-                    date = item.Date;
-                    break;
-                }
-
-                var stringDate = date.ToString("yyyy-MM-dd");
-
-                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
-
-                blob.Metadata.Add("user", name);
-                blob.Metadata.Add("date", stringDate);
-                blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
-                await blob.UploadTextAsync(payload);
-                await blob.SetMetadataAsync();
-                trace.Add("data", payload);
-                trace.Add("date", date.ToString());
-                trace.Add("name", name);
-                trace.Add("requestbody", messageHeader.Body.ToString());
-            }
-            catch (Exception e)
-            {
-                trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
-                trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
-                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
-                log.LogError(correlationId, $"'{methodName}' - rejected", trace);
-            }
-            finally
-            {
-                log.LogTrace(eventId, $"'{methodName}' - finished");
-                log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
-            }
-        }
-
-        /// <summary>
         /// Creates the order.
         /// </summary>
         /// <param name="input">The input.</param>
@@ -281,6 +210,69 @@ namespace PlanB.Butler.Services.Controllers
             {
                 log.LogTrace(eventId, $"'{methodName}' - finished");
                 log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+            }
+
+            return actionResult;
+        }
+
+        /// <summary>
+        /// Gets the order by identifier.
+        /// </summary>
+        /// <param name="req">The req.</param>
+        /// <param name="id">The identifier.</param>
+        /// <param name="blob">The BLOB.</param>
+        /// <param name="log">The log.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>Order.</returns>
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(OrderModel), StatusCodes.Status200OK)]
+        [FunctionName("GetOrderById")]
+        public static IActionResult GetOrderById(
+             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "orders/{id}")] HttpRequest req,
+             string id,
+             [Blob("orders/{id}.json", FileAccess.ReadWrite, Connection = "StorageSend")] string blob,
+             ILogger log,
+             ExecutionContext context)
+        {
+            Guid correlationId = Util.ReadCorrelationId(req.Headers);
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            var trace = new Dictionary<string, string>();
+            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            IActionResult actionResult = null;
+
+            OrderModel orderModel = null;
+            using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
+            {
+                try
+                {
+                    trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                    trace.Add("id", id);
+                    orderModel = JsonConvert.DeserializeObject<OrderModel>(blob);
+
+                    log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                    actionResult = new OkObjectResult(orderModel);
+                }
+                catch (Exception e)
+                {
+                    trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                    trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                    log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                    log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Details = e.StackTrace,
+                        Message = e.Message,
+                    };
+                    actionResult = new BadRequestObjectResult(errorModel);
+                }
+                finally
+                {
+                    log.LogTrace(eventId, $"'{methodName}' - finished");
+                    log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                }
             }
 
             return actionResult;
