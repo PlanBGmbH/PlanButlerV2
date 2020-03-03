@@ -10,7 +10,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.0.100
+        dotnet-version: 3.1.101
     - name: Build with dotnet
       run: dotnet build PlanB.Butler.sln --configuration Release
 
@@ -23,4 +23,15 @@ jobs:
       with:
         dotnet-version: 2.2.108
     - name: Test with dotnet
-      run: dotnet test PlanB.Butler.Library/PlanB.Butler.Library.Test/PlanB.Butler.Library.Test.csproj --configuration Release
+      run: dotnet test PlanB.Butler.Library/PlanB.Butler.Library.Test/PlanB.Butler.Library.Test.csproj --configuration Release --collect:"Code Coverage"
+
+  test-service-library:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Test with dotnet
+      run: dotnet test PlanB.Butler.Services/PlanB.Butler.Services.Test/PlanB.Butler.Services.Test.csproj --configuration Release --collect:"Code Coverage"
