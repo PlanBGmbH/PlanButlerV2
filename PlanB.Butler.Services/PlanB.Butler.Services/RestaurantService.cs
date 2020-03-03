@@ -156,7 +156,74 @@ namespace PlanB.Butler.Services
                         Details = e.StackTrace,
                         Message = e.Message,
                     };
-                    actionResult = new BadRequestObjectResult(model);
+                    actionResult = new BadRequestObjectResult(errorModel);
+                }
+                finally
+                {
+                    log.LogTrace(eventId, $"'{methodName}' - finished");
+                    log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                }
+            }
+
+            return actionResult;
+        }
+
+        /// <summary>
+        /// Deletes the restaurant by identifier.
+        /// </summary>
+        /// <param name="req">The req.</param>
+        /// <param name="id">The identifier.</param>
+        /// <param name="blob">The BLOB.</param>
+        /// <param name="log">The log.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>IActionResult.</returns>
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [FunctionName("DeleteRestaurantById")]
+        public static IActionResult DeleteRestaurantById(
+            [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "restaurants/{id}")] HttpRequest req,
+            string id,
+            [Blob("restaurants/{id}.json", FileAccess.ReadWrite, Connection = "StorageSend")] CloudBlockBlob blob,
+            ILogger log,
+            ExecutionContext context)
+        {
+            Guid correlationId = Util.ReadCorrelationId(req.Headers);
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            var trace = new Dictionary<string, string>();
+            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            IActionResult actionResult = null;
+
+            using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
+            {
+                try
+                {
+                    trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                    trace.Add("id", id);
+
+                    if (blob != null)
+                    {
+                        Task task = blob.DeleteIfExistsAsync();
+                        task.Wait();
+
+                        actionResult = new OkResult();
+                        log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                    }
+                }
+                catch (Exception e)
+                {
+                    trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                    trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                    log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                    log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Details = e.StackTrace,
+                        Message = e.Message,
+                    };
+                    actionResult = new BadRequestObjectResult(errorModel);
                 }
                 finally
                 {
