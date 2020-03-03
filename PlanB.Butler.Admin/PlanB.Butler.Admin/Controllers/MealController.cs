@@ -81,7 +81,6 @@ namespace PlanB.Butler.Admin.Controllers
 
             if (this.ModelState.IsValid)
             {
-
                 var result = await this.mealService.UpdateMeal(meal);
                 return this.RedirectToAction(nameof(this.Index));
             }
@@ -94,7 +93,7 @@ namespace PlanB.Butler.Admin.Controllers
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <returns>Meal.</returns>
-        public async Task<IActionResult> Edit(string? id)
+        public async Task<IActionResult> Edit(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -109,6 +108,43 @@ namespace PlanB.Butler.Admin.Controllers
             }
 
             return this.View(meal);
+        }
+
+        /// <summary>
+        /// Deletes the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>IActionResult.</returns>
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return this.NotFound();
+            }
+
+            var meal = await this.mealService.GetMeal(id);
+
+            if (meal == null)
+            {
+                return this.NotFound();
+            }
+
+            return this.View(meal);
+        }
+
+        /// <summary>
+        /// Deletes the confirmed.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>IActionResult.</returns>
+        [HttpPost]
+        [ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            await this.mealService.DeleteMeal(id);
+
+            return this.RedirectToAction(nameof(this.Index));
         }
     }
 }
