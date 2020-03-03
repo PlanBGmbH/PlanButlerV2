@@ -8,6 +8,7 @@ using System.IO;
 using System.Net.Mime;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Web;
 
 using AzureFunctions.Extensions.Swashbuckle.Attribute;
 using Microsoft.AspNetCore.Http;
@@ -82,14 +83,16 @@ namespace PlanB.Butler.Services.Controllers
 
                     if (isValid)
                     {
-                        var date = mealModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                        var fileName = CreateFileName(mealModel);
+                        trace.Add($"fileName", fileName);
+                        mealModel.Id = fileName;
 
-                        var filename = $"{date}-{mealModel.Restaurant}.json";
-                        trace.Add($"filename", filename);
+                        var fullFileName = $"{fileName}.json";
+                        trace.Add($"fullFileName", fullFileName);
 
                         req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
 
-                        CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
+                        CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{fullFileName}");
                         if (blob != null)
                         {
                             blob.Properties.ContentType = "application/json";
@@ -543,6 +546,19 @@ namespace PlanB.Butler.Services.Controllers
             }
 
             return isValid;
+        }
+
+        /// <summary>
+        /// Creates the name of the file.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <returns>FileName without extension.</returns>
+        internal static string CreateFileName(MealModel model)
+        {
+            var date = model.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            string fileName = $"{date}-{model.Restaurant}";
+            fileName = HttpUtility.UrlEncode(fileName);
+            return fileName;
         }
     }
 }
