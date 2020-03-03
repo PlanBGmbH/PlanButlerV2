@@ -21,7 +21,16 @@ namespace BotLibraryV2
 
         public double Price { get; set; }
 
+        [Obsolete("Please use 'Quantity'")]
         public int Quantaty { get; set; }
+
+        /// <summary>
+        /// Gets or sets the quantity.
+        /// </summary>
+        /// <value>
+        /// The quantity.
+        /// </value>
+        public int Quantity { get; set; }
 
         public double Grand { get; set; }
     }

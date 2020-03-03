@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 using Newtonsoft.Json;
@@ -23,8 +24,7 @@ namespace PlanB.Butler.Services.Models
         [JsonProperty("id")]
         public string Id
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
