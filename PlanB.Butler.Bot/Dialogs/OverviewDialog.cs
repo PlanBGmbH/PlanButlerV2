@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Reflection;
 using System.Resources;
 using System.Threading;
@@ -15,9 +16,9 @@ using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using PlanB.Butler.Bot;
+using PlanB.Butler.Bot.Services;
 
-namespace PlanB.Butler.Bot
+namespace PlanB.Butler.Bot.Dialogs
 {
     /// <summary>
     /// OverviewDialog.
@@ -25,13 +26,18 @@ namespace PlanB.Butler.Bot
     /// <seealso cref="Microsoft.Bot.Builder.Dialogs.ComponentDialog" />
     public class OverviewDialog : ComponentDialog
     {
+        /// <summary>
+        /// The client factory.
+        /// </summary>
+        private readonly IHttpClientFactory clientFactory;
+
         private static Plan plan = new Plan();
         private static int dayId;
+        [Obsolete("Why is this still in use?")]
         private static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
         private static int indexer = 0;
         private static bool valid;
 
-        private static ComponentDialog[] dialogs;
         /// <summary>
         /// OverviewDialogHelp.
         /// OverviewDialogOrderFood
@@ -42,6 +48,7 @@ namespace PlanB.Butler.Bot
         /// OverviewDialogWhatNow
         /// OverviewDialogError.
         /// </summary>
+        private static ComponentDialog[] dialogs;
 
         private static string overviewDialogHelp = string.Empty;
         private static string overviewDialogOrderFood = string.Empty;
@@ -55,19 +62,24 @@ namespace PlanB.Butler.Bot
 
         // In this Array you can Easy modify your choice List.
         private static string[] choices;
-        
+
         /// <summary>
         /// The bot configuration.
         /// </summary>
         private readonly IOptions<BotConfig> botConfig;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OverviewDialog"/> class.
+        /// Initializes a new instance of the <see cref="OverviewDialog" /> class.
         /// </summary>
         /// <param name="config">The configuration.</param>
-        public OverviewDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
+        /// <param name="telemetryClient">The telemetry client.</param>
+        /// <param name="httpClientFactory">The HTTP client factory.</param>
+        public OverviewDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient, IHttpClientFactory httpClientFactory)
             : base(nameof(OverviewDialog))
         {
+            this.botConfig = config;
+            this.clientFactory = httpClientFactory;
+
             ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs", Assembly.GetExecutingAssembly());
 
             overviewDialogHelp = rm.GetString("OverviewDialog_Help");
@@ -80,15 +92,13 @@ namespace PlanB.Butler.Bot
             overviewDialogError = rm.GetString("OtherDayDialog_Error2");
             otherDayDialogOrder = rm.GetString("OtherDayDialog_Order");
 
-            this.botConfig = config;
-
-            choices = new string[]{ overviewDialogOrderFood, overviewDialogOtherDay, overviewDialogDeleteOrder, overviewDialogShowDepts, overviewDialogDaysOrder };
+            choices = new string[] { overviewDialogOrderFood, overviewDialogOtherDay, overviewDialogDeleteOrder, overviewDialogShowDepts, overviewDialogDaysOrder };
             OrderDialog orderDialog = new OrderDialog(config, telemetryClient);
             NextOrder nextorderDialog = new NextOrder(config, telemetryClient);
             PlanDialog planDialog = new PlanDialog(config, telemetryClient);
             CreditDialog creditDialog = new CreditDialog(config, telemetryClient);
             OrderForOtherDayDialog orderForAnotherDay = new OrderForOtherDayDialog(config, telemetryClient);
-            DeleteOrderDialog deleteOrderDialog = new DeleteOrderDialog(config, telemetryClient);
+            DeleteOrderDialog deleteOrderDialog = new DeleteOrderDialog(config, telemetryClient, this.clientFactory);
             List<ComponentDialog> dialogsList = new List<ComponentDialog>();
             DailyCreditDialog dailyCreditDialog = new DailyCreditDialog(config, telemetryClient);
             ExcellDialog excellDialog = new ExcellDialog(config, telemetryClient);
@@ -117,7 +127,7 @@ namespace PlanB.Butler.Bot
             this.AddDialog(new CreditDialog(config, telemetryClient));
             this.AddDialog(new PlanDialog(config, telemetryClient));
             this.AddDialog(new OrderForOtherDayDialog(config, telemetryClient));
-            this.AddDialog(new DeleteOrderDialog(config, telemetryClient));
+            this.AddDialog(new DeleteOrderDialog(config, telemetryClient, this.clientFactory));
             this.AddDialog(new NextOrder(config, telemetryClient));
             this.AddDialog(new DailyCreditDialog(config, telemetryClient));
             this.AddDialog(new ExcellDialog(config, telemetryClient));
@@ -166,32 +176,50 @@ namespace PlanB.Butler.Bot
                 valid = false;
             }
 
-            List<string> choise = new List<string>();
-            var day = plan.Planday[dayId];
-            if (day.Restaurant1 != null)
+            IMealService mealService = new MealService(this.clientFactory.CreateClient(), this.botConfig.Value);
+            var meals = await mealService.GetMeals(string.Empty, string.Empty);
+            var mealEnumerator = meals.GetEnumerator();
+            PlanDay day = new PlanDay();
+            while (mealEnumerator.MoveNext())
             {
-                choise.Add(day.Restaurant1);
+                if (string.IsNullOrEmpty(day.Restaurant1))
+                {
+                    day.Restaurant1 = mealEnumerator.Current.Restaurant;
+                }
+
+                if (string.IsNullOrEmpty(day.Restaurant2) && day.Restaurant1 != mealEnumerator.Current.Restaurant)
+                {
+                    day.Restaurant2 = mealEnumerator.Current.Restaurant;
+                }
             }
 
-            if (day.Restaurant2 != null)
-            {
-                choise.Add(day.Restaurant2);
-            }
+            List<string> restaurants = new List<string>();
+            //var day = plan.Planday[dayId];
+            //if (day.Restaurant1 != null)
+            //{
+            //    restaurants.Add(day.Restaurant1);
+            //}
+
+            //if (day.Restaurant2 != null)
+            //{
+            //    restaurants.Add(day.Restaurant2);
+            //}
 
             string msg = string.Empty;
-            bool temp = false;;
-            foreach (var item in choise)
+            bool temp = false;
+
+            // TODO: What is the idea of this?
+            foreach (var restaurant in restaurants)
             {
                 if (temp == false)
                 {
-                    var otherDayDialog_Order1 = MessageFactory.Text(string.Format(otherDayDialogOrder, item));
+                    var otherDayDialog_Order1 = MessageFactory.Text(string.Format(otherDayDialogOrder, restaurant));
                     msg = $" {otherDayDialog_Order1}";
                     temp = true;
                 }
                 else
                 {
-                    
-                    
+                    // TODO: ??
                 }
             }
 

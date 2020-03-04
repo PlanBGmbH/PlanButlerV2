@@ -21,6 +21,7 @@ using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using PlanB.Butler.Bot.Dialogs;
 
 namespace PlanB.Butler.Bot
 {
@@ -55,6 +56,13 @@ namespace PlanB.Butler.Bot
             services.Configure<BotConfig>(this.configuration.GetSection("myConfiguration"));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+
+            // The Bot needs an HttpClient to download and upload files.
+            //services.AddHttpClient();
+            services.AddHttpClient<PlanB.Butler.Bot.Services.IMealService, PlanB.Butler.Bot.Services.MealService>()
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5));
+
 
             // Create the Bot Framework Adapter with error handling enabled.
             services.AddSingleton<IBotFrameworkHttpAdapter, AdapterWithErrorHandler>();

@@ -13,7 +13,7 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace PlanB.Butler.Bot
+namespace PlanB.Butler.Bot.Dialogs
 {
     /// <summary>
     /// DailyCreditDialog.

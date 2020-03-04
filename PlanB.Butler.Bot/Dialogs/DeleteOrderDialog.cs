@@ -1,6 +1,9 @@
-﻿using System;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+using System;
 using System.Collections.Generic;
-using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Resources;
 using System.Threading;
@@ -13,9 +16,8 @@ using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using PlanB.Butler.Bot;
 
-namespace PlanB.Butler.Bot
+namespace PlanB.Butler.Bot.Dialogs
 {
     /// <summary>
     /// DeleteOrderDialog.
@@ -23,34 +25,35 @@ namespace PlanB.Butler.Bot
     /// <seealso cref="Microsoft.Bot.Builder.Dialogs.ComponentDialog" />
     public class DeleteOrderDialog : ComponentDialog
     {
+        /// <summary>
+        /// The client factory.
+        /// </summary>
+        private readonly IHttpClientFactory clientFactory;
+
+        /// <summary>
+        /// The bot configuration.
+        /// </summary>
+        private readonly IOptions<BotConfig> botConfig;
+
         static Plan plan = new Plan();
         static Plan orderedfood = new Plan();
         static int valueDay;
         const double grand = 3.30;
         static string dayName;
+        [Obsolete("Why is this still in use?")]
         static string[] weekDays = { "Montag", "Dienstag", "Mitwoch", "Donnerstag", "Freitag" };
+        [Obsolete("Why is this still in use?")]
         static string[] weekDaysEN = { "monday", "tuesday", "wednesday", "thursday", "friday" };
         static int indexer = 0;
+        [Obsolete("Why is this still in use?")]
         static string[] companyStatus = { "intern", "extern", "internship" };
+        [Obsolete("Why is this still in use?")]
         static string[] companyStatusD = { "Für mich", "Kunde", "Praktikant" };
+        [Obsolete("Naming Conventions!")]
         static Order obj = new Order();
 
-        /// <summary>
-        /// DeletDialogTimePrompt.
-        /// DeletDialogWhoPrompt
-        /// NextOrderDialogMyself
-        /// NextOrderDialolTrainee
-        /// NextOrderDialogCostumer
-        /// DeletDialogNoOrder
-        /// DeletDialogDeleteSucess
-        /// DeletDialogDeletePrompt
-        /// DeletDialogYes
-        /// DeletDialogNo
-        /// OtherDayDialogError2.
-        /// </summary>
-
         private static string deletDialogTimePrompt = string.Empty;
-        private static string deletDialogWhoPrompt = string.Empty; 
+        private static string deletDialogWhoPrompt = string.Empty;
         private static string nextOrderDialogMyself = string.Empty;
         private static string nextOrderDialogTrainee = string.Empty;
         private static string nextOrderDialogCostumer = string.Empty;
@@ -61,20 +64,18 @@ namespace PlanB.Butler.Bot
         private static string deletDialogNo = string.Empty;
         private static string otherDayDialogError2 = string.Empty;
 
-
         /// <summary>
-        /// The bot configuration.
-        /// </summary>
-        private readonly IOptions<BotConfig> botConfig;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DeleteOrderDialog"/> class.
+        /// Initializes a new instance of the <see cref="DeleteOrderDialog" /> class.
         /// </summary>
         /// <param name="config">The configuration.</param>
-        public DeleteOrderDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
+        /// <param name="telemetryClient">The telemetry client.</param>
+        /// <param name="httpClientFactory">The HTTP client factory.</param>
+        public DeleteOrderDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient, IHttpClientFactory httpClientFactory)
             : base(nameof(DeleteOrderDialog))
         {
             ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs", Assembly.GetExecutingAssembly());
+            this.clientFactory = httpClientFactory;
+            this.botConfig = config;
 
             deletDialogTimePrompt = rm.GetString("DeletDialog_TimePrompt");
             deletDialogWhoPrompt = rm.GetString("DeletDialog_WhoPrompt");
@@ -88,15 +89,10 @@ namespace PlanB.Butler.Bot
             deletDialogNo = rm.GetString("no");
             otherDayDialogError2 = rm.GetString("OtherDayDialog_Error2");
 
+            //// Get the Plan
+            //string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
 
-
-
-            this.botConfig = config;
-
-            // Get the Plan
-            string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
-
-            plan = JsonConvert.DeserializeObject<Plan>(food);
+            //plan = JsonConvert.DeserializeObject<Plan>(food);
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
                 {
