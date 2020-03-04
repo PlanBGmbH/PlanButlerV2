@@ -2,19 +2,13 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-using AdaptiveCards;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Builder.Dialogs.Choices;
-using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
-using PlanB.Butler.Bot;
 
 namespace PlanB.Butler.Bot.Dialogs
 {
@@ -41,6 +35,7 @@ namespace PlanB.Butler.Bot.Dialogs
             // Set the telemetry client for this and all child dialogs.
             this.TelemetryClient = telemetryClient;
             this.clientFactory = httpClientFactory;
+            this.TelemetryClient?.TrackTrace($"{nameof(MainDialog)} started.", Severity.Information, new Dictionary<string, string>());
 
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
@@ -53,8 +48,16 @@ namespace PlanB.Butler.Bot.Dialogs
 
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);
+            this.TelemetryClient?.TrackTrace($"{nameof(MainDialog)} finished.", Severity.Information, new Dictionary<string, string>());
+            this.TelemetryClient?.Flush();
         }
 
+        /// <summary>
+        /// Initials the step asynchronous.
+        /// </summary>
+        /// <param name="stepContext">The step context.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>DialogTurnResult.</returns>
         private async Task<DialogTurnResult> InitialStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);

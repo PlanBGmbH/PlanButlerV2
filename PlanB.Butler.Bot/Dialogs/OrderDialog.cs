@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,6 +11,7 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using PlanB.Butler.Bot.Services;
 
 namespace PlanB.Butler.Bot.Dialogs
 {
@@ -26,10 +28,24 @@ namespace PlanB.Butler.Bot.Dialogs
         /// </summary>
         private readonly IOptions<BotConfig> botConfig;
 
-        public OrderDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
+        /// <summary>
+        /// The client factory.
+        /// </summary>
+        private readonly IHttpClientFactory clientFactory;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrderDialog"/> class.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
+        /// <param name="telemetryClient">The telemetry client.</param>
+        /// <param name="httpClientFactory">The HTTP client factory.</param>
+        public OrderDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient, IHttpClientFactory httpClientFactory)
             : base(nameof(OrderDialog))
         {
             this.TelemetryClient = telemetryClient;
+            this.botConfig = config;
+            this.clientFactory = httpClientFactory;
+
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
                 {
@@ -54,6 +70,25 @@ namespace PlanB.Butler.Bot.Dialogs
 
         private async Task<DialogTurnResult> TimeDayStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
+            IMealService mealService = new MealService(this.clientFactory.CreateClient(), this.botConfig.Value);
+            var meals = await mealService.GetMeals(string.Empty, string.Empty);
+            var mealEnumerator = meals.GetEnumerator();
+            PlanDay day = new PlanDay();
+            while (mealEnumerator.MoveNext())
+            {
+                if (string.IsNullOrEmpty(day.Restaurant1))
+                {
+                    day.Restaurant1 = mealEnumerator.Current.Restaurant;
+                }
+
+                if (string.IsNullOrEmpty(day.Restaurant2) && day.Restaurant1 != mealEnumerator.Current.Restaurant)
+                {
+                    day.Restaurant2 = mealEnumerator.Current.Restaurant;
+                }
+            }
+
+
+
             // Get the Plan
             try
             {
