@@ -62,7 +62,7 @@ namespace PlanB.Butler.Services.Controllers
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
             IActionResult actionResult = null;
 
-            List<RestaurantModel> restaurant = new List<RestaurantModel>();
+            List<RestaurantModel> restaurants = new List<RestaurantModel>();
             using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
             {
                 try
@@ -80,8 +80,16 @@ namespace PlanB.Butler.Services.Controllers
                     }
                     while (blobContinuationToken != null);
 
+                    foreach (var item in cloudBlockBlobs)
+                    {
+                        CloudBlockBlob blob = (CloudBlockBlob)item;
+                        var blobContent = blob.DownloadTextAsync();
+                        var blobRestaurant = JsonConvert.DeserializeObject<RestaurantModel>(await blobContent);
+                        restaurants.Add(blobRestaurant);
+                    }
+
                     log.LogInformation(correlationId, $"'{methodName}' - success", trace);
-                    actionResult = new OkObjectResult(restaurant);
+                    actionResult = new OkObjectResult(restaurants);
                 }
                 catch (Exception e)
                 {
