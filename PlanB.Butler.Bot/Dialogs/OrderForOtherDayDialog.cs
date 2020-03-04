@@ -18,7 +18,7 @@ using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace PlanB.Butler.Bot
+namespace PlanB.Butler.Bot.Dialogs
 {
     /// <summary>
     /// OrderForOtherDayDialog.

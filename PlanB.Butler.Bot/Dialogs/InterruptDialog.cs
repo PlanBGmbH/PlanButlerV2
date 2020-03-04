@@ -17,7 +17,7 @@ using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace PlanB.Butler.Bot
+namespace PlanB.Butler.Bot.Dialogs
 {
     /// <summary>
     /// InterruptDialog.
@@ -35,14 +35,14 @@ namespace PlanB.Butler.Bot
         private static Plan plan = new Plan();
         private readonly IOptions<BotConfig> botConfig;
 
-        public InterruptDialog(string v, IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
+        public InterruptDialog(string v, IOptions<BotConfig> config, IBotTelemetryClient telemetryClient, IHttpClientFactory clientFactory)
             : base(nameof(InterruptDialog))
         {
             ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs", Assembly.GetExecutingAssembly());
             interruptDialogHelpText = rm.GetString("InterruptDialog_HelpText");
 
             this.botConfig = config;
-            this.AddDialog(new OverviewDialog(config, telemetryClient));
+            this.AddDialog(new OverviewDialog(config, telemetryClient, clientFactory));
             this.AddDialog(new ExcellDialog(config, telemetryClient));
         }
 

@@ -1,20 +1,24 @@
-﻿namespace PlanB.Butler.Bot
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Reflection;
-    using System.Resources;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using BotLibraryV2;
-    using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Dialogs;
-    using Microsoft.Bot.Builder.Dialogs.Choices;
-    using Microsoft.Bot.Schema;
-    using Microsoft.Extensions.Localization;
-    using Microsoft.Extensions.Options;
-    using Newtonsoft.Json;
+﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Resources;
+using System.Threading;
+using System.Threading.Tasks;
+
+using BotLibraryV2;
+using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Choices;
+using Microsoft.Bot.Schema;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+
+namespace PlanB.Butler.Bot.Dialogs
+{
     public class PlanDialog : ComponentDialog
     {
         /// <summary>

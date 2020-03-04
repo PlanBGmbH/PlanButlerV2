@@ -9,6 +9,22 @@ namespace PlanB.Butler.Bot
     public class BotConfig
     {
         /// <summary>
+        /// Gets or sets the butler service URL.
+        /// </summary>
+        /// <value>
+        /// The butler service URL.
+        /// </value>
+        public string ButlerServiceUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets the butler service key.
+        /// </summary>
+        /// <value>
+        /// The butler service key.
+        /// </value>
+        public string ButlerServiceKey { get; set; }
+
+        /// <summary>
         /// Gets or sets the storage account URL.
         /// </summary>
         /// <value>

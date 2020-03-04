@@ -15,7 +15,7 @@ using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace PlanB.Butler.Bot
+namespace PlanB.Butler.Bot.Dialogs
 {
     public class CreditDialog : ComponentDialog
     {
