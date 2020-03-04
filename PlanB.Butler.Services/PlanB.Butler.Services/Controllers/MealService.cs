@@ -293,7 +293,7 @@ namespace PlanB.Butler.Services.Controllers
                         Details = e.StackTrace,
                         Message = e.Message,
                     };
-                    actionResult = new BadRequestObjectResult(mealModel);
+                    actionResult = new BadRequestObjectResult(errorModel);
                 }
                 finally
                 {
@@ -480,7 +480,7 @@ namespace PlanB.Butler.Services.Controllers
                         Details = e.StackTrace,
                         Message = e.Message,
                     };
-                    actionResult = new BadRequestObjectResult(mealModel);
+                    actionResult = new BadRequestObjectResult(errorModel);
                 }
                 finally
                 {

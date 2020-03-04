@@ -27,10 +27,12 @@
     {
         public string Name { get; set; }
 
+        [Obsolete("Replace Restaurant1 with List<Restaurant>")]
         public string Restaurant1 { get; set; }
 
         public List<Meal1> Meal1 { get; set; }
 
+        [Obsolete("Replace Restaurant2 with List<Restaurant>")]
         public string Restaurant2 { get; set; }
 
         public List<Meal2> Meal2 { get; set; }
