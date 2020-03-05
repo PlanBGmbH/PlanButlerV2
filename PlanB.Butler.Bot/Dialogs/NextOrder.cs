@@ -155,6 +155,7 @@ namespace PlanB.Butler.Bot.Dialogs
             {
                 valid = false;
             }
+
             stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
             if (companyStatus == "extern")
             {

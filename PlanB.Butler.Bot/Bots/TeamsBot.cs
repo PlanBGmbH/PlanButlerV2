@@ -56,6 +56,7 @@ namespace PlanB.Butler.Bot
         /// are joining the conversation, it calls this method.
         /// </remarks>
         /// <seealso cref="M:Microsoft.Bot.Builder.ActivityHandler.OnConversationUpdateActivityAsync(Microsoft.Bot.Builder.ITurnContext{Microsoft.Bot.Schema.IConversationUpdateActivity},System.Threading.CancellationToken)" />
+        /// <returns>Task.</returns>
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
             await turnContext.SendActivityAsync(teamBotsWelcomeMessage, cancellationToken: cancellationToken);
@@ -66,6 +67,7 @@ namespace PlanB.Butler.Bot
         /// </summary>
         /// <param name="turnContext">The turn context.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>Task.</returns>
         protected override async Task OnSigninVerifyStateAsync(ITurnContext<IInvokeActivity> turnContext, CancellationToken cancellationToken)
         {
             this.Logger.LogInformation("Running dialog with signin/verifystate from an Invoke Activity.");
