@@ -107,7 +107,7 @@ namespace PlanB.Butler.Bot.Dialogs
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-            this.AddDialog(new NextOrder(config, telemetryClient));
+            this.AddDialog(new NextOrder(config, telemetryClient, this.clientFactory));
 
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);
@@ -279,18 +279,6 @@ namespace PlanB.Butler.Bot.Dialogs
             }
         }
 
-        public Order GetOrder(Order order)
-        {
-            OrderBlob orderBlob = new OrderBlob();
-            int weeknumber = (DateTime.Now.DayOfYear / 7) + 1;
-            orderBlob = JsonConvert.DeserializeObject<OrderBlob>(BotMethods.GetDocument("orders", "orders_" + weeknumber + "_" + DateTime.Now.Year + ".json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey));
-
-            var bufferOrder = orderBlob.OrderList.FindAll(x => x.Name == order.Name);
-
-            var temp = bufferOrder.FindAll(x => x.CompanyStatus == order.CompanyStatus);
-            var orderValue = temp[temp.Count - 1];
-            return orderValue;
-        }
         public void DeleteOrder(Order order, string serviceBusConnectionString)
         {
             string date = order.Date.ToString("yyyy-MM-dd");

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Resources;
 using System.Threading;
@@ -26,6 +27,11 @@ namespace PlanB.Butler.Bot.Dialogs
     /// <seealso cref="Microsoft.Bot.Builder.Dialogs.ComponentDialog" />
     public class OrderForOtherDayDialog : ComponentDialog
     {
+        /// <summary>
+        /// The client factory.
+        /// </summary>
+        private readonly IHttpClientFactory clientFactory;
+
         private static Plan plan = new Plan();
         private static int valueDay;
         private const double grand = 3.30;
@@ -65,12 +71,19 @@ namespace PlanB.Butler.Bot.Dialogs
         private static string nextOrderDialogSaveOrder = string.Empty;
 
         private IBotTelemetryClient telemetryClient;
+
         /// <summary>
         /// The bot configuration.
         /// </summary>
         private readonly IOptions<BotConfig> botConfig;
 
-        public OrderForOtherDayDialog(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrderForOtherDayDialog"/> class.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
+        /// <param name="botTelemetryClient">The telemetry client.</param>
+        /// <param name="httpClientFactory">The HTTP client factory.</param>
+        public OrderForOtherDayDialog(IOptions<BotConfig> config, IBotTelemetryClient botTelemetryClient, IHttpClientFactory httpClientFactory)
             : base(nameof(OrderForOtherDayDialog))
         {
             ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs", Assembly.GetExecutingAssembly());
@@ -85,8 +98,9 @@ namespace PlanB.Butler.Bot.Dialogs
             otherDayDialogOrder = rm.GetString("OtherDayDialog_Order");
             nextOrderDialogSaveOrder = rm.GetString("NextOrderDialog_SaveOrder");
 
-            this.telemetryClient = telemetryClient;
+            this.telemetryClient = botTelemetryClient;
             this.botConfig = config;
+            this.clientFactory = httpClientFactory;
 
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
@@ -103,7 +117,7 @@ namespace PlanB.Butler.Bot.Dialogs
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-            this.AddDialog(new NextOrder(config, telemetryClient));
+            this.AddDialog(new NextOrder(config, this.telemetryClient, this.clientFactory));
 
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Resources;
 using System.Threading;
@@ -17,6 +18,7 @@ using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using PlanB.Butler.Bot.Services;
 
 namespace PlanB.Butler.Bot.Dialogs
 {
@@ -25,6 +27,11 @@ namespace PlanB.Butler.Bot.Dialogs
     /// </summary>
     public class NextOrder : ComponentDialog
     {
+        /// <summary>
+        /// The client factory.
+        /// </summary>
+        private readonly IHttpClientFactory clientFactory;
+
         private static Plan plan = new Plan();
         private static int dayId;
         private static bool valid;
@@ -85,7 +92,7 @@ namespace PlanB.Butler.Bot.Dialogs
         /// NextOrderConstructor.
         /// </summary>
         /// <param name="config">The configuration.</param>
-        public NextOrder(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient)
+        public NextOrder(IOptions<BotConfig> config, IBotTelemetryClient telemetryClient, IHttpClientFactory httpClientFactory)
             : base(nameof(NextOrder))
         {
             ResourceManager rm = new ResourceManager("PlanB.Butler.Bot.Dictionary.Dialogs", Assembly.GetExecutingAssembly());
@@ -105,6 +112,7 @@ namespace PlanB.Butler.Bot.Dialogs
 
             this.botConfig = config;
             this.telemetryClient = telemetryClient;
+            this.clientFactory = httpClientFactory;
 
             //for (int i = 0; i < weekDays.Length; i++)
             //{
@@ -141,20 +149,41 @@ namespace PlanB.Butler.Bot.Dialogs
             this.InitialDialogId = nameof(WaterfallDialog);
         }
 
+        private PlanDay planDay;
+
         private async Task<DialogTurnResult> CompanyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // Get the Plan
-            try
+            //try
+            //{
+            //    string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
+            //    plan = JsonConvert.DeserializeObject<Plan>(food);
+            //    dayId = plan.Planday.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
+            //    valid = true;
+            //}
+            //catch
+            //{
+            //    valid = false;
+            //}
+
+            IMealService mealService = new MealService(this.clientFactory.CreateClient(), this.botConfig.Value);
+            var meals = await mealService.GetMeals(string.Empty, string.Empty);
+            var mealEnumerator = meals.GetEnumerator();
+            this.planDay = new PlanDay();
+            while (mealEnumerator.MoveNext())
             {
-                string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
-                plan = JsonConvert.DeserializeObject<Plan>(food);
-                dayId = plan.Planday.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
-                valid = true;
+                if (string.IsNullOrEmpty(this.planDay.Restaurant1))
+                {
+                    this.planDay.Restaurant1 = mealEnumerator.Current.Restaurant;
+                }
+
+                if (string.IsNullOrEmpty(this.planDay.Restaurant2) && this.planDay.Restaurant1 != mealEnumerator.Current.Restaurant)
+                {
+                    this.planDay.Restaurant2 = mealEnumerator.Current.Restaurant;
+                }
             }
-            catch
-            {
-                valid = false;
-            }
+
+
             stepContext.Values["name"] = stepContext.Context.Activity.From.Name;
             if (companyStatus == "extern")
             {
@@ -238,9 +267,8 @@ namespace PlanB.Butler.Bot.Dialogs
             return await stepContext.NextAsync(null, cancellationToken);
         }
 
-        private static async Task<DialogTurnResult> RestaurantStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> RestaurantStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-
 
             if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde" || stepContext.Values["companyStatus"].ToString().ToLower() == "extern")
             {
@@ -260,6 +288,26 @@ namespace PlanB.Butler.Bot.Dialogs
                 stepContext.Values["companyName"] = (string)stepContext.Result;
             }
 
+            if (string.IsNullOrEmpty(this.planDay.Restaurant2))
+            {
+                stepContext.Values["restaurant"] = this.planDay.Restaurant1;
+                return await stepContext.NextAsync(null, cancellationToken);
+            }
+            else
+            {
+
+                return await stepContext.PromptAsync(
+                    nameof(ChoicePrompt),
+                    new PromptOptions
+                    {
+                        Prompt = MessageFactory.Text(nextOrderDialogRestaurantPrompt),
+                        Choices = GetChoice("restaurant", plan),
+                        Style = ListStyle.HeroCard,
+                    }, cancellationToken);
+
+            }
+
+            /*
             if (string.IsNullOrEmpty(plan.Planday[indexer].Restaurant2))
             {
                 stepContext.Values["restaurant"] = plan.Planday[indexer].Restaurant1;
@@ -278,6 +326,7 @@ namespace PlanB.Butler.Bot.Dialogs
                     }, cancellationToken);
 
             }
+            */
         }
 
         /// <summary>
@@ -577,11 +626,6 @@ namespace PlanB.Butler.Bot.Dialogs
         }
 
         /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="order"></param>
-
-        /// <summary>
         /// Gets the chioses corresponding to the identifier you sepcify
         /// </summary>
         /// <param name="identifier">The identifier is used to define what choises you want</param>
@@ -589,18 +633,18 @@ namespace PlanB.Butler.Bot.Dialogs
         /// <returns>Returnds the specified choises</returns>
         private static IList<Choice> GetChoice(string identifier, Plan plan)
         {
-            List<string> choise = new List<string>();
+            List<string> choice = new List<string>();
             var day = plan.Planday[dayId];
             if (identifier == "restaurant")
             {
                 if (day.Restaurant1 != null)
                 {
-                    choise.Add(day.Restaurant1);
+                    choice.Add(day.Restaurant1);
                 }
 
                 if (day.Restaurant2 != null)
                 {
-                    choise.Add(day.Restaurant2);
+                    choice.Add(day.Restaurant2);
                 }
             }
             else if (identifier == "food1")
@@ -609,9 +653,10 @@ namespace PlanB.Butler.Bot.Dialogs
                 {
                     meal1List.Add(food.Name);
                 }
+
                 foreach (var food in day.Meal1)
                 {
-                    choise.Add(food.Name + " " + food.Price + "€");
+                    choice.Add(food.Name + " " + food.Price + "€");
                     meal1ListwithMoney.Add(food.Name + " " + food.Price + "€");
                 }
             }
@@ -621,14 +666,15 @@ namespace PlanB.Butler.Bot.Dialogs
                 {
                     meal2List.Add(food.Name);
                 }
+
                 foreach (var food in day.Meal2)
                 {
-                    choise.Add(food.Name + " " + food.Price + "€");
+                    choice.Add(food.Name + " " + food.Price + "€");
                     meal2ListWithMoney.Add(food.Name + " " + food.Price + "€");
                 }
             }
 
-            return ChoiceFactory.ToChoices(choise);
+            return ChoiceFactory.ToChoices(choice);
         }
     }
 }
