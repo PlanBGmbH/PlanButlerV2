@@ -95,10 +95,10 @@ namespace PlanB.Butler.Bot.Dialogs
 
             choices = new string[] { overviewDialogOrderFood, overviewDialogOtherDay, overviewDialogDeleteOrder, overviewDialogShowDepts, overviewDialogDaysOrder };
             OrderDialog orderDialog = new OrderDialog(this.botConfig, telemetryClient, this.clientFactory);
-            NextOrder nextorderDialog = new NextOrder(this.botConfig, telemetryClient);
+            NextOrder nextorderDialog = new NextOrder(this.botConfig, telemetryClient, this.clientFactory);
             PlanDialog planDialog = new PlanDialog(this.botConfig, telemetryClient);
             CreditDialog creditDialog = new CreditDialog(this.botConfig, telemetryClient);
-            OrderForOtherDayDialog orderForAnotherDay = new OrderForOtherDayDialog(this.botConfig, telemetryClient);
+            OrderForOtherDayDialog orderForAnotherDay = new OrderForOtherDayDialog(this.botConfig, telemetryClient, this.clientFactory);
             DeleteOrderDialog deleteOrderDialog = new DeleteOrderDialog(this.botConfig, telemetryClient, this.clientFactory);
             List<ComponentDialog> dialogsList = new List<ComponentDialog>();
             DailyCreditDialog dailyCreditDialog = new DailyCreditDialog(this.botConfig, telemetryClient);
@@ -127,9 +127,9 @@ namespace PlanB.Butler.Bot.Dialogs
             this.AddDialog(new OrderDialog(this.botConfig, telemetryClient, this.clientFactory));
             this.AddDialog(new CreditDialog(this.botConfig, telemetryClient));
             this.AddDialog(new PlanDialog(this.botConfig, telemetryClient));
-            this.AddDialog(new OrderForOtherDayDialog(this.botConfig, telemetryClient));
+            this.AddDialog(new OrderForOtherDayDialog(this.botConfig, telemetryClient, this.clientFactory));
             this.AddDialog(new DeleteOrderDialog(this.botConfig, telemetryClient, this.clientFactory));
-            this.AddDialog(new NextOrder(this.botConfig, telemetryClient));
+            this.AddDialog(new NextOrder(this.botConfig, telemetryClient, this.clientFactory));
             this.AddDialog(new DailyCreditDialog(this.botConfig, telemetryClient));
             this.AddDialog(new ExcellDialog(this.botConfig, telemetryClient));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));

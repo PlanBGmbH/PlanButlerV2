@@ -107,7 +107,7 @@ namespace PlanB.Butler.Bot.Dialogs
             this.AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             this.AddDialog(new TextPrompt(nameof(TextPrompt)));
             this.AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
-            this.AddDialog(new NextOrder(config, telemetryClient));
+            this.AddDialog(new NextOrder(config, telemetryClient, this.clientFactory));
 
             // The initial child Dialog to run.
             this.InitialDialogId = nameof(WaterfallDialog);
