@@ -58,7 +58,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PlanB.Butler.Library\PlanB.Butler.Library\PlanB.Butler.Library.csproj" />
+    <ProjectReference Include="..\..\PlanB.Butler.Library\PlanB.Butler.Library\PlanB.Butler.Library.csproj" />
   </ItemGroup>
 
   <ItemGroup>
