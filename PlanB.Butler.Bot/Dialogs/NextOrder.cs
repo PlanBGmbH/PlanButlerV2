@@ -631,7 +631,7 @@ namespace PlanB.Butler.Bot.Dialogs
         /// <param name="identifier">The identifier is used to define what choises you want</param>
         /// <param name="plan">The plan Object</param>
         /// <returns>Returnds the specified choises</returns>
-        private static IList<Choice> GetChoice(string identifier, Plan plan)
+        internal static IList<Choice> GetChoice(string identifier, Plan plan)
         {
             List<string> choice = new List<string>();
             var day = plan.Planday[dayId];
