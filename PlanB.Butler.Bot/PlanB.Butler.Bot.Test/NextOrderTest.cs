@@ -48,7 +48,7 @@ namespace PlanB.Butler.Bot.Test
         [ExpectedException(typeof(NullReferenceException))]
         public void PlanNullIdentifierEmpty()
         {
-            var result = NextOrder.GetChoice(string.Empty, this.plan);
+            var result = NextOrder.GetChoice(string.Empty, null);
             Assert.IsNotNull(result);
         }
 
