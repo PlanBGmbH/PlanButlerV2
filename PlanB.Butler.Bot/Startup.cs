@@ -2,18 +2,13 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
+using System.Runtime.CompilerServices;
 
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.Localization.Routing;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.ApplicationInsights;
 using Microsoft.Bot.Builder.Integration.ApplicationInsights.Core;
@@ -22,6 +17,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using PlanB.Butler.Bot.Dialogs;
+
+[assembly: InternalsVisibleTo("PlanB.Butler.Bot.Test")]
 
 namespace PlanB.Butler.Bot
 {
@@ -34,8 +31,6 @@ namespace PlanB.Butler.Bot
         /// The configuration.
         /// </summary>
         private readonly IConfiguration configuration;
-
-
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Startup"/> class.
@@ -57,12 +52,10 @@ namespace PlanB.Butler.Bot
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-
             // The Bot needs an HttpClient to download and upload files.
-            //services.AddHttpClient();
+            // services.AddHttpClient();
             services.AddHttpClient<PlanB.Butler.Bot.Services.IMealService, PlanB.Butler.Bot.Services.MealService>()
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
-
 
             // Create the Bot Framework Adapter with error handling enabled.
             services.AddSingleton<IBotFrameworkHttpAdapter, AdapterWithErrorHandler>();
