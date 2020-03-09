@@ -52,6 +52,7 @@ namespace PlanB.Butler.Bot.Dialogs
         [Obsolete("Naming Conventions!")]
         static Order obj = new Order();
 
+  
         private static string deletDialogTimePrompt = string.Empty;
         private static string deletDialogWhoPrompt = string.Empty;
         private static string nextOrderDialogMyself = string.Empty;

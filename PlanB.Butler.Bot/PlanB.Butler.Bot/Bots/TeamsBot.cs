@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Threading;
@@ -11,6 +12,7 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace PlanB.Butler.Bot
 {
@@ -60,6 +62,13 @@ namespace PlanB.Butler.Bot
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
             await turnContext.SendActivityAsync(teamBotsWelcomeMessage, cancellationToken: cancellationToken);
+
+            // AdaptiveCard Test
+            var welcomeCard = this.CreateAdaptiveCardAttachment();
+            var response = MessageFactory.Attachment(welcomeCard, ssml: "Welcome");
+            await turnContext.SendActivityAsync(response, cancellationToken);
+            await this.Dialog.RunAsync(turnContext, this.ConversationState.CreateProperty<DialogState>("DialogState"), cancellationToken);
+
         }
 
         /// <summary>
@@ -76,6 +85,18 @@ namespace PlanB.Butler.Bot
 
             // Run the Dialog with the new Invoke Activity.
             await this.Dialog.RunAsync(turnContext, this.ConversationState.CreateProperty<DialogState>(nameof(DialogState)), cancellationToken);
+        }
+        private Attachment CreateAdaptiveCardAttachment()
+        {
+            var path = "PlanB.Butler.Bot.cards.Summary.json";
+            using var stream = GetType().Assembly.GetManifestResourceStream(path);
+            using var reader = new StreamReader(stream);
+            var adaptiveCard = reader.ReadToEnd();
+            return new Attachment()
+            {
+                ContentType = "application/vnd.microsoft.card.adaptive",
+                Content = JsonConvert.DeserializeObject(adaptiveCard),
+            };
         }
     }
 }

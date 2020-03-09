@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
@@ -54,20 +55,6 @@ namespace PlanB.Butler.Bot.Dialogs
         private static HttpStatusCode statusSalary;
         private static HttpStatusCode statusMoney;
 
-        /// <summary>
-        /// NextOrderDialogAmountFoodPrompt.
-        /// NextOrderDialogNameTraineePrompt
-        /// NextOrderDialogCompanyPrompt
-        /// NextOrderDialogMyself
-        /// NextOrderDialogTrainee
-        /// NextOrderDialogCostumer
-        /// NextOrderDialogRestaurantPrompt
-        /// NextOrderDialogFoodPrompt
-        /// NextOrderDialogError
-        /// NextOrderDialogError1
-        /// OtherDayDialogOrder
-        /// NextOrderDialogSaveOrder.
-        /// </summary>
         private static string nextOrderDialogAmountFoodPrompt = string.Empty;
         private static string nextOrderDialogNameTraineePrompt = string.Empty;
         private static string nextOrderDialogCompanyPrompt = string.Empty;
@@ -454,9 +441,6 @@ namespace PlanB.Butler.Bot.Dialogs
             return await stepContext.NextAsync(null, cancellationToken);
         }
 
-
-
-
         /// <summary>
         /// PriceStepAsync.
         /// </summary>
@@ -512,26 +496,44 @@ namespace PlanB.Butler.Bot.Dialogs
                         order.Price = 0;
                     }
                     else
-
+                    {
                         order.Price = Math.Round(Convert.ToDouble(stepContext.Values["price"]) - grand, 2);
-                }
+                    }
 
-                var bufferorder = order;
-                HttpStatusCode statusOrder = await BotMethods.UploadOrder(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-                HttpStatusCode statusSalary = await BotMethods.UploadOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-                HttpStatusCode statusMoney = await BotMethods.UploadMoney(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-                if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
-                {
-                    await stepContext.Context.SendActivityAsync(MessageFactory.Text(nextOrderDialogSaveOrder), cancellationToken);
-                }
-                else
-                {
-                    await stepContext.Context.SendActivityAsync(MessageFactory.Text(nextOrderDialogError1), cancellationToken);
-                    BotMethods.DeleteOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-                    BotMethods.DeleteMoney(bufferorder, weekDays[indexer].ToString().ToLower(), this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-                    BotMethods.DeleteOrder(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
-                    await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
-                    return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
+                    var bufferorder = order;
+                    HttpStatusCode statusOrder = await BotMethods.UploadOrder(order, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                    HttpStatusCode statusSalary = await BotMethods.UploadOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                    HttpStatusCode statusMoney = await BotMethods.UploadMoney(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                    if (statusMoney == HttpStatusCode.OK || (statusMoney == HttpStatusCode.Created && statusOrder == HttpStatusCode.OK) || (statusOrder == HttpStatusCode.Created && statusSalary == HttpStatusCode.OK) || statusSalary == HttpStatusCode.Created)
+                    {
+                        await stepContext.Context.SendActivityAsync(MessageFactory.Text(nextOrderDialogSaveOrder), cancellationToken);
+
+                        // Adaptive Card
+                        async Task OnTurn(ITurnContext turnContext)
+                        {
+                            if (turnContext.Activity.Value != null)
+                            {
+                                await turnContext.SendActivityAsync(turnContext.Activity.Value.ToString());
+
+                            }
+
+                            if (turnContext.Activity.Type == ActivityTypes.Message)
+                            {
+                                var response = turnContext.Activity.CreateReply();
+                                response.Attachments = new List<Attachment>() { CreateAdaptiveCardAttachment() };
+                                await turnContext.SendActivityAsync(response);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        await stepContext.Context.SendActivityAsync(MessageFactory.Text(nextOrderDialogError1), cancellationToken);
+                        BotMethods.DeleteOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                        BotMethods.DeleteMoney(bufferorder, weekDays[indexer].ToString().ToLower(), this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                        BotMethods.DeleteOrder(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
+                        await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
+                        return await stepContext.BeginDialogAsync(nameof(OverviewDialog), null, cancellationToken);
+                    }
                 }
             }
             else if (stepContext.Values["companyStatus"].ToString().ToLower() == "kunde" || stepContext.Values["companyStatus"].ToString().ToLower() == "extern")
@@ -616,6 +618,7 @@ namespace PlanB.Butler.Bot.Dialogs
                 statusSalary = await BotMethods.UploadOrderforSalaryDeduction(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
                 statusMoney = await BotMethods.UploadMoney(bufferorder, this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey, this.botConfig.Value.ServiceBusConnectionString);
             }
+
             var state = new Dictionary<string, string>();
             string orderJson = JsonConvert.SerializeObject(order);
             state.Add("Order", orderJson);
@@ -676,7 +679,17 @@ namespace PlanB.Butler.Bot.Dialogs
 
             return ChoiceFactory.ToChoices(choice);
         }
+        private Attachment CreateAdaptiveCardAttachment()
+        {
+            var path = "PlanB.Butler.Bot.cards.Summary.json";
+            using var stream = GetType().Assembly.GetManifestResourceStream(path);
+            using var reader = new StreamReader(stream);
+            var adaptiveCard = reader.ReadToEnd();
+            return new Attachment()
+            {
+                ContentType = "application/vnd.microsoft.card.adaptive",
+                Content = JsonConvert.DeserializeObject(adaptiveCard),
+            };
+        }
     }
 }
-
-

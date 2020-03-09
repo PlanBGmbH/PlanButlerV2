@@ -1,0 +1,81 @@
+{
+  "type": "AdaptiveCard",
+  "fallbackText": "Das sollte nicht passieren",
+  "lang": "en",
+  "version": "1.0",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Summary",
+      "spacing": "Large",
+      "size": "Large",
+      "weight": "Bolder"
+    },
+    {
+      "type": "ColumnSet",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "stretch",
+          "style": "emphasis",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Date"
+            },
+            {
+              "type": "TextBlock",
+              "separator": true,
+              "text": "Order"
+            },
+            {
+              "type": "TextBlock",
+              "text": "Price"
+            },
+            {
+              "type": "TextBlock",
+              "text": "Discount"
+            },
+            {
+              "type": "TextBlock",
+              "separator": true,
+              "text": "Total",
+              "weight": "Bolder"
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "stretch",
+          "style": "emphasis",
+          "items": [
+            {
+              "type": "TextBlock",
+              "separator": true,
+              "text": "..."
+            },
+            {
+              "type": "TextBlock",
+              "separator": true,
+              "text": "..."
+            },
+            {
+              "type": "TextBlock",
+              "text": "..."
+            },
+            {
+              "type": "TextBlock",
+              "text": "..."
+            },
+            {
+              "type": "TextBlock",
+              "separator": true,
+              "text": "..."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
+}
