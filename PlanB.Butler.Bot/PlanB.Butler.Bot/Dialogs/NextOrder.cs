@@ -141,34 +141,34 @@ namespace PlanB.Butler.Bot.Dialogs
         private async Task<DialogTurnResult> CompanyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // Get the Plan
-            //try
-            //{
-            //    string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
-            //    plan = JsonConvert.DeserializeObject<Plan>(food);
-            //    dayId = plan.Planday.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
-            //    valid = true;
-            //}
-            //catch
-            //{
-            //    valid = false;
-            //}
-
-            IMealService mealService = new MealService(this.clientFactory.CreateClient(), this.botConfig.Value);
-            var meals = await mealService.GetMeals(string.Empty, string.Empty);
-            var mealEnumerator = meals.GetEnumerator();
-            this.planDay = new PlanDay();
-            while (mealEnumerator.MoveNext())
+            try
             {
-                if (string.IsNullOrEmpty(this.planDay.Restaurant1))
-                {
-                    this.planDay.Restaurant1 = mealEnumerator.Current.Restaurant;
-                }
-
-                if (string.IsNullOrEmpty(this.planDay.Restaurant2) && this.planDay.Restaurant1 != mealEnumerator.Current.Restaurant)
-                {
-                    this.planDay.Restaurant2 = mealEnumerator.Current.Restaurant;
-                }
+                string food = BotMethods.GetDocument("eatingplan", "ButlerOverview.json", this.botConfig.Value.StorageAccountUrl, this.botConfig.Value.StorageAccountKey);
+                plan = JsonConvert.DeserializeObject<Plan>(food);
+                dayId = plan.Planday.FindIndex(x => x.Name == DateTime.Now.DayOfWeek.ToString().ToLower());
+                valid = true;
             }
+            catch
+            {
+                valid = false;
+            }
+
+            //IMealService mealService = new MealService(this.clientFactory.CreateClient(), this.botConfig.Value);
+            //var meals = await mealService.GetMeals(string.Empty, string.Empty);
+            //var mealEnumerator = meals.GetEnumerator();
+            //this.planDay = new PlanDay();
+            //while (mealEnumerator.MoveNext())
+            //{
+            //    if (string.IsNullOrEmpty(this.planDay.Restaurant1))
+            //    {
+            //        this.planDay.Restaurant1 = mealEnumerator.Current.Restaurant;
+            //    }
+
+            //    if (string.IsNullOrEmpty(this.planDay.Restaurant2) && this.planDay.Restaurant1 != mealEnumerator.Current.Restaurant)
+            //    {
+            //        this.planDay.Restaurant2 = mealEnumerator.Current.Restaurant;
+            //    }
+            //}
 
 
             stepContext.Values["name"] = stepContext.Context.Activity.From.Name;

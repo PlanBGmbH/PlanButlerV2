@@ -70,22 +70,22 @@ namespace PlanB.Butler.Bot.Dialogs
 
         private async Task<DialogTurnResult> TimeDayStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            IMealService mealService = new MealService(this.clientFactory.CreateClient(), this.botConfig.Value);
-            var meals = await mealService.GetMeals(string.Empty, string.Empty);
-            var mealEnumerator = meals.GetEnumerator();
-            PlanDay day = new PlanDay();
-            while (mealEnumerator.MoveNext())
-            {
-                if (string.IsNullOrEmpty(day.Restaurant1))
-                {
-                    day.Restaurant1 = mealEnumerator.Current.Restaurant;
-                }
+            //IMealService mealService = new MealService(this.clientFactory.CreateClient(), this.botConfig.Value);
+            //var meals = await mealService.GetMeals(string.Empty, string.Empty);
+            //var mealEnumerator = meals.GetEnumerator();
+            //PlanDay day = new PlanDay();
+            //while (mealEnumerator.MoveNext())
+            //{
+            //    if (string.IsNullOrEmpty(day.Restaurant1))
+            //    {
+            //        day.Restaurant1 = mealEnumerator.Current.Restaurant;
+            //    }
 
-                if (string.IsNullOrEmpty(day.Restaurant2) && day.Restaurant1 != mealEnumerator.Current.Restaurant)
-                {
-                    day.Restaurant2 = mealEnumerator.Current.Restaurant;
-                }
-            }
+            //    if (string.IsNullOrEmpty(day.Restaurant2) && day.Restaurant1 != mealEnumerator.Current.Restaurant)
+            //    {
+            //        day.Restaurant2 = mealEnumerator.Current.Restaurant;
+            //    }
+            //}
 
 
 
