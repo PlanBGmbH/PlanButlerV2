@@ -12,6 +12,7 @@ using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 
+using AdaptiveCards;
 using BotLibraryV2;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
@@ -116,13 +117,14 @@ namespace PlanB.Butler.Bot.Dialogs
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
             {
-                this.CompanyStepAsync,
+                CompanyStepAsync,
                 NameStepAsync,
                 RestaurantStepAsync,
                 QuantityStepAsync,
                 FoodStepAsync,
                 MealQuantityStepAsync,
                 PriceStepAsync,
+                DisplayCardAsync, 
                 this.SummaryStepAsync,
             };
 
@@ -197,7 +199,6 @@ namespace PlanB.Butler.Bot.Dialogs
                 //    }
                 //}
 
-
                 return await stepContext.PromptAsync(
                               nameof(ChoicePrompt),
                               new PromptOptions
@@ -209,9 +210,29 @@ namespace PlanB.Butler.Bot.Dialogs
             }
         }
 
+        // Test Adaptive Card
+        private async Task<DialogTurnResult> DisplayCardAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            var path = Path.Combine(".", "AdaptiveCards", "Summary.json");
+            var summaryCard = File.ReadAllText(path);
+            var cardAttachment = new Attachment()
+            {
+                ContentType = "application/vnd.microsoft.card.adaptive",
+                Content = JsonConvert.DeserializeObject(summaryCard),
+            };
+            var message = MessageFactory.Text(string.Empty);
+            message.Attachments = new List<Attachment>() { cardAttachment };
+            await stepContext.Context.SendActivityAsync(message, cancellationToken);
+
+            var opts = new PromptOptions
+            {
+            };
+
+            return await stepContext.PromptAsync(nameof(TextPrompt), opts);
+        }
+
         private static async Task<DialogTurnResult> NameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-
 
             try
             {
@@ -219,7 +240,7 @@ namespace PlanB.Butler.Bot.Dialogs
                 companyStatus = (string)stepContext.Values["companyStatus"];
                 if (companyStatus.ToLower().ToString() == "kunde" || companyStatus == "extern")
                 {
-                    if (companyName == " ")
+                    if (companyName == nextOrderDialogCostumer)
                     {
                         return await stepContext.PromptAsync(
                                                      nameof(TextPrompt),
@@ -239,7 +260,9 @@ namespace PlanB.Butler.Bot.Dialogs
                               cancellationToken);
                 }
                 else
+                {
                     return await stepContext.NextAsync(null, cancellationToken);
+                }
             }
             catch (Exception ex)
             {
@@ -282,7 +305,6 @@ namespace PlanB.Butler.Bot.Dialogs
             }
             else
             {
-
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
@@ -378,6 +400,7 @@ namespace PlanB.Butler.Bot.Dialogs
             if (stepContext.Values["restaurant"].ToString().ToLower() == plan.Planday[indexer].Restaurant1.ToLower())
             {
                 stepContext.Values["rest1"] = "yes";
+
                 return await stepContext.PromptAsync(
                     nameof(ChoicePrompt),
                     new PromptOptions
@@ -508,22 +531,6 @@ namespace PlanB.Butler.Bot.Dialogs
                     {
                         await stepContext.Context.SendActivityAsync(MessageFactory.Text(nextOrderDialogSaveOrder), cancellationToken);
 
-                        // Adaptive Card
-                        async Task OnTurn(ITurnContext turnContext)
-                        {
-                            if (turnContext.Activity.Value != null)
-                            {
-                                await turnContext.SendActivityAsync(turnContext.Activity.Value.ToString());
-
-                            }
-
-                            if (turnContext.Activity.Type == ActivityTypes.Message)
-                            {
-                                var response = turnContext.Activity.CreateReply();
-                                response.Attachments = new List<Attachment>() { CreateAdaptiveCardAttachment() };
-                                await turnContext.SendActivityAsync(response);
-                            }
-                        }
                     }
                     else
                     {
@@ -679,17 +686,22 @@ namespace PlanB.Butler.Bot.Dialogs
 
             return ChoiceFactory.ToChoices(choice);
         }
-        private Attachment CreateAdaptiveCardAttachment()
+
+        public Attachment CreateAdaptiveCardAttachment()
         {
-            var path = "PlanB.Butler.Bot.cards.Summary.json";
-            using var stream = GetType().Assembly.GetManifestResourceStream(path);
-            using var reader = new StreamReader(stream);
-            var adaptiveCard = reader.ReadToEnd();
-            return new Attachment()
+            var path = "PlanB.Butler.Bot.AdaptiveCards.Summary.json";
+            using (var stream = GetType().Assembly.GetManifestResourceStream(path))
             {
-                ContentType = "application/vnd.microsoft.card.adaptive",
-                Content = JsonConvert.DeserializeObject(adaptiveCard),
-            };
+                using (var reader = new StreamReader(stream))
+                {
+                    var adaptiveCard = reader.ReadToEnd();
+                    return new Attachment()
+                    {
+                        ContentType = "application/vnd.microsoft.card.adaptive",
+                        Content = JsonConvert.DeserializeObject(adaptiveCard),
+                    };
+                }
+            }
         }
     }
 }

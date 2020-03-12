@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Content Remove="AdaptiveCard.json" />
+    <Content Remove="appsettings.Development.json" />
     <Content Remove="stylecop.json" />
   </ItemGroup>
 
@@ -36,6 +37,7 @@
 
   <ItemGroup>
     <None Include="AdaptiveCard.json" />
+    <None Include="appsettings.Development.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -67,12 +69,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Dialogs.resx</DependentUpon>
     </Compile>
-  </ItemGroup>
-
-    <ItemGroup>
-    <Content Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
     <ItemGroup>

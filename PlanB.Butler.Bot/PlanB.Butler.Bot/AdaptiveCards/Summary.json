@@ -7,9 +7,9 @@
     {
       "type": "TextBlock",
       "text": "Summary",
-      "spacing": "Large",
-      "size": "Large",
-      "weight": "Bolder"
+      "spacing": "large",
+      "size": "large",
+      "weight": "bolder"
     },
     {
       "type": "ColumnSet",
@@ -52,7 +52,7 @@
             {
               "type": "TextBlock",
               "separator": true,
-              "text": "..."
+              "value":  "..."
             },
             {
               "type": "TextBlock",

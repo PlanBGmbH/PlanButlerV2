@@ -223,7 +223,7 @@ namespace PlanB.Butler.Bot.Dialogs
                 }
             }
 
-            await stepContext.Context.SendActivityAsync(MessageFactory.Text(""));
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text(string.Empty));
 
             // Reply to the activity we received with an activity.
             var reply = MessageFactory.Attachment(attachments);

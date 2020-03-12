@@ -63,12 +63,6 @@ namespace PlanB.Butler.Bot
         {
             await turnContext.SendActivityAsync(teamBotsWelcomeMessage, cancellationToken: cancellationToken);
 
-            // AdaptiveCard Test
-            var welcomeCard = this.CreateAdaptiveCardAttachment();
-            var response = MessageFactory.Attachment(welcomeCard, ssml: "Welcome");
-            await turnContext.SendActivityAsync(response, cancellationToken);
-            await this.Dialog.RunAsync(turnContext, this.ConversationState.CreateProperty<DialogState>("DialogState"), cancellationToken);
-
         }
 
         /// <summary>
@@ -85,18 +79,6 @@ namespace PlanB.Butler.Bot
 
             // Run the Dialog with the new Invoke Activity.
             await this.Dialog.RunAsync(turnContext, this.ConversationState.CreateProperty<DialogState>(nameof(DialogState)), cancellationToken);
-        }
-        private Attachment CreateAdaptiveCardAttachment()
-        {
-            var path = "PlanB.Butler.Bot.cards.Summary.json";
-            using var stream = GetType().Assembly.GetManifestResourceStream(path);
-            using var reader = new StreamReader(stream);
-            var adaptiveCard = reader.ReadToEnd();
-            return new Attachment()
-            {
-                ContentType = "application/vnd.microsoft.card.adaptive",
-                Content = JsonConvert.DeserializeObject(adaptiveCard),
-            };
         }
     }
 }

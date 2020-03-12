@@ -150,7 +150,7 @@ namespace PlanB.Butler.Bot
 
             app.UseMvc();
 
-            // app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
         }
     }
 }

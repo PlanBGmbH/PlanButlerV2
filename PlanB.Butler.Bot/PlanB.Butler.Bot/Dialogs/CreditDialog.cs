@@ -38,8 +38,6 @@ namespace PlanB.Butler.Bot.Dialogs
         private static string creditDialogYes = string.Empty;
         private static string creditDialogNo = string.Empty;
 
-
-
         /// <summary>
         /// The bot configuration.
         /// </summary>
