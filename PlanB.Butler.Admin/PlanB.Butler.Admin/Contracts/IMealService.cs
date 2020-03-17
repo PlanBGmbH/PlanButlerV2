@@ -39,6 +39,5 @@ namespace PlanB.Butler.Admin.Contracts
         /// <param name="id">The identifier.</param>
         /// <returns>Meal by Id.</returns>
         Task<MealViewModel> GetMeal(string id);
-
     }
 }

@@ -51,6 +51,9 @@ namespace PlanB.Butler.Admin
             services.AddControllersWithViews();
             services.AddHttpClient<IMealService, MealService>()
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
+
+            services.AddHttpClient<IRestaurantService, RestaurantService>()
+              .SetHandlerLifetime(TimeSpan.FromMinutes(5));
         }
 
         /// <summary>
