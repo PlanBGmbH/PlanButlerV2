@@ -89,5 +89,14 @@ namespace PlanB.Butler.Services.Models
         /// </value>
         [JsonProperty("emailAddress")]
         public string EmailAddress { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date.
+        /// </summary>
+        /// <value>
+        /// The date.
+        /// </value>
+        [JsonProperty("date")]
+        public DateTime Date { get; set; }
     }
 }

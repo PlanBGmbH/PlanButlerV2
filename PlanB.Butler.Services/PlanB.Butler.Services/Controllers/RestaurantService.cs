@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Net.Mime;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,9 +36,113 @@ namespace PlanB.Butler.Services.Controllers
         private const string MetaRestaurant = "restaurant";
 
         /// <summary>
+        /// The meta date.
+        /// </summary>
+        private const string MetaDate = "date";
+
+        /// <summary>
         /// The meta city.
         /// </summary>
         private const string MetaCity = "city";
+
+        /// <summary>
+        /// Updates the Restaurant by identifier.
+        /// </summary>
+        /// <param name="req">The req.</param>
+        /// <param name="id">The identifier.</param>
+        /// <param name="existingContent">The BLOB.</param>
+        /// <param name="cloudBlobContainer">The cloud BLOB container.</param>
+        /// <param name="log">The log.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>IActionResult.</returns>
+        [FunctionName("UpdateRestaurantById")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(RestaurantModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        public static async Task<IActionResult> UpdateRestaurantById(
+            [HttpTrigger(AuthorizationLevel.Function, "put", Route = "restaurants/{id}")] HttpRequest req,
+            string id,
+            [Blob("restaurants/{id}.json", FileAccess.ReadWrite, Connection = "StorageSend")] string existingContent,
+            [Blob("restaurants", FileAccess.ReadWrite, Connection = "StorageSend")] CloudBlobContainer cloudBlobContainer,
+            ILogger log,
+            ExecutionContext context)
+        {
+            Guid correlationId = Util.ReadCorrelationId(req.Headers);
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            var trace = new Dictionary<string, string>();
+            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            IActionResult actionResult = null;
+
+            RestaurantModel restaurantModel = null;
+
+            using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
+            {
+                try
+                {
+                    trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                    trace.Add("id", id);
+                    restaurantModel = JsonConvert.DeserializeObject<RestaurantModel>(existingContent);
+
+                    var date = restaurantModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                    var filename = $"{date}-{restaurantModel.City}.json";
+                    trace.Add($"filename", filename);
+                    string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                    trace.Add("requestBody", requestBody);
+                    restaurantModel = JsonConvert.DeserializeObject<RestaurantModel>(requestBody);
+
+                    req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
+
+                    bool isValid = Validate(restaurantModel, correlationId, log, out ErrorModel errorModel);
+                    if (isValid)
+                    {
+                        CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
+                        if (blob != null)
+                        {
+                            blob.Properties.ContentType = "application/json";
+                            var metaDate = restaurantModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+                            blob.Metadata.Add(MetaDate, metaDate);
+                            blob.Metadata.Add(MetaRestaurant, restaurantModel.ToString());
+                            blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
+                            var restaurant = JsonConvert.SerializeObject(restaurantModel);
+                            trace.Add("restaurant", restaurant);
+
+                            Task task = blob.UploadTextAsync(restaurant);
+                            task.Wait();
+                            actionResult = new OkObjectResult(restaurantModel);
+                            log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                        }
+                    }
+                    else
+                    {
+                        actionResult = new BadRequestObjectResult(errorModel);
+                        log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
+                    }
+                }
+                catch (Exception e)
+                {
+                    trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                    trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                    log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                    log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Details = e.StackTrace,
+                        Message = e.Message,
+                    };
+                    actionResult = new BadRequestObjectResult(errorModel);
+                }
+                finally
+                {
+                    log.LogTrace(eventId, $"'{methodName}' - finished");
+                    log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                }
+            }
+
+            return actionResult;
+        }
 
         /// <summary>
         /// Gets the restaurants.
@@ -142,16 +247,17 @@ namespace PlanB.Butler.Services.Controllers
             EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
             IActionResult actionResult = null;
 
+            RestaurantModel restaurantModel = null;
             using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
             {
                 try
                 {
                     trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
                     trace.Add("id", id);
-                    RestaurantModel model = JsonConvert.DeserializeObject<RestaurantModel>(blob);
+                    restaurantModel = JsonConvert.DeserializeObject<RestaurantModel>(blob);
 
                     log.LogInformation(correlationId, $"'{methodName}' - success", trace);
-                    actionResult = new OkObjectResult(model);
+                    actionResult = new OkObjectResult(restaurantModel);
                 }
                 catch (Exception e)
                 {

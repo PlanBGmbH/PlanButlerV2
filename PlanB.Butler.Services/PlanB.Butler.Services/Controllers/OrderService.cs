@@ -31,6 +31,168 @@ namespace PlanB.Butler.Services.Controllers
     public static class OrderService
     {
         /// <summary>
+        /// Updates the Restaurant by identifier.
+        /// </summary>
+        /// <param name="req">The req.</param>
+        /// <param name="id">The identifier.</param>
+        /// <param name="existingContent">The BLOB.</param>
+        /// <param name="cloudBlobContainer">The cloud BLOB container.</param>
+        /// <param name="log">The log.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>IActionResult.</returns>
+        [FunctionName("UpdateOrderById")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(RestaurantModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        public static async Task<IActionResult> UpdateOrderById(
+            [HttpTrigger(AuthorizationLevel.Function, "put", Route = "order/{id}")] HttpRequest req,
+            string id,
+            [Blob("order/{id}.json", FileAccess.ReadWrite, Connection = "StorageSend")] string existingContent,
+            [Blob("order", FileAccess.ReadWrite, Connection = "StorageSend")] CloudBlobContainer cloudBlobContainer,
+            ILogger log,
+            ExecutionContext context)
+        {
+            Guid correlationId = Util.ReadCorrelationId(req.Headers);
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            var trace = new Dictionary<string, string>();
+            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            IActionResult actionResult = null;
+
+            OrderModel orderModel = null;
+
+            using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
+            {
+                try
+                {
+                    trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                    trace.Add("id", id);
+                    orderModel = JsonConvert.DeserializeObject<OrderModel>(existingContent);
+
+                    var date = orderModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                    var filename = $"{date}-{orderModel}.json";
+                    trace.Add($"filename", filename);
+                    string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                    trace.Add("requestBody", requestBody);
+                    orderModel = JsonConvert.DeserializeObject<OrderModel>(requestBody);
+
+                    req.HttpContext.Response.Headers.Add(Constants.ButlerCorrelationTraceHeader, correlationId.ToString());
+
+                    bool isValid = Validate(orderModel, correlationId, log, out ErrorModel errorModel);
+                    if (isValid)
+                    {
+                        CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference($"{filename}");
+                        if (blob != null)
+                        {
+                            blob.Properties.ContentType = "application/json";
+                            var restaurant = JsonConvert.SerializeObject(orderModel);
+                            trace.Add("restaurant", restaurant);
+
+                            Task task = blob.UploadTextAsync(restaurant);
+                            task.Wait();
+                            actionResult = new OkObjectResult(orderModel);
+                            log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                        }
+                    }
+                    else
+                    {
+                        actionResult = new BadRequestObjectResult(errorModel);
+                        log.LogInformation(correlationId, $"'{methodName}' - is not valid", trace);
+                    }
+                }
+                catch (Exception e)
+                {
+                    trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                    trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                    log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                    log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Details = e.StackTrace,
+                        Message = e.Message,
+                    };
+                    actionResult = new BadRequestObjectResult(errorModel);
+                }
+                finally
+                {
+                    log.LogTrace(eventId, $"'{methodName}' - finished");
+                    log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                }
+            }
+
+            return actionResult;
+        }
+
+        /// <summary>
+        /// Deletes the meal by identifier.
+        /// </summary>
+        /// <param name="req">The req.</param>
+        /// <param name="id">The identifier.</param>
+        /// <param name="blob">The BLOB.</param>
+        /// <param name="log">The log.</param>
+        /// <param name="context">The context.</param>
+        /// <returns>IActionResult.</returns>
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [FunctionName("DeleteOrderById")]
+        public static IActionResult DeleteOrderById(
+            [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "order/{id}")] HttpRequest req,
+            string id,
+            [Blob("order/{id}.json", FileAccess.ReadWrite, Connection = "StorageSend")] CloudBlockBlob blob,
+            ILogger log,
+            ExecutionContext context)
+        {
+            Guid correlationId = Util.ReadCorrelationId(req.Headers);
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            var trace = new Dictionary<string, string>();
+            EventId eventId = new EventId(correlationId.GetHashCode(), Constants.ButlerCorrelationTraceName);
+            IActionResult actionResult = null;
+
+            using (log.BeginScope("Method:{methodName} CorrelationId:{CorrelationId} Label:{Label}", methodName, correlationId.ToString(), context.InvocationId.ToString()))
+            {
+                try
+                {
+                    trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+                    trace.Add("id", id);
+
+                    if (blob != null)
+                    {
+                        Task task = blob.DeleteIfExistsAsync();
+                        task.Wait();
+
+                        actionResult = new OkResult();
+                        log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+                    }
+                }
+                catch (Exception e)
+                {
+                    trace.Add(string.Format("{0} - {1}", methodName, "rejected"), e.Message);
+                    trace.Add(string.Format("{0} - {1} - StackTrace", methodName, "rejected"), e.StackTrace);
+                    log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+                    log.LogError(correlationId, $"'{methodName}' - rejected", trace);
+
+                    ErrorModel errorModel = new ErrorModel()
+                    {
+                        CorrelationId = correlationId,
+                        Details = e.StackTrace,
+                        Message = e.Message,
+                    };
+                    actionResult = new BadRequestObjectResult(errorModel);
+                }
+                finally
+                {
+                    log.LogTrace(eventId, $"'{methodName}' - finished");
+                    log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+                }
+            }
+
+            return actionResult;
+        }
+
+        /// <summary>
         /// Gets the daily order overview for user.
         /// </summary>
         /// <param name="req">The req.</param>
@@ -276,6 +438,80 @@ namespace PlanB.Butler.Services.Controllers
             }
 
             return actionResult;
+        }
+
+        /// <summary>
+        /// Validates the specified model.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <param name="correlationId">The correlation identifier.</param>
+        /// <param name="log">The log.</param>
+        /// <param name="errorModel">The error model.</param>
+        /// <returns><c>True</c> if data is valid; otherwise <c>False</c>.</returns>
+        internal static bool Validate(OrderModel model, Guid correlationId, ILogger log, out ErrorModel errorModel)
+        {
+            bool isValid = true;
+            errorModel = null;
+            var trace = new Dictionary<string, string>();
+            var methodName = MethodBase.GetCurrentMethod().Name;
+            trace.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString());
+
+            StringBuilder message = new StringBuilder();
+
+            if (string.IsNullOrEmpty(model.Name))
+            {
+                message.Append("No restaurant name!");
+                isValid = false;
+            }
+
+            if (string.IsNullOrEmpty(model.CompanyName))
+            {
+                message.Append("No company name !");
+                isValid = false;
+            }
+
+            if (string.IsNullOrEmpty(model.Restaurant))
+            {
+                message.Append("No restaurant");
+                isValid = false;
+            }
+
+            if (string.IsNullOrEmpty(model.Meal))
+            {
+                message.Append("No meal");
+                isValid = false;
+            }
+
+            if (double.IsNaN(model.Price))
+            {
+                message.Append("No price");
+                isValid = false;
+            }
+
+            if (double.IsNaN(model.Benefit))
+            {
+                message.Append("No benefit!");
+                isValid = false;
+            }
+
+            if (!isValid)
+            {
+                errorModel = new ErrorModel()
+                {
+                    CorrelationId = correlationId,
+                    Message = message.ToString(),
+                };
+                trace.Add("Message", errorModel.Message);
+                log.LogInformation(correlationId, $"'{methodName}' - rejected", trace);
+            }
+            else
+            {
+                log.LogInformation(correlationId, $"'{methodName}' - success", trace);
+            }
+
+            log.LogInformation(correlationId, $"'{methodName}' - finished", trace);
+
+            return isValid;
         }
     }
 }
