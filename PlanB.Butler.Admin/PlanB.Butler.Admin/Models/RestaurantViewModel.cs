@@ -39,10 +39,8 @@ namespace PlanB.Butler.Admin.Models
         [JsonProperty("url")]
         public Uri Url { get; set; }
 
-
         [JsonProperty("correlationid")]
         public Guid? CorrelationId { get; set; }
-
 
         [JsonProperty("name")]
         public string Name { get; set; }

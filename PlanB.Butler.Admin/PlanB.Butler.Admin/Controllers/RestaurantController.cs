@@ -82,7 +82,6 @@ namespace PlanB.Butler.Admin.Controllers
             if (this.ModelState.IsValid)
             {
                 var result = await this.restaurantService.UpdateRestaurant(restaurant);
-                return this.RedirectToAction(nameof(this.Index));
             }
 
             return this.View(restaurant);
@@ -93,7 +92,7 @@ namespace PlanB.Butler.Admin.Controllers
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <returns>Meal.</returns>
-        public async Task<IActionResult> Edit(string? id)
+        public async Task<IActionResult> Edit(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -110,6 +109,5 @@ namespace PlanB.Butler.Admin.Controllers
             return this.View(restaurant);
         }
 
-
-    } 
+    }
 }

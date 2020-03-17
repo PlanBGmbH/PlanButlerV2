@@ -82,10 +82,7 @@ namespace PlanB.Butler.Admin.Services
             httpRequestMessage.Headers.Clear();
             Util.AddDefaultEsbHeaders(httpRequestMessage, correlationId, this.config["FunctionsKey"]);
             var result = await this.httpClient.SendAsync(httpRequestMessage);
-            result.EnsureSuccessStatusCode();
-
             var body = result.Content.ReadAsStringAsync().Result;
-
             var meal = JsonConvert.DeserializeObject<MealViewModel>(body);
 
             return meal;

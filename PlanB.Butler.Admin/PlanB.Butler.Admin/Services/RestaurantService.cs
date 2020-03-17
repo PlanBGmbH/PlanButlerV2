@@ -65,7 +65,7 @@ namespace PlanB.Butler.Admin.Services
             result.EnsureSuccessStatusCode();
             var success = result.IsSuccessStatusCode;
             return success;
-        }
+        }   
 
         /// <summary>
         /// Gets the restaurant.
@@ -128,7 +128,6 @@ namespace PlanB.Butler.Admin.Services
             httpRequestMessage.Headers.Clear();
             Util.AddDefaultEsbHeaders(httpRequestMessage, correlationId, this.config["FunctionsKey"]);
             var result = await this.httpClient.SendAsync(httpRequestMessage);
-            result.EnsureSuccessStatusCode();
             var responseString = await result.Content.ReadAsStringAsync();
 
             var updatedRestaurant = JsonConvert.DeserializeObject<RestaurantViewModel>(responseString);
