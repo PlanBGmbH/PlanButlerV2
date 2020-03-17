@@ -1,36 +1,32 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Company>PlanB. GmbH</Company>
+    <Product>PlanB Butler Bot</Product>
+    <Authors>PlanB. GmbH</Authors>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>bin\Debug\netcoreapp3.1\</OutputPath>
-    <DocumentationFile>bin\Debug\netcoreapp3.1\PlanB.Butler.Services.Test.xml</DocumentationFile>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>bin\Release\netcoreapp3.0\</OutputPath>
-    <DocumentationFile>bin\Release\netcoreapp3.0\PlanB.Butler.Services.Test.xml</DocumentationFile>
+    <CodeAnalysisRuleSet />
+    <OutputPath>bin\Release\netcoreapp2.2\</OutputPath>
+    <DocumentationFile>bin\Release\netcoreapp2.2\PlanB.Butler.Bot.Test.xml</DocumentationFile>
   </PropertyGroup>
-
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet />
+    <OutputPath>bin\Debug\netcoreapp2.2\</OutputPath>
+    <DocumentationFile>bin\Debug\netcoreapp2.2\PlanB.Butler.Bot.Test.xml</DocumentationFile>
+  </PropertyGroup>  
   <ItemGroup>
-    <None Remove="Settings.StyleCop" />
     <None Remove="StyleCop.Analyzers.ruleset" />
     <None Remove="stylecop.json" />
   </ItemGroup>
-
   <ItemGroup>
-    <AdditionalFiles Include="Settings.StyleCop" />
     <AdditionalFiles Include="StyleCop.Analyzers.ruleset" />
     <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-    <PackageReference Include="Moq" Version="4.13.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.1.0" />
     <PackageReference Include="MSTest.TestFramework" Version="2.1.0" />
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
@@ -39,9 +35,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\PlanB.Butler.Services\PlanB.Butler.Services.csproj" />
+    <ProjectReference Include="..\PlanB.Butler.Bot\PlanB.Butler.Bot.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,12 +1,10 @@
-﻿// Copyright (c) PlanB. GmbH. All Rights Reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
+﻿using Newtonsoft.Json;
 using System;
-using System.Globalization;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-using Newtonsoft.Json;
-
-namespace PlanB.Butler.Services.Models
+namespace PlanB.Butler.Bot.Models
 {
     /// <summary>
     /// MealModel.

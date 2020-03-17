@@ -47,7 +47,7 @@ namespace PlanB.Butler.Admin.Services
         /// <returns>
         /// True or false.
         /// </returns>
-        public async Task<bool> CreateMeal(MealViewModel meal)
+        public async Task<MealViewModel> CreateMeal(MealViewModel meal)
         {
             Guid correlationId = Guid.NewGuid();
             meal.CorrelationId = correlationId;
@@ -63,8 +63,26 @@ namespace PlanB.Butler.Admin.Services
             Util.AddDefaultEsbHeaders(httpRequestMessage, correlationId, this.config["FunctionsKey"]);
             var result = await this.httpClient.SendAsync(httpRequestMessage);
             result.EnsureSuccessStatusCode();
-            var success = result.IsSuccessStatusCode;
-            return success;
+
+            MealViewModel responseModel = JsonConvert.DeserializeObject<MealViewModel>(result.Content.ReadAsStringAsync().Result);
+            return responseModel;
+        }
+
+        /// <summary>
+        /// Deletes the meal.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>
+        /// Succes or failure.
+        /// </returns>
+        public async Task<bool> DeleteMeal(string id)
+        {
+            var uri = this.config["MealsUri"].TrimEnd('/') + "/" + id;
+
+            this.httpClient.DefaultRequestHeaders.Add(Constants.FunctionsKeyHeader, this.config["FunctionsKey"]);
+            var response = await this.httpClient.DeleteAsync(uri);
+
+            return response.IsSuccessStatusCode;
         }
 
         /// <summary>
