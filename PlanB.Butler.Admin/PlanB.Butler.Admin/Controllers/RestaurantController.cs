@@ -18,7 +18,6 @@ namespace PlanB.Butler.Admin.Controllers
     public class RestaurantController : Controller
     {
         /// GET: /<controller>
-
         private IRestaurantService restaurantService;
 
         /// <summary>
