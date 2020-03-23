@@ -129,7 +129,7 @@ namespace PlanB.Butler.Admin.Services
             Util.AddDefaultEsbHeaders(httpRequestMessage, correlationId, this.config["FunctionsKey"]);
             var result = await this.httpClient.SendAsync(httpRequestMessage);
             var responseString = await result.Content.ReadAsStringAsync();
-
+            result.EnsureSuccessStatusCode();
             var updatedRestaurant = JsonConvert.DeserializeObject<RestaurantViewModel>(responseString);
             return updatedRestaurant;
         }

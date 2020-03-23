@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using PlanB.Butler.Admin.Contracts;
 
 namespace PlanB.Butler.Admin.Controllers
@@ -71,13 +72,15 @@ namespace PlanB.Butler.Admin.Controllers
         /// <returns>IActionResult.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,CorrelationId,Date,Price,Name,Restaurant")] Models.RestaurantViewModel restaurant)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,CorrelationId,Date,Price,Name,Restaurant,PhoneNumber,City")] Models.RestaurantViewModel restaurant)
         {
             if (id != restaurant.Id)
             {
                 return this.NotFound();
             }
 
+            var json = JsonConvert.SerializeObject(restaurant);
+            Console.WriteLine(json);
             if (this.ModelState.IsValid)
             {
                 var result = await this.restaurantService.UpdateRestaurant(restaurant);
