@@ -47,7 +47,7 @@ namespace PlanB.Butler.Admin.Services
         /// <returns>
         /// True or false.
         /// </returns>
-        public async Task<bool> CreateRestaurant(RestaurantViewModel restaurant)
+        public async Task <RestaurantViewModel> CreateRestaurant(RestaurantViewModel restaurant)
         {
             Guid correlationId = Guid.NewGuid();
             restaurant.CorrelationId = correlationId;
@@ -63,8 +63,9 @@ namespace PlanB.Butler.Admin.Services
             Util.AddDefaultEsbHeaders(httpRequestMessage, correlationId, this.config["FunctionsKey"]);
             var result = await this.httpClient.SendAsync(httpRequestMessage);
             result.EnsureSuccessStatusCode();
-            var success = result.IsSuccessStatusCode;
-            return success;
+
+            RestaurantViewModel responseModel = JsonConvert.DeserializeObject<RestaurantViewModel>(result.Content.ReadAsStringAsync().Result);
+            return responseModel;
         }   
 
         /// <summary>
@@ -132,6 +133,23 @@ namespace PlanB.Butler.Admin.Services
             result.EnsureSuccessStatusCode();
             var updatedRestaurant = JsonConvert.DeserializeObject<RestaurantViewModel>(responseString);
             return updatedRestaurant;
+        }
+
+        /// <summary>
+        /// Deletes the restaurant.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>
+        /// Succes or failure.
+        /// </returns>
+        public async Task<bool> DeleteRestaurant(string id)
+        {
+            var uri = this.config["RestaurantUri"].TrimEnd('/') + "/" + id;
+
+            this.httpClient.DefaultRequestHeaders.Add(Constants.FunctionsKeyHeader, this.config["FunctionsKey"]);
+            var response = await this.httpClient.DeleteAsync(uri);
+
+            return response.IsSuccessStatusCode;
         }
     }
 }

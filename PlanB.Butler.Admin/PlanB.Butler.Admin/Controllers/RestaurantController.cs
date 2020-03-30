@@ -19,7 +19,7 @@ namespace PlanB.Butler.Admin.Controllers
     public class RestaurantController : Controller
     {
         /// GET: /<controller>
-        private IRestaurantService restaurantService;
+        private readonly IRestaurantService restaurantService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RestaurantController"/> class.
@@ -53,7 +53,7 @@ namespace PlanB.Butler.Admin.Controllers
         /// <returns>Meal.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CorrelationId,Date,Price,Name,Restaurant")] Models.RestaurantViewModel restaurant)
+        public async Task<IActionResult> Create([Bind("Id,CorrelationId,Date,Price,Name,Restaurant,PhoneNumber,City, Street, PostalCode, Url, Email")] Models.RestaurantViewModel restaurant)
         {
             if (this.ModelState.IsValid)
             {
@@ -72,7 +72,7 @@ namespace PlanB.Butler.Admin.Controllers
         /// <returns>IActionResult.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,CorrelationId,Date,Price,Name,Restaurant,PhoneNumber,City")] Models.RestaurantViewModel restaurant)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,CorrelationId,Date,Price,Name,Restaurant,PhoneNumber,City, Street, PostalCode, Url, Email")] Models.RestaurantViewModel restaurant)
         {
             if (id != restaurant.Id)
             {
@@ -110,6 +110,41 @@ namespace PlanB.Butler.Admin.Controllers
 
             return this.View(restaurant);
         }
+        /// <summary>
+        /// Deletes the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>IActionResult.</returns>
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return this.NotFound();
+            }
 
+            var restaurant = await this.restaurantService.GetRestaurant(id);
+
+            if (restaurant == null)
+            {
+                return this.NotFound();
+            }
+
+            return this.View(restaurant);
+        }
+
+        /// <summary>
+        /// Deletes the confirmed.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>IActionResult.</returns>
+        [HttpPost]
+        [ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            await this.restaurantService.DeleteRestaurant(id);
+
+            return this.RedirectToAction(nameof(this.Index));
+        }
     }
 }

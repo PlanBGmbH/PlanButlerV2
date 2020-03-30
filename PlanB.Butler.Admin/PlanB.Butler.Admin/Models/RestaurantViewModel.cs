@@ -39,12 +39,30 @@ namespace PlanB.Butler.Admin.Models
         [JsonProperty("url")]
         public Uri Url { get; set; }
 
+        /// <summary>
+        /// Gets or sets the correlationid.
+        /// </summary>
+        /// <value>
+        /// The correlationid.
+        /// </value>
         [JsonProperty("correlationid")]
         public Guid? CorrelationId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
         [JsonProperty("name")]
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the street.
+        /// </summary>
+        /// <value>
+        /// The street.
+        /// </value>
         [JsonProperty("street")]
         public string Street { get; set; }
 
@@ -83,17 +101,5 @@ namespace PlanB.Butler.Admin.Models
         /// </value>
         [JsonProperty("emailAddress")]
         public string EmailAddress { get; set; }
-
-        /// <summary>
-        /// Gets or sets the date.
-        /// </summary>
-        /// <value>
-        /// The date.
-        /// </value>
-        [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy}")]
-        [DataType(DataType.Date)]
-        [JsonProperty("date")]
-        public DateTime Date { get; set; }
-
     }
 }
