@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using PlanB.Butler.Admin.Contracts;
+using PlanB.Butler.Admin.Models;
 
 namespace PlanB.Butler.Admin.Controllers
 {
@@ -18,6 +19,9 @@ namespace PlanB.Butler.Admin.Controllers
     /// <seealso cref="Microsoft.AspNetCore.Mvc.Controller" />
     public class RestaurantController : Controller
     {
+        /// <summary>
+        /// restaurantService
+        /// </summary>
         /// GET: /<controller>
         private readonly IRestaurantService restaurantService;
 
@@ -33,7 +37,7 @@ namespace PlanB.Butler.Admin.Controllers
         /// <returns>Index.</returns>
         public IActionResult Index()
         {
-            var restaurant = this.restaurantService.GetRestaurant().Result;
+            var restaurant = this.restaurantService.GetRestaurants().Result;
             return this.View(restaurant);
         }
 
@@ -53,7 +57,7 @@ namespace PlanB.Butler.Admin.Controllers
         /// <returns>Meal.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CorrelationId,Date,Price,Name,Restaurant,PhoneNumber,City, Street, PostalCode, Url, Email")] Models.RestaurantViewModel restaurant)
+        public async Task<IActionResult> Create([Bind("Id, CorrelationId, Date,Price,Name,Restaurant,PhoneNumber,City, Street, PostalCode, Url, EmailAddress")] RestaurantViewModel restaurant)
         {
             if (this.ModelState.IsValid)
             {
@@ -72,7 +76,7 @@ namespace PlanB.Butler.Admin.Controllers
         /// <returns>IActionResult.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,CorrelationId,Date,Price,Name,Restaurant,PhoneNumber,City, Street, PostalCode, Url, Email")] Models.RestaurantViewModel restaurant)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,CorrelationId, Date,Price,Name,Restaurant,PhoneNumber,City, Street, PostalCode, Url, EmailAddress")] RestaurantViewModel restaurant)
         {
             if (id != restaurant.Id)
             {
@@ -84,6 +88,7 @@ namespace PlanB.Butler.Admin.Controllers
             if (this.ModelState.IsValid)
             {
                 var result = await this.restaurantService.UpdateRestaurant(restaurant);
+                return this.RedirectToAction(nameof(this.Index));
             }
 
             return this.View(restaurant);

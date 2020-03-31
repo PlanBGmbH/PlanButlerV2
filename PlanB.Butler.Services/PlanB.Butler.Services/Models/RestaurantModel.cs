@@ -91,12 +91,12 @@ namespace PlanB.Butler.Services.Models
         public string EmailAddress { get; set; }
 
         /// <summary>
-        /// Gets or sets the date.
+        /// Gets or sets the correlationid.
         /// </summary>
         /// <value>
-        /// The date.
+        /// The correlationid.
         /// </value>
-        [JsonProperty("date")]
-        public DateTime Date { get; set; }
+        [JsonProperty("correlationid")]
+        public Guid? CorrelationId { get; set; }
     }
 }

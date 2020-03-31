@@ -41,13 +41,13 @@ namespace PlanB.Butler.Admin.Services
         }
 
         /// <summary>
-        /// Creates the meal.
+        /// Creates the restaurant.
         /// </summary>
         /// <param name="restaurant">The restaurant.</param>
         /// <returns>
         /// True or false.
         /// </returns>
-        public async Task <RestaurantViewModel> CreateRestaurant(RestaurantViewModel restaurant)
+        public async Task<RestaurantViewModel> CreateRestaurant(RestaurantViewModel restaurant)
         {
             Guid correlationId = Guid.NewGuid();
             restaurant.CorrelationId = correlationId;
@@ -83,11 +83,9 @@ namespace PlanB.Butler.Admin.Services
             httpRequestMessage.Headers.Clear();
             Util.AddDefaultEsbHeaders(httpRequestMessage, correlationId, this.config["FunctionsKey"]);
             var result = await this.httpClient.SendAsync(httpRequestMessage);
-            result.EnsureSuccessStatusCode();
-
             var body = result.Content.ReadAsStringAsync().Result;
-
-            var restaurant = JsonConvert.DeserializeObject<RestaurantViewModel>(body);
+            var restaurant = JsonConvert.DeserializeObject<RestaurantViewModel>(body); 
+            result.EnsureSuccessStatusCode();
             return restaurant;
         }
 
@@ -97,7 +95,7 @@ namespace PlanB.Butler.Admin.Services
         /// <returns>
         /// Restaurant.
         /// </returns>
-        public async Task<List<RestaurantViewModel>> GetRestaurant()
+        public async Task<List<RestaurantViewModel>> GetRestaurants()
         {
             var uri = this.config["RestaurantUri"];
             this.httpClient.DefaultRequestHeaders.Add(Constants.FunctionsKeyHeader, this.config["FunctionsKey"]);
@@ -129,8 +127,9 @@ namespace PlanB.Butler.Admin.Services
             httpRequestMessage.Headers.Clear();
             Util.AddDefaultEsbHeaders(httpRequestMessage, correlationId, this.config["FunctionsKey"]);
             var result = await this.httpClient.SendAsync(httpRequestMessage);
-            var responseString = await result.Content.ReadAsStringAsync();
             result.EnsureSuccessStatusCode();
+            var responseString = await result.Content.ReadAsStringAsync();
+
             var updatedRestaurant = JsonConvert.DeserializeObject<RestaurantViewModel>(responseString);
             return updatedRestaurant;
         }

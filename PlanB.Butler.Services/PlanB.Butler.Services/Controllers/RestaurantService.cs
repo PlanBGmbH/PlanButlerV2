@@ -83,9 +83,9 @@ namespace PlanB.Butler.Services.Controllers
                     trace.Add("id", id);
                     restaurantModel = JsonConvert.DeserializeObject<RestaurantModel>(existingContent);
 
-                    var date = restaurantModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                    //var date = restaurantModel.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-                    var filename = $"{date}-{restaurantModel.City}.json";
+                    var filename = $"{restaurantModel.Name}-{restaurantModel.City}.json";
                     trace.Add($"filename", filename);
                     string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
                     trace.Add("requestBody", requestBody);
@@ -100,8 +100,8 @@ namespace PlanB.Butler.Services.Controllers
                         if (blob != null)
                         {
                             blob.Properties.ContentType = "application/json";
-                            var metaDate = restaurantModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
-                            blob.Metadata.Add(MetaDate, metaDate);
+                            //var metaDate = restaurantModel.Date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+                            //blob.Metadata.Add(MetaDate, metaDate);
                             blob.Metadata.Add(MetaRestaurant, restaurantModel.ToString());
                             blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
                             var restaurant = JsonConvert.SerializeObject(restaurantModel);
@@ -403,12 +403,12 @@ namespace PlanB.Butler.Services.Controllers
                         {
                             blob.Properties.ContentType = "application/json";
                             blob.Metadata.Add(Constants.ButlerCorrelationTraceName, correlationId.ToString().Replace("-", string.Empty));
-                            blob.Metadata.Add(MetaRestaurant, System.Web.HttpUtility.HtmlEncode(restaurantModel.Name));
-                            blob.Metadata.Add(MetaCity, System.Web.HttpUtility.HtmlEncode(restaurantModel.City));
+                            blob.Metadata.Add(MetaRestaurant, HttpUtility.HtmlEncode(restaurantModel.Name));
+                            blob.Metadata.Add(MetaCity, HttpUtility.HtmlEncode(restaurantModel.City));
                             var restaurant = JsonConvert.SerializeObject(restaurantModel);
                             trace.Add("restaurant", restaurant);
 
-                            Task task = blob.UploadTextAsync(requestBody);
+                            Task task = blob.UploadTextAsync(restaurant);
                             task.Wait();
 
                             actionResult = new OkObjectResult(restaurantModel);

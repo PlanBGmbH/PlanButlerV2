@@ -17,7 +17,7 @@ namespace PlanB.Butler.Admin.Contracts
         /// Gets the restaurant.
         /// </summary>
         /// <returns>Restaurant.</returns>
-        Task<List<RestaurantViewModel>> GetRestaurant();
+        Task<List<RestaurantViewModel>> GetRestaurants();
 
         /// <summary>
         /// Creates the meal.

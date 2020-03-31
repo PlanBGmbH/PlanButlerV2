@@ -103,7 +103,7 @@ namespace PlanB.Butler.Services.Controllers
                             var meal = JsonConvert.SerializeObject(mealModel);
                             trace.Add("meal", meal);
 
-                            Task task = blob.UploadTextAsync(requestBody);
+                            Task task = blob.UploadTextAsync(meal);
                             task.Wait();
                             actionResult = new OkObjectResult(mealModel);
                             log.LogInformation(correlationId, $"'{methodName}' - success", trace);
